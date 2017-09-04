@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include "TTF.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <glm\glm.hpp>

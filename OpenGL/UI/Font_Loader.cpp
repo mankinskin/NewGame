@@ -21,9 +21,6 @@ std::string gl::GUI::Text::Initializer::font_store_directory = DEFAULT_STORE_DIR
 FT_Library gl::GUI::Text::Initializer::ftLib;
 int gl::GUI::Text::Initializer::showDistanceField = 1;
 
-using Utility::TTFCore::vec4f;
-using Utility::TTFCore::vec2f;
-#define INF 1E20
 /*
 PIPELINE FOR FONT LOADING
 - Include desired font paths 

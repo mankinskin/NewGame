@@ -3,10 +3,10 @@
 #include <glm\glm.hpp>
 #include <unordered_map>
 #include <OpenGL\UI\GUI.h>
-#include "managed_vector.h"
 #include <functional>
 #include <tuple>
 #include <utility>
+#include <initializer_list>
 namespace App {
 	namespace Input {
 
@@ -53,9 +53,16 @@ namespace App {
 			return l.action == r.action && l.mods == r.mods;
 		}
 
+		extern std::vector<unsigned> allSignals;
+		extern unsigned TOTAL_SIGNAL_COUNT;
 		
-
-		
+		template<class EventType>
+		class Signal {
+		public:
+			Signal(unsigned pIndex, EventType pEvent):index(pIndex), evnt(pEvent){}
+			EventType evnt;
+			unsigned index;
+		};
 
 		class KeyEvent {
 		public:
@@ -63,12 +70,13 @@ namespace App {
 				:key(-1), change(KeyCondition()) {}
 			KeyEvent(Key pKey, KeyCondition pChange)
 				:key(pKey), change(pChange){}
+			KeyEvent(Key pKey, int pAction, int pMods)
+				:key(pKey), change(KeyCondition(pAction, pMods)) {}
 
 			Key key;
 			KeyCondition change;
 		};
-		extern std::vector<KeyEvent> keySignalBindings;
-		extern std::vector<unsigned> signals;
+		extern std::vector<Signal<KeyEvent>> allKeySignals;
 		inline bool operator==(KeyEvent const & l, KeyEvent const& r) {
 			return l.key == r.key && l.change == r.change;
 		}
@@ -89,46 +97,61 @@ namespace App {
 
 		extern std::vector<KeyEvent> keyEventBuffer;
 		extern std::vector<ButtonEvent> buttonEventBuffer;
+		
 
 		
 		template<typename R, typename... Args>
-		class FuncBinding {
-		private:
-			std::tuple<Args...> args;
-			R(*fun)(Args...);
-		public:
+		class FuncSlot {
 			
-			FuncBinding(R(*pF)(Args...) , Args... pArgs) 
-				:fun(pF), args(std::forward<Args>(pArgs)...), signalBindings(std::vector<unsigned int>()){
+		public:
+			FuncSlot(): fun(nullptr), args(std::tuple<Args...>()), signal_bindings(std::vector<unsigned>())
+			{}
+
+			FuncSlot(R(*pF)(Args...) , Args... pArgs)
+				:fun(pF), args(std::forward_as_tuple(pArgs)...), signal_bindings(), slot_index(instances.size()){
 				
-			}
-			std::vector<unsigned int> signalBindings;
-			static std::vector<FuncBinding<R, Args...>> allInstances;
-
-
-			void bind(unsigned int pSignalBinding) {
-				//this check shouldnt be needed. initialize function bindings at function creation
-				//auto it = std::find(signalBindings.begin(), signalBindings.end(), pSignalBinding);
-				//if (it == signalBindings.end()) {
-					signalBindings.push_back(pSignalBinding);
-				//}
+				instances.push_back(*this);
 			}
 
-			void fix() {
-				allInstances.push_back(*this);
+			static void reserve_slots(unsigned int pCount) {
+				instances.reserve(pCount);
 			}
+			static void invoke_all(){
+				for (FuncSlot<R, Args...>& inst : instances) {
+					if (inst.should_call()) {
+						inst.invoke();
+					}
+				}
+			}
+			static void bind(unsigned int pSlot, std::initializer_list<unsigned int> pSignals);
 
-			R invoke() {
+			R invoke() const {
 				return std::apply(fun, args);
 			}
-
-			R callFunc(Args... pArgs) {
+			R callFunc(Args... pArgs) const {
 				return fun(pArgs...);
 			}
+		static std::vector<FuncSlot<R, Args...>> instances;
+		private:
+			R(*fun)(Args...);
+			std::tuple<Args...> args;
+			std::vector<unsigned int> signal_bindings;
+			unsigned int slot_index;
+			
+			
+			int should_call() {
+				for (unsigned s : signal_bindings) {
+					if (allSignals[s]) {
+						return 1;
+					}
+				}
+				return 0;					
+			}
 		};
-
 		template<typename R, typename... Args>
-		std::vector<FuncBinding<R, Args...>> FuncBinding<R, Args...>::allInstances = std::vector<FuncBinding<R, Args...>>();
+		std::vector<FuncSlot<R, Args...>> FuncSlot<R, Args...>::instances = std::vector<FuncSlot<R, Args...>>();
+		
+		
 		
 		extern std::vector<void(*)()> callbackBuffer;
 		//Buttons
@@ -147,7 +170,7 @@ namespace App {
 		void init();
 		void frame_end();
 		void callFunctions();
-		void setCursorMode(int pMode);
+		void toggleCenterCursorRef(int* pMode);
 		void toggleCenterCursor();
 		void checkEvents();
 		//KEYS
@@ -174,5 +197,11 @@ namespace App {
 		static void mouseButton_Callback(GLFWwindow* window, int pButton, int pAction, int pMods);
 		static void scroll_Callback(GLFWwindow* window, double pX, double pY);
 
-	}
+		template<typename R, typename ...Args>
+		inline void FuncSlot<R, Args...>::bind(unsigned int pSlot, std::initializer_list<unsigned int> pSignals)
+		{
+			instances[pSlot].signal_bindings = std::vector<unsigned>(pSignals);
+		}
+
+}
 }

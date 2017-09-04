@@ -22,7 +22,7 @@ std::unordered_map<unsigned int, unsigned int> gl::Shader::Data::bufferTargetBin
 unsigned int gl::Shader::Data::createStorage(unsigned int pCapacity, const void* pData, unsigned int pFlags)
 {
 	Storage storage;
-	unsigned int ind = allStorages.size();
+	size_t ind = allStorages.size();
 	storage.capacity = pCapacity;
 	storage.bufferFlags = pFlags;
 	glCreateBuffers(1, &storage.ID);
@@ -35,7 +35,7 @@ unsigned int gl::Shader::Data::createStorage(unsigned int pCapacity, const void*
 unsigned int gl::Shader::Data::createStream(unsigned int pStorageIndex, unsigned int pMapFlags)
 {
 	Stream stream;
-	unsigned int ind = allStreams.size();
+	size_t ind = allStreams.size();
 	Storage& storage = allStorages[pStorageIndex];
 	storage.streamIndex = ind;
 	stream.alignment = UNIFORM_BUFFER_OFFSET_ALIGNMENT;

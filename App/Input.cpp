@@ -19,8 +19,9 @@ std::vector<void(*)()> App::Input::callbackBuffer;
 std::vector<gl::GUI::Quad> App::Input::quadLoadBuffer;
 std::vector<App::Input::KeyEvent> App::Input::keyEventBuffer;
 std::vector<App::Input::ButtonEvent> App::Input::buttonEventBuffer;
-std::vector<App::Input::KeyEvent> App::Input::keySignalBindings;
-std::vector<unsigned> App::Input::signals;
+std::vector<App::Input::Signal<App::Input::KeyEvent>> App::Input::allKeySignals;
+std::vector<unsigned> App::Input::allSignals;
+unsigned App::Input::TOTAL_SIGNAL_COUNT;
 /*
 button-pipeline
 to set up
@@ -38,6 +39,7 @@ every frame
 - callButtons
 */
 
+
 void App::Input::init()
 {
 
@@ -50,16 +52,56 @@ void App::Input::init()
 	glfwSetMouseButtonCallback(App::mainWindow.window, mouseButton_Callback);
 	glfwSetScrollCallback(App::mainWindow.window, scroll_Callback);
 	
-	//FuncBinding<void, int> setCursorModeBinding(setCursorMode, 1);
-	//setCursorModeBinding.bind(0);
-	FuncBinding<void> exitProgramBinding(App::quit);
-	exitProgramBinding.bind(0);
-	exitProgramBinding.fix();
-	keySignalBindings.reserve(1);
-	signals.resize(1);
-	//keySignalBindings.push_back(KeyEvent(GLFW_KEY_C, KeyCondition(1, 0)));
-	keySignalBindings.push_back(KeyEvent(GLFW_KEY_ESCAPE, KeyCondition(1, 0)));
+	//Init function slots
+	App::Input::FuncSlot<void>::reserve_slots(12);
+
+	FuncSlot<void> moveForwardSlot(gl::Camera::forward);
+	FuncSlot<void> moveBackwardSlot(gl::Camera::back);
+	FuncSlot<void> moveLeftSlot(gl::Camera::left);
+	FuncSlot<void> moveRightSlot(gl::Camera::right);
+	FuncSlot<void> moveUpSlot(gl::Camera::up);
+	FuncSlot<void> moveDownSlot(gl::Camera::down);
+	FuncSlot<void> stopZSlot(gl::Camera::stop_z);
+	FuncSlot<void> stopXSlot(gl::Camera::stop_x);
+	FuncSlot<void> stopYSlot(gl::Camera::stop_y);
 	
+	FuncSlot<void> exitProgramSlot(App::quit);
+	FuncSlot<void> setCameraModeSlot(toggleCenterCursor);
+	FuncSlot<void> togglePrintInfoSlot(App::Debug::togglePrintInfo);
+	
+	//init Event Signals
+	allKeySignals.reserve(16);	//Movement
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_W, 1, 0)));
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_W, 0, 0)));
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_S, 1, 0)));
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_S, 0, 0)));
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_A, 1, 0)));
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_A, 0, 0)));
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_D, 1, 0)));
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_D, 0, 0)));
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_SPACE, 1, 0)));
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_SPACE, 0, 0)));
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_Z, 1, 0)));
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_Z, 0, 0)));
+	//Misc
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_ESCAPE, 1, 0)));
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_C, 1, 0)));
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_I, 1, 0)));
+	//bind signals to slots
+	allSignals.resize(TOTAL_SIGNAL_COUNT);
+	App::Input::FuncSlot<void>::bind(0, { 0 });//forward
+	App::Input::FuncSlot<void>::bind(1, { 2 });//back
+	App::Input::FuncSlot<void>::bind(2, { 4 });//left
+	App::Input::FuncSlot<void>::bind(3, { 6 });//right
+	App::Input::FuncSlot<void>::bind(4, { 8 });//up
+	App::Input::FuncSlot<void>::bind(5, { 10 });//down
+	App::Input::FuncSlot<void>::bind(6, { 1, 3 });//stop_z
+	App::Input::FuncSlot<void>::bind(7, { 5, 7 });//stop_x
+	App::Input::FuncSlot<void>::bind(8, { 9, 11 });//stop_y
+
+	App::Input::FuncSlot<void>::bind(9, { 12 });//exit
+	App::Input::FuncSlot<void>::bind(10, { 13 });//setCameraMode
+	App::Input::FuncSlot<void>::bind(11, { 14 });//togglePrintInfo
 }
 
 
@@ -69,7 +111,7 @@ void App::Input::calculateDetectionRanges()
 	using gl::GUI::allSizes;
 	using gl::GUI::allPositions;
 	using gl::GUI::allQuads;
-	unsigned int quadCount = quadLoadBuffer.size();
+	size_t quadCount = quadLoadBuffer.size();
 	allDetectors.resize(quadCount);
 	allButtonStates.resize(quadCount);
 	for (unsigned int q = 0; q < quadCount; ++q) {
@@ -88,8 +130,8 @@ void App::Input::clearDetectionRanges()
 
 void App::Input::checkEvents() {
 	//TODO find a way to manage ranges of different element types
-	unsigned int buttonEventCount = buttonEventBuffer.size();
-	unsigned int keyEventCount = keyEventBuffer.size();
+	size_t buttonEventCount = buttonEventBuffer.size();
+	size_t keyEventCount = keyEventBuffer.size();
 	std::vector<void(*)()> cbs;
 	cbs.resize(buttonEventCount + keyEventCount);
 	
@@ -99,10 +141,13 @@ void App::Input::checkEvents() {
 	//keyEvents
 	for (unsigned int e = 0; e < keyEventCount; ++e) {
 		KeyEvent& kev = keyEventBuffer[e];
-		auto it = std::find(keySignalBindings.begin(), keySignalBindings.end(), kev);
-		if (it != keySignalBindings.end()) {
-			signals[(it - keySignalBindings.begin())] = 1;
-		}		
+		for (unsigned int ks = 0; ks < allKeySignals.size(); ++ks) {
+			Signal<KeyEvent>& sig = allKeySignals[ks];
+			if (sig.evnt == kev) {
+				allSignals[sig.index] = 1;
+			}
+		}
+		
 	}
 	keyEventBuffer.clear();
 	//-----------------------------------------
@@ -120,10 +165,6 @@ void App::Input::checkEvents() {
 	std::memcpy(&callbackBuffer[0], &cbs[0], sizeof(void(*)())*to_call);
 }
 
-
-
-
-
 void App::Input::frame_end()
 {
 	cursorFrameDelta = glm::vec2();
@@ -138,20 +179,9 @@ void App::Input::frame_end()
 
 void App::Input::callFunctions()
 {
-	for (FuncBinding<void, int>& fun : FuncBinding<void, int>::allInstances) {
-		for (int bin : fun.signalBindings) {
-			if (signals[bin]) {
-				fun.invoke();
-			}
-		}
-	}
-	for (FuncBinding<void>& fun : FuncBinding<void>::allInstances) {
-		for (int bin : fun.signalBindings) {
-			if (signals[bin]) {
-				fun.invoke();
-			}
-		}
-	}
+	FuncSlot<void>::invoke_all();
+	//FuncSlot<void, int*>::invoke_all();
+	std::fill(allSignals.begin(), allSignals.end(), 0);
 }
 
 void App::Input::fetchGLFWEvents()
@@ -164,10 +194,10 @@ void App::Input::fetchGLFWEvents()
 
 void App::Input::fetchButtonEvents()
 {
-	unsigned int button_count = allDetectors.size();
+	size_t button_count = allDetectors.size();
 	std::vector<ButtonEvent> evnts(button_count);
 	unsigned int evnt_count = 0;
-	for (unsigned int b = 0; b < button_count; ++b) {
+	for (size_t b = 0; b < button_count; ++b) {
 		//compare all previous button states to all new ones
 		ButtonCondition& prevState = allButtonStates[b];
 		int inside = is_inside_quad((glm::vec2)relativeCursorPosition, allDetectors[b]);
@@ -188,7 +218,7 @@ void App::Input::fetchButtonEvents()
 }
 void App::Input::key_Callback(GLFWwindow * window, int pKey, int pScancode, int pAction, int pMods)
 {
-	keyEventBuffer.push_back(KeyEvent(pKey, KeyCondition(pAction, pMods)));
+	keyEventBuffer.push_back(KeyEvent(pKey, pAction, pMods));
 }
 
 void App::Input::char_Callback(GLFWwindow * window, unsigned int pCodepoint)
@@ -222,19 +252,19 @@ void App::Input::scroll_Callback(GLFWwindow * window, double pX, double pY)
 	scroll = (int)pY;
 }
 
-void App::Input::setCursorMode(int pMode)
+void App::Input::toggleCenterCursorRef(int* pMode)
 {
-	if (pMode) {
+	if (*pMode) {
 		glfwSetInputMode(App::mainWindow.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 	else {
 		glfwSetInputMode(App::mainWindow.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
+	*pMode = !*pMode;
 }
 
 void App::Input::toggleCenterCursor()
 {
-	centerCursor = !centerCursor;
-	setCursorMode(centerCursor);
+	toggleCenterCursorRef(&centerCursor);
 }
 

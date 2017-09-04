@@ -40,7 +40,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -73,6 +73,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(SolutionDir);$(SolutionDir)\deps\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)\Debug;$(SolutionDir)\deps\lib\x86;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(SolutionDir);$(SolutionDir)\deps\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>$(SolutionDir)\Debug;$(SolutionDir)\deps\libs\x86;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -136,7 +140,6 @@
     <ClInclude Include="UI\Font_Loader.h" />
     <ClInclude Include="UI\GUI.h" />
     <ClInclude Include="UI\Text.h" />
-    <ClInclude Include="UI\TTF.h" />
     <ClInclude Include="Utility\dt\dt.h" />
     <ClInclude Include="Utility\dt\image.h" />
     <ClInclude Include="Utility\dt\imconv.h" />
@@ -156,7 +159,6 @@
     <ClCompile Include="UI\Font_Loader.cpp" />
     <ClCompile Include="UI\GUI.cpp" />
     <ClCompile Include="UI\Text.cpp" />
-    <ClCompile Include="UI\TTF.cpp" />
     <ClCompile Include="Utility\dt\dt.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

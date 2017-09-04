@@ -1,9 +1,3 @@
-﻿  App.cpp
-  Unknown compiler version - please run the configure tests and report the results
-  main.cpp
-  Input.cpp
-  Debug.cpp
-  ContextWindow.cpp
-  Generating Code...
-  edid-parse.c
-LINK : fatal error LNK1104: cannot open file 'libboost_thread-vc141-mt-gd-1_64.lib'
+﻿  Input.cpp
+  App.vcxproj -> C:\Users\Linus\source\repos\NewGame\Debug\NewGame.exe
+  App.vcxproj -> C:\Users\Linus\source\repos\NewGame\Debug\NewGame.pdb (Partial PDB)

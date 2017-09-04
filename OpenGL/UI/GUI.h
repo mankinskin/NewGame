@@ -1,7 +1,6 @@
 #pragma once
 #include <OpenGL\Global\gl.h>
 #include <string>
-#include <App\managed_vector.h>
 namespace gl {
 	namespace GUI {
 		typedef unsigned int Quad;
