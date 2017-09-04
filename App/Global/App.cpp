@@ -1,0 +1,174 @@
+#include "stdafx.h"
+#include "App.h"
+#include "Debug.h"
+#include "..\Input.h"
+#include <conio.h>
+#include <thread>
+#include <chrono>
+#include <OpenGL\Global\gl.h>
+#include <OpenGL\UI\Text.h>
+#include <OpenGL\Camera.h>
+#include <OpenGL\Global\glDebug.h>
+#include <OpenGL\UI\Font_Loader.h>
+#include <OpenGL\UI\GUI.h>
+
+
+App::State App::state = App::State::Init;
+App::ContextWindow::Window App::mainWindow = App::ContextWindow::Window();
+double App::timeFactor = 1.0;
+double App::lastFrameMS = 0;
+double App::lastFrameLimitedMS = 0;
+double App::totalMS = 0;
+double App::targetFrameMS = 16.0;
+
+
+void App::init()
+{
+	state = Running;
+	initGLFW();
+	//Windows and gl Context
+	ContextWindow::initMonitors();
+	ContextWindow::primaryMonitor.init();
+	mainWindow.setSize(1600, 850);
+	mainWindow.init();
+	//Input listeners
+	Input::init();
+	gl::init();
+	gl::configure();
+
+	
+	Debug::printErrors();
+}
+
+void App::initGLFW()
+{
+	unsigned int glfw = glfwInit();
+	if (glfw != GLFW_TRUE) {
+		Debug::pushError(("\nApp::init() - Unable to initialize GLFW (glfwInit() return code: %i)\n" + glfw), Debug::Error::Severity::Fatal);
+		while (!_getch()) {}
+		exit(glfw);
+	}
+}
+
+
+void App::mainMenu()
+{
+	using gl::GUI::Text::Textbox;
+	using gl::GUI::Text::LoadString;
+	using gl::GUI::Text::TextMetrics;
+	using gl::GUI::Text::StringRenderInstructions;
+	using gl::GUI::Text::createTextbox;
+	using gl::GUI::Text::insertTextboxString;
+	using gl::GUI::Text::createString;
+	using gl::GUI::Text::createStringRenderInstructions;
+	glClearColor(0.05f, 0.0f, 0.0f, 1.0f);
+	gl::GUI::createQuads();
+	
+	gl::GUI::Text::allTextboxes.reserve(2);
+	gl::GUI::Text::allTextMetrics.reserve(1);
+	gl::GUI::Text::allStrRenderInstructions.reserve(1);
+	StringRenderInstructions* basicStringRenderInst = createStringRenderInstructions(1.5f, 0.8f, 1.0f, glm::vec4(0.1f, 0.05f, 0.05f, 0.91f));
+	LoadString runProgramStr = createString("PLAY", basicStringRenderInst, 0);
+	LoadString quitProgramStr = createString("QUIT", basicStringRenderInst, 0);
+	TextMetrics* basicTextMetrics = gl::GUI::Text::createTextMetrics(1.0f, 1.0f, 1.0f, 1.0f);
+	
+	Textbox* tb1 = createTextbox(0, basicTextMetrics, TEXT_LAYOUT_BOUND_LEFT, 0.003f);
+	Textbox* tb2 = createTextbox(1, basicTextMetrics, TEXT_LAYOUT_BOUND_LEFT, 0.003f);
+	insertTextboxString(tb1, runProgramStr);
+	insertTextboxString(tb2, quitProgramStr);
+	App::Input::calculateDetectionRanges();
+	gl::GUI::updateGUI();
+	gl::GUI::Text::loadStrings();
+	gl::GUI::Text::updateCharStorage();
+	while (state == App::MainMenu) {
+
+		App::Input::fetchGLFWEvents();
+		Input::fetchButtonEvents();
+		App::Input::checkEvents();
+		App::Input::callFunctions();
+		gl::GUI::updateGUI();
+
+		gl::frame();
+
+		Input::frame_end();
+		Debug::printErrors();
+		updateTime();
+		updateTimeFactor();
+		limitFPS();
+
+		Debug::printInfo();
+	}
+	gl::GUI::clearBuffers();
+	App::Input::clearDetectionRanges();
+	gl::GUI::Text::clearCharStorage();
+}
+
+void App::run() {
+	state = App::State::Running;
+}
+
+void App::quit() {
+	state = App::State::Exit;
+}
+
+void App::frameLoop()
+{
+	glClearColor(0.01f, 0.01f, 0.01f, 1.0f);
+	
+
+	gl::GUI::Text::loadStrings();
+	gl::GUI::Text::updateCharStorage();
+
+	gl::GUI::updateGUI();
+	while (state == App::State::Running) {
+
+		
+		Input::fetchGLFWEvents();
+		
+		App::Input::checkEvents();
+		App::Input::callFunctions();
+		gl::Camera::look(Input::cursorFrameDelta);
+		gl::Camera::update();
+		gl::GUI::updateGUI();
+		gl::updateGeneralUniformBuffer();
+		
+		
+		gl::frame();
+
+		Input::frame_end();
+		Debug::printErrors();
+		updateTime();
+		updateTimeFactor();
+		limitFPS();
+		
+		Debug::printInfo();
+	}
+}
+
+
+
+//--Global Time--
+void App::updateTime()
+{
+	double thisFrameMS = (glfwGetTime() * 1000.0);
+	lastFrameMS = thisFrameMS - totalMS;
+	totalMS = thisFrameMS;
+}
+
+void App::limitFPS()
+{
+	lastFrameLimitedMS = lastFrameMS;
+	if (lastFrameMS < targetFrameMS) {
+		lastFrameLimitedMS = targetFrameMS;
+		std::this_thread::sleep_for(std::chrono::milliseconds((int)(targetFrameMS - lastFrameMS)));
+	}
+}
+
+void App::updateTimeFactor() {
+	timeFactor = lastFrameMS / targetFrameMS;
+}
+
+void App::setTargetFPS(unsigned int pTargetFPS)
+{
+	targetFrameMS = (unsigned int)(1000.0f / (float)pTargetFPS);
+}

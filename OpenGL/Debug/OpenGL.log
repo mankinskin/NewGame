@@ -1,0 +1,21 @@
+﻿  dt.cpp
+  TTF.cpp
+  Unknown compiler version - please run the configure tests and report the results
+  Text.cpp
+  GUI.cpp
+c:\users\linus\source\repos\newgame\opengl\ui\gui.cpp(33): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\linus\source\repos\newgame\opengl\ui\gui.cpp(34): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\linus\source\repos\newgame\opengl\ui\gui.cpp(37): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\linus\source\repos\newgame\opengl\ui\gui.cpp(38): warning C4305: 'argument': truncation from 'double' to 'float'
+  Font_Loader.cpp
+  Unknown compiler version - please run the configure tests and report the results
+  Model.cpp
+  glDebug.cpp
+  gl.cpp
+  Unknown compiler version - please run the configure tests and report the results
+  Camera.cpp
+  Texture.cpp
+  Shader_Loader.cpp
+  Shader_Data.cpp
+  Shader.cpp
+  Compiling...
