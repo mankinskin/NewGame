@@ -254,13 +254,14 @@ void App::Input::scroll_Callback(GLFWwindow * window, double pX, double pY)
 
 void App::Input::toggleCenterCursorRef(int* pMode)
 {
+	*pMode = !*pMode;
 	if (*pMode) {
 		glfwSetInputMode(App::mainWindow.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 	else {
 		glfwSetInputMode(App::mainWindow.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
-	*pMode = !*pMode;
+	
 }
 
 void App::Input::toggleCenterCursor()
