@@ -71,7 +71,8 @@ void App::Input::init()
 	FuncSlot<void> exitProgramSlot(App::quit);
 	FuncSlot<void> setCameraModeSlot(toggleCenterCursor);
 	FuncSlot<void> togglePrintInfoSlot(App::Debug::togglePrintInfo);
-	
+	FuncSlot<void> toggleCoordinateSysSlot(gl::Debug::toggleCoord);
+	FuncSlot<void> toggleGridSlot(gl::Debug::toggleGrid);
 	//init Event Signals
 	//-----------------------
 	//Mouse Buttons
@@ -110,6 +111,10 @@ void App::Input::init()
 	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_ESCAPE, 1, 0)));
 	App::Input::FuncSlot<void>::bind(togglePrintInfoSlot, { TOTAL_SIGNAL_COUNT });//togglePrintInfo
 	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_I, 1, 0)));
+	App::Input::FuncSlot<void>::bind(toggleCoordinateSysSlot, { TOTAL_SIGNAL_COUNT });//toggleCoordSys
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_H, 1, 0)));
+	App::Input::FuncSlot<void>::bind(toggleGridSlot, { TOTAL_SIGNAL_COUNT });//toggleGrid
+	allKeySignals.push_back(Signal<KeyEvent>(TOTAL_SIGNAL_COUNT++, KeyEvent(GLFW_KEY_G, 1, 0)));
 	//--------------------------------
 	//Buttons
 
