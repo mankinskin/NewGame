@@ -3,8 +3,10 @@ deps
 Debug
 NewGame.VC.db
 x64
+.vs/
 *.pdb
 *.lib
 *.dll
 *.exe
-.vs/
+*.ilk
+*.exp
