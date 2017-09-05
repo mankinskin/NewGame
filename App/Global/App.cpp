@@ -86,11 +86,12 @@ void App::mainMenu()
 		Input::fetchButtonEvents();
 		App::Input::checkEvents();
 		App::Input::callFunctions();
+		Input::end();
 		gl::GUI::updateGUI();
 
 		gl::frame();
 
-		Input::frame_end();
+		
 		Debug::printErrors();
 		updateTime();
 		updateTimeFactor();
@@ -127,6 +128,7 @@ void App::frameLoop()
 		
 		App::Input::checkEvents();
 		App::Input::callFunctions();
+		Input::end();
 		gl::Camera::look(Input::cursorFrameDelta);
 		gl::Camera::update();
 		gl::GUI::updateGUI();
@@ -135,7 +137,7 @@ void App::frameLoop()
 		
 		gl::frame();
 
-		Input::frame_end();
+		
 		Debug::printErrors();
 		updateTime();
 		updateTimeFactor();

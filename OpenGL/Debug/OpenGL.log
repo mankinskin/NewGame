@@ -1,10 +1,2 @@
-﻿  Text.cpp
-  GUI.cpp
-c:\users\linus\source\repos\newgame\opengl\ui\gui.cpp(33): warning C4305: 'argument': truncation from 'double' to 'float'
-c:\users\linus\source\repos\newgame\opengl\ui\gui.cpp(34): warning C4305: 'argument': truncation from 'double' to 'float'
-c:\users\linus\source\repos\newgame\opengl\ui\gui.cpp(37): warning C4305: 'argument': truncation from 'double' to 'float'
-c:\users\linus\source\repos\newgame\opengl\ui\gui.cpp(38): warning C4305: 'argument': truncation from 'double' to 'float'
-  Font_Loader.cpp
-  gl.cpp
-  Generating Code...
+﻿  gl.cpp
   OpenGL.vcxproj -> C:\Users\Linus\source\repos\NewGame\Debug\OpenGL.lib
