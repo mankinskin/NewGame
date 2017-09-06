@@ -93,4 +93,31 @@ void gl::Shader::unuse()
 	glUseProgram(0);
 }
 
+void gl::Shader::bindBufferToUniformBlock(unsigned int pProgram, unsigned int pStorageIndex, std::string pBlockName)
+{
+	VAO::Storage& storage = VAO::allStorages[pStorageIndex];
+	bindBufferToUniformBlock(pProgram, storage, pBlockName);
+	VAO::allStorages[pStorageIndex] = storage;
+}
+
+void gl::Shader::bindBufferToUniformBlock(unsigned int pProgram, VAO::Storage& pStorage, std::string pBlockName)
+{
+	int blockIndex = glGetUniformBlockIndex(pProgram, pBlockName.c_str());
+	if (blockIndex < 0) {
+		App::Debug::pushError("invalid uniform block name " + pBlockName + "!");
+		return;
+	}
+	glUniformBlockBinding(pProgram, blockIndex, pStorage.binding);
+	gl::Debug::getGLError("bindUniformBlockBuffer()");
+}
+
+void gl::Shader::bindBufferToUniformBlock(std::string pProgramName, unsigned int pTargetStorageIndex, std::string pBlockName)
+{
+	auto it = shaderProgramLookup.find(pProgramName);
+	if (it == shaderProgramLookup.end()) {
+		App::Debug::pushError("bindUniformBlockBuffer(): Tried to access invalid shader program!");
+		return;
+	}
+	bindBufferToUniformBlock(it->second.ID, pTargetStorageIndex, pBlockName);
+}
 

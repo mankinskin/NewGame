@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <glm\glm.hpp>
-#include "Shader_Data.h"
+#include "VAO.h"
 
 namespace gl {
 	namespace Shader {
@@ -58,6 +58,11 @@ namespace gl {
 		void use(std::string pProgramName);
 		void use(unsigned int pID);
 		void unuse();
+		void addVertexAttribute(unsigned int pProgram, std::string pAttributeName, unsigned int pAttributeIndex);
+		void addVertexAttribute(std::string pProgramName, std::string pAttributeName, unsigned int pAttributeIndex);
 
+		void bindBufferToUniformBlock(std::string pProgramName, unsigned int pTargetStorageIndex, std::string pBlockName);
+		void bindBufferToUniformBlock(unsigned int pProgram, unsigned int pTargetStorageIndex, std::string pBlockName);
+		void bindBufferToUniformBlock(unsigned int pProgram, VAO::Storage& pStorage, std::string pBlockName);
 	}
 }
