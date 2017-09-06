@@ -19,7 +19,8 @@ namespace gl {
 			unsigned int stride = 0;
 		};
 
-
+		unsigned int createStorage();
+		void initStorageData(unsigned int pStorage, unsigned int pCapacity, const void * pData, unsigned int pFlags);
 		unsigned int createStorage(unsigned int pCapacity, const void* pData, unsigned int pFlags);
 		
 		struct Stream{
@@ -41,8 +42,8 @@ namespace gl {
 		void * mapStorage(Storage& pStorage, unsigned int pFlags);
 		void bindStorage(unsigned int pStorageIndex, unsigned int pTarget);
 		void bindStorage(unsigned int pTarget, Storage& pStorage);
-		void bindVertexArrayVertexStorage(unsigned int pStorageIndex, unsigned int pVAO, unsigned int pTarget, unsigned int pBinding, unsigned int pStride);
-		void bindVertexArrayVertexStorage(Storage& pStorage, unsigned int pVAO, unsigned int pTarget, unsigned int pBinding, unsigned int pStride);
+		void bindVertexArrayVertexStorage(unsigned int pStorageIndex, unsigned int pVAO, unsigned int pBinding, unsigned int pStride);
+		void bindVertexArrayVertexStorage(unsigned int pVAO, unsigned int pBinding, Storage& pStorage, unsigned int pStride);
 		void initVertexAttrib(unsigned int pVAO, unsigned int pBindingIndex, unsigned int pAttributeIndex, unsigned int pCount, unsigned int pType, unsigned int pOffset, unsigned int pNormalize = false);
 		
 		extern int MIN_MAP_BUFFER_ALIGNMENT;
@@ -54,22 +55,6 @@ namespace gl {
 		extern std::vector<Storage> allStorages;
 		extern std::vector<Stream> allStreams;
 
-		void setUniform(unsigned int pProgram, std::string pUniformName, int& pValue);
-		void setUniform(unsigned int pProgram, std::string pUniformName, unsigned int& pValue);
-		void setUniform(unsigned int pProgram, std::string pUniformName, float& pValue);
-		void setUniform(unsigned int pProgram, std::string pUniformName, glm::ivec3& pValue);
-		void setUniform(unsigned int pProgram, std::string pUniformName, glm::uvec3& pValue);
-		void setUniform(unsigned int pProgram, std::string pUniformName, glm::vec3& pValue);
-		void setUniform(unsigned int pProgram, std::string pUniformName, glm::mat3& pValue, bool pTranspose = 0);
-		void setUniform(unsigned int pProgram, std::string pUniformName, glm::ivec4& pValue);
-		void setUniform(unsigned int pProgram, std::string pUniformName, glm::uvec4& pValue);
-		void setUniform(unsigned int pProgram, std::string pUniformName, glm::vec4& pValue);
-		void setUniform(unsigned int pProgram, std::string pUniformName, glm::mat4& pValue, bool pTranspose = 0);
-		template<typename T>
-		void setUniform(unsigned int pProgram, std::string pUniformName, T pValue)
-		{
-			setUniform(pProgram, pUniformName, pValue);
-			gl::Debug::getGLError("setUniform");
-		}
+		
 	}
 }

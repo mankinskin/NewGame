@@ -3,7 +3,7 @@
 #include <App\Global\Debug.h>
 #include "..\BaseGL\Shader.h"
 #include "..\Camera.h"
-
+#include "../BaseGL/VAO.h"
 
 unsigned int gl::Debug::vertexBuffer;
 unsigned int gl::Debug::indexBuffer;
@@ -127,8 +127,8 @@ void gl::Debug::initDebugVAOs()
 {
 	glCreateVertexArrays(1, &VAO);
 	glVertexArrayVertexBuffer(VAO, 0, vertexBuffer + 1, 0, sizeof(LineVertex));
-	Shader::Data::initVertexAttrib(VAO, 0, 0, 4, GL_FLOAT, offsetof(LineVertex, position));
-	Shader::Data::initVertexAttrib(VAO, 0, 1, 4, GL_FLOAT, offsetof(LineVertex, color));
+	VAO::initVertexAttrib(VAO, 0, 0, 4, GL_FLOAT, offsetof(LineVertex, position));
+	VAO::initVertexAttrib(VAO, 0, 1, 4, GL_FLOAT, offsetof(LineVertex, color));
 	glVertexArrayElementBuffer(VAO, indexBuffer + 1);
 
 	
@@ -137,8 +137,8 @@ void gl::Debug::initDebugVAOs()
 
 void gl::Debug::init()
 {	
-	vertexBuffer = Shader::Data::createStorage(vertices.size() * sizeof(LineVertex), &vertices[0], 0);
-	indexBuffer = Shader::Data::createStorage(indices.size() * sizeof(unsigned int), &indices[0], 0);
+	vertexBuffer = VAO::createStorage(vertices.size() * sizeof(LineVertex), &vertices[0], 0);
+	indexBuffer = VAO::createStorage(indices.size() * sizeof(unsigned int), &indices[0], 0);
 	initDebugVAOs();
 	
 	getGLError("gl::Debug::init():");
@@ -208,6 +208,6 @@ void gl::Debug::initDebugShader()
 {
 	Index lineShader = Shader::newProgram("debugLine", Shader::newModule("gridShader.vert"), Shader::newModule("gridShader.frag"));
 	lineShaderID = lineShader.ID;
-	Shader::Data::addVertexAttribute(lineShaderID, "position", 0);
-	Shader::Data::addVertexAttribute(lineShaderID, "color", 1);
+	Shader::addVertexAttribute(lineShaderID, "position", 0);
+	Shader::addVertexAttribute(lineShaderID, "color", 1);
 }

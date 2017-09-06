@@ -1,7 +1,7 @@
 #include "..\Global\stdafx.h"
 #include "GUI.h"
 #include "..\BaseGL\Shader.h"
-#include "..\BaseGL\Shader_Data.h"
+#include "..\BaseGL\VAO.h"
 #include "..\Global\glDebug.h"
 #include <App\Global\Debug.h>
 
@@ -30,12 +30,12 @@ void gl::GUI::createQuads()
 {
 
 	allPositions.reserve(2);
-	Pos p1 = gl::GUI::createPos(-0.99, -0.80);
-	Pos p2 = gl::GUI::createPos(-0.99,- 0.90);
+	Pos p1 = gl::GUI::createPos(-0.99f, -0.80f);
+	Pos p2 = gl::GUI::createPos(-0.99f,- 0.90f);
 
 	allSizes.reserve(2);
-	Size s1 = gl::GUI::createSize(0.3, 0.07);
-	Size s2 = gl::GUI::createSize(0.3, 0.07);
+	Size s1 = gl::GUI::createSize(0.3f, 0.07f);
+	Size s2 = gl::GUI::createSize(0.3f, 0.07f);
 
 
 	allColors.reserve(2);
@@ -67,21 +67,21 @@ void gl::GUI::initGUIBuffers()
 {
 	//BUFFERS
 	
-	guiPositionBuffer = Shader::Data::createStorage( MAX_GUI_QUADS*sizeof(float)*2, nullptr, GL_MAP_WRITE_BIT | Shader::Data::STREAM_FLAGS);
-	Shader::Data::createStream(guiPositionBuffer, GL_MAP_WRITE_BIT);
-	Shader::Data::bindStorage(GL_UNIFORM_BUFFER, guiPositionBuffer);
+	guiPositionBuffer = VAO::createStorage( MAX_GUI_QUADS*sizeof(float)*2, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+	VAO::createStream(guiPositionBuffer, GL_MAP_WRITE_BIT);
+	VAO::bindStorage(GL_UNIFORM_BUFFER, guiPositionBuffer);
 
-	guiSizeBuffer = Shader::Data::createStorage(MAX_GUI_QUADS * sizeof(float) * 2, nullptr, GL_MAP_WRITE_BIT | Shader::Data::STREAM_FLAGS);
-	Shader::Data::createStream(guiSizeBuffer, GL_MAP_WRITE_BIT);
-	Shader::Data::bindStorage(GL_UNIFORM_BUFFER, guiSizeBuffer);
+	guiSizeBuffer = VAO::createStorage(MAX_GUI_QUADS * sizeof(float) * 2, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+	VAO::createStream(guiSizeBuffer, GL_MAP_WRITE_BIT);
+	VAO::bindStorage(GL_UNIFORM_BUFFER, guiSizeBuffer);
 
-	guiColorBuffer = Shader::Data::createStorage(MAX_GUI_QUADS * sizeof(float) * 4, nullptr, GL_MAP_WRITE_BIT | Shader::Data::STREAM_FLAGS);
-	Shader::Data::createStream(guiColorBuffer, GL_MAP_WRITE_BIT);
-	Shader::Data::bindStorage(GL_UNIFORM_BUFFER, guiColorBuffer);
+	guiColorBuffer = VAO::createStorage(MAX_GUI_QUADS * sizeof(float) * 4, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+	VAO::createStream(guiColorBuffer, GL_MAP_WRITE_BIT);
+	VAO::bindStorage(GL_UNIFORM_BUFFER, guiColorBuffer);
 
-	guiUVBuffer = Shader::Data::createStorage(MAX_GUI_QUADS * sizeof(float) * 4, nullptr, GL_MAP_WRITE_BIT | Shader::Data::STREAM_FLAGS);
-	Shader::Data::createStream(guiUVBuffer, GL_MAP_WRITE_BIT);
-	Shader::Data::bindStorage(GL_UNIFORM_BUFFER, guiUVBuffer);
+	guiUVBuffer = VAO::createStorage(MAX_GUI_QUADS * sizeof(float) * 4, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+	VAO::createStream(guiUVBuffer, GL_MAP_WRITE_BIT);
+	VAO::bindStorage(GL_UNIFORM_BUFFER, guiUVBuffer);
 
 	
 
@@ -93,17 +93,17 @@ void gl::GUI::initGUIBuffers()
 	glVertexArrayElementBuffer(guiVAO, quadEBO);
 
 	//quad indices
-	guiQuadBuffer = Shader::Data::createStorage(MAX_GUI_QUADS * sizeof(glm::ivec4), nullptr, GL_MAP_WRITE_BIT | Shader::Data::STREAM_FLAGS);
-	Shader::Data::createStream(guiQuadBuffer, GL_MAP_WRITE_BIT);
-	Shader::Data::bindVertexArrayVertexStorage(guiQuadBuffer, guiVAO, GL_ARRAY_BUFFER, 1, sizeof(glm::ivec4));
+	guiQuadBuffer = VAO::createStorage(MAX_GUI_QUADS * sizeof(glm::ivec4), nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+	VAO::createStream(guiQuadBuffer, GL_MAP_WRITE_BIT);
+	VAO::bindVertexArrayVertexStorage(guiVAO, 1, guiQuadBuffer, sizeof(glm::ivec4));
 	glVertexArrayBindingDivisor(guiVAO, 1, 1);
 
-	Shader::Data::initVertexAttrib(guiVAO, 0, 0, 2, GL_FLOAT, 0);
+	VAO::initVertexAttrib(guiVAO, 0, 0, 2, GL_FLOAT, 0);
 
-	Shader::Data::initVertexAttrib(guiVAO, 1, 1, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, x));
-	Shader::Data::initVertexAttrib(guiVAO, 1, 2, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, y));
-	Shader::Data::initVertexAttrib(guiVAO, 1, 3, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, z));
-	Shader::Data::initVertexAttrib(guiVAO, 1, 4, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, w));
+	VAO::initVertexAttrib(guiVAO, 1, 1, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, x));
+	VAO::initVertexAttrib(guiVAO, 1, 2, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, y));
+	VAO::initVertexAttrib(guiVAO, 1, 3, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, z));
+	VAO::initVertexAttrib(guiVAO, 1, 4, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, w));
 	
 	gl::Debug::getGLError("gl::GUI::initGuiBuffers()");
 }
@@ -124,21 +124,21 @@ void gl::GUI::updateGUI() {
 	}
 
 
-	Shader::Data::streamStorage(guiQuadBuffer, sizeof(glm::ivec4)*indexQuads.size(), &indexQuads[0]);
-	Shader::Data::streamStorage(guiPositionBuffer, sizeof(glm::vec2)*allPositions.size(), &allPositions[0]);
-	Shader::Data::streamStorage(guiSizeBuffer, sizeof(glm::vec2)*allSizes.size(), &allSizes[0]);
-	Shader::Data::streamStorage(guiColorBuffer, sizeof(glm::vec4)*allColors.size(), &allColors[0]);
-	//Shader::Data::streamTargetStorage(guiUVBuffer, sizeof(glm::vec4)*allUVRanges.size(), &allUVRanges[0]);
+	VAO::streamStorage(guiQuadBuffer, sizeof(glm::ivec4)*indexQuads.size(), &indexQuads[0]);
+	VAO::streamStorage(guiPositionBuffer, sizeof(glm::vec2)*allPositions.size(), &allPositions[0]);
+	VAO::streamStorage(guiSizeBuffer, sizeof(glm::vec2)*allSizes.size(), &allSizes[0]);
+	VAO::streamStorage(guiColorBuffer, sizeof(glm::vec4)*allColors.size(), &allColors[0]);
+	//VAO::streamTargetStorage(guiUVBuffer, sizeof(glm::vec4)*allUVRanges.size(), &allUVRanges[0]);
 }
 
 void gl::GUI::initGUIShaders()
 {
 	
 	guiQuadShader = Shader::newProgram("guiQuad", Shader::newModule("guiQuad.vert"), Shader::newModule("guiQuad.frag")).ID;
-	Shader::Data::addVertexAttribute(guiQuadShader, "posIndex", 0);
-	Shader::Data::addVertexAttribute(guiQuadShader, "sizeIndex", 1);
-	Shader::Data::addVertexAttribute(guiQuadShader, "uvIndex", 2);
-	Shader::Data::addVertexAttribute(guiQuadShader, "colorIndex", 3);
+	Shader::addVertexAttribute(guiQuadShader, "posIndex", 0);
+	Shader::addVertexAttribute(guiQuadShader, "sizeIndex", 1);
+	Shader::addVertexAttribute(guiQuadShader, "uvIndex", 2);
+	Shader::addVertexAttribute(guiQuadShader, "colorIndex", 3);
 }
 
 void gl::GUI::renderGUI()

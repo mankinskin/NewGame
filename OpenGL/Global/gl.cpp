@@ -9,7 +9,7 @@
 #include "..\Camera.h"
 #include "glDebug.h"
 #include <glm\gtc\type_ptr.hpp>
-#include "..\BaseGL\Shader_Data.h"
+#include "..\BaseGL\Shader.h"
 #include "..\BaseGL\Texture.h"
 #include "..\UI\Font_Loader.h"
 #include "..\UI\GUI.h"
@@ -90,14 +90,14 @@ void gl::init()
 	//bind uniform buffers to shaders
 	initGeneralUniformBuffer();
 	
-	Shader::Data::bindBufferToUniformBlock(GUI::Text::glyphShapeProgram, generalUniformBuffer, "GeneralUniformBuffer");
+	Shader::bindBufferToShader(GUI::Text::glyphShapeProgram, generalUniformBuffer, "GeneralUniformBuffer");
 	
-	Shader::Data::bindBufferToUniformBlock(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
+	Shader::bindBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
 	
-	Shader::Data::bindBufferToUniformBlock(gl::GUI::guiQuadShader, gl::GUI::guiPositionBuffer, "PositionBuffer");
-	Shader::Data::bindBufferToUniformBlock(gl::GUI::guiQuadShader, gl::GUI::guiSizeBuffer, "SizeBuffer");
-	Shader::Data::bindBufferToUniformBlock(gl::GUI::guiQuadShader, gl::GUI::guiUVBuffer, "UVBuffer");
-	Shader::Data::bindBufferToUniformBlock(gl::GUI::guiQuadShader, gl::GUI::guiColorBuffer, "ColorBuffer");
+	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiPositionBuffer, "PositionBuffer");
+	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiSizeBuffer, "SizeBuffer");
+	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiUVBuffer, "UVBuffer");
+	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiColorBuffer, "ColorBuffer");
 	
 	
 	
@@ -120,7 +120,7 @@ void gl::setViewport(App::ContextWindow::Window& pViewport) {
 
 void gl::getOpenGLInitValues()
 {
-	Shader::Data::STREAM_FLAGS = GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+	VAO::STREAM_FLAGS = GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
 	glGetIntegerv(GL_MAJOR_VERSION, &OPENGL_VERSION[0]);
 	glGetIntegerv(GL_MINOR_VERSION, &OPENGL_VERSION[1]);
 	GLSL_VERSION = std::string((char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
@@ -136,11 +136,11 @@ void gl::getOpenGLInitValues()
 	glGetIntegeri_v(GL_MAX_COMPUTE_FIXED_GROUP_SIZE_ARB, 1, &MAX_WORK_GROUP_SIZE.y);
 	glGetIntegeri_v(GL_MAX_COMPUTE_FIXED_GROUP_SIZE_ARB, 2, &MAX_WORK_GROUP_SIZE.z);
 
-	glGetIntegerv(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, &Shader::Data::SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT);
-	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &Shader::Data::UNIFORM_BUFFER_OFFSET_ALIGNMENT);
-	glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &Shader::Data::MAX_UNIFORM_BUFFER_BINDINGS);
+	glGetIntegerv(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, &VAO::SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT);
+	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &VAO::UNIFORM_BUFFER_OFFSET_ALIGNMENT);
+	glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &VAO::MAX_UNIFORM_BUFFER_BINDINGS);
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &MAX_TEXTURE_UNIT_COUNT);
-	glGetIntegerv(GL_MIN_MAP_BUFFER_ALIGNMENT, &Shader::Data::MIN_MAP_BUFFER_ALIGNMENT);
+	glGetIntegerv(GL_MIN_MAP_BUFFER_ALIGNMENT, &VAO::MIN_MAP_BUFFER_ALIGNMENT);
 	screenPixelWidth = App::mainWindow.width;
 	screenPixelHeight = App::mainWindow.height;
 
@@ -178,17 +178,17 @@ void gl::initQuadBuffers()
 	unsigned int iarr[6] = {
 		0, 1, 2, 2, 1, 3
 	};
-	quadVBO = Shader::Data::createStorage(sizeof(float) * 4 * 2, &varr[0], 0) + 1;
-	quadEBO = Shader::Data::createStorage(sizeof(unsigned int) * 6, &iarr[0], 0) + 1;
+	quadVBO = VAO::createStorage(sizeof(float) * 4 * 2, &varr[0], 0) + 1;
+	quadEBO = VAO::createStorage(sizeof(unsigned int) * 6, &iarr[0], 0) + 1;
 }
 
 void gl::initGeneralUniformBuffer()
 {
 	unsigned int generalUniformDataSize = sizeof(float) * 16 * 2;
 	
-	generalUniformBuffer = Shader::Data::createStorage(generalUniformDataSize * 16, nullptr, GL_MAP_WRITE_BIT | Shader::Data::STREAM_FLAGS);
-	Shader::Data::createStream(generalUniformBuffer,  GL_MAP_WRITE_BIT);
-	Shader::Data::bindStorage(GL_UNIFORM_BUFFER, generalUniformBuffer);
+	generalUniformBuffer = VAO::createStorage(generalUniformDataSize * 16, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+	VAO::createStream(generalUniformBuffer,  GL_MAP_WRITE_BIT);
+	VAO::bindStorage(GL_UNIFORM_BUFFER, generalUniformBuffer);
 	Debug::getGLError("gl::initGeneralUniformBuffer()1:");
 }
 
@@ -199,7 +199,7 @@ void gl::updateGeneralUniformBuffer()
 	std::memcpy(&generalUniformData[0], glm::value_ptr(Camera::infiniteProjectionMatrix), sizeof(float) * 16);
 	std::memcpy(&generalUniformData[16], glm::value_ptr(Camera::viewMatrix), sizeof(float) * 16);
 	
-	Shader::Data::streamStorage(generalUniformBuffer, sizeof(float) * 32, &generalUniformData[0]);
+	VAO::streamStorage(generalUniformBuffer, sizeof(float) * 32, &generalUniformData[0]);
 	
 	Debug::getGLError("gl::update():");
 }

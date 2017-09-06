@@ -6,7 +6,7 @@
 #include "..\BaseGL\Texture.h"
 #include "..\Global\glDebug.h"
 #include "..\Camera.h"
-#include "..\BaseGL\Shader_Data.h"
+#include "..\BaseGL\VAO.h"
 #include <App\Global\Debug.h>
 #include <math.h>
 #include <OpenGL\Utility\dt\dt.h>
@@ -425,8 +425,8 @@ storeGlyphs(Font& pFont, const LoadFont & pLoadFont)
 		allMetrics[pFont.metricOffset + g] = GlyphMetrics((float)(qud.maxX - qud.minX) / ((float)screenPixelWidth / 2.0f), (float)(qud.maxY - qud.minY) / ((float)screenPixelHeight / 2.0f), (float)met.advanceX / ((float)screenPixelWidth / 2.0f), (float)met.xBearing / ((float)screenPixelWidth / 2.0f), (float)met.yBearing / ((float)screenPixelHeight / 2.0f));
 		//allMetrics[pSize.metricOffset + g] = GlyphMetrics((float)met.width, (float)met.height, (float)met.advanceX, (float)met.xBearing, (float)met.yBearing);
 	}
-	pFont.glyphStorageIndex = Shader::Data::createStorage(sizeof(Glyph)*glyCount, &glyphs[0], 0);
-	Shader::Data::bindStorage(GL_UNIFORM_BUFFER, pFont.glyphStorageIndex);
+	pFont.glyphStorageIndex = VAO::createStorage(sizeof(Glyph)*glyCount, &glyphs[0], 0);
+	VAO::bindStorage(GL_UNIFORM_BUFFER, pFont.glyphStorageIndex);
 
 }
 

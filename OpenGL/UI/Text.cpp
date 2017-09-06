@@ -217,19 +217,19 @@ renderGlyphs()
 
 	glm::mat4 ortho = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);
 	static float ref = 0.5f;
-	Shader::Data::setUniform(glyphShapeProgram, "atlas", 0);
-	//Shader::Data::setUniform(glyphShapeProgram, "ortho", ortho);
+	Shader::setUniform(glyphShapeProgram, "atlas", 0);
+	//VAO::setUniform(glyphShapeProgram, "ortho", ortho);
 	for (unsigned int fo = 0; fo < allFonts.size(); ++fo) {
 		Font& font = allFonts[fo];
 		glBindTexture(GL_TEXTURE_2D, font.atlasID);
-		Shader::Data::bindBufferToUniformBlock(glyphShapeProgram, font.glyphStorageIndex, "GlyphBuffer");
+		Shader::bindBufferToShader(glyphShapeProgram, font.glyphStorageIndex, "GlyphBuffer");
 		for (unsigned int s = 0; s < font.stringCount; ++s) {
 			String& str = stringBuffer[font.stringOffset + s];
 			StringRenderInstructions& inst = *str.render_instructions;
-			Shader::Data::setUniform(glyphShapeProgram, "hardness", inst.hardness);
-			Shader::Data::setUniform(glyphShapeProgram, "thickness", inst.thickness);
-			Shader::Data::setUniform(glyphShapeProgram, "color", inst.color);
-			Shader::Data::setUniform(glyphShapeProgram, "depth", inst.depth);
+			Shader::setUniform(glyphShapeProgram, "hardness", inst.hardness);
+			Shader::setUniform(glyphShapeProgram, "thickness", inst.thickness);
+			Shader::setUniform(glyphShapeProgram, "color", inst.color);
+			Shader::setUniform(glyphShapeProgram, "depth", inst.depth);
 
 
 
@@ -255,8 +255,8 @@ updateCharStorage()
 		charQuadPtr = &charQuadBuffer[0];
 		glyphIndexPtr = &glyphIndexBuffer[0];
 	
-	Shader::Data::streamStorage(quadStorage, sizeof(CharQuad)*charQuadBuffer.size(), charQuadPtr);
-	Shader::Data::streamStorage(charStorage, sizeof(unsigned int)*glyphIndexBuffer.size(), glyphIndexPtr);
+	VAO::streamStorage(quadStorage, sizeof(CharQuad)*charQuadBuffer.size(), charQuadPtr);
+	VAO::streamStorage(charStorage, sizeof(unsigned int)*glyphIndexBuffer.size(), glyphIndexPtr);
 	}
 }
 
@@ -279,9 +279,9 @@ void gl::GUI::Text::
 initFontShader()
 {
 	glyphShapeProgram = Shader::newProgram("glyphShapeShader", Shader::newModule("glyphShapeShader.vert"), Shader::newModule("glyphShapeShader.frag")).ID;
-	Shader::Data::addVertexAttribute(glyphShapeProgram, "pos", 0);
-	Shader::Data::addVertexAttribute(glyphShapeProgram, "quad", 1);
-	Shader::Data::addVertexAttribute(glyphShapeProgram, "index", 2);
+	Shader::addVertexAttribute(glyphShapeProgram, "pos", 0);
+	Shader::addVertexAttribute(glyphShapeProgram, "quad", 1);
+	Shader::addVertexAttribute(glyphShapeProgram, "index", 2);
 }
 
 void gl::GUI::Text::
@@ -289,18 +289,18 @@ initFontVAO() {
 	glCreateVertexArrays(1, &fontVAO);
 	//Quad triangles 
 	glVertexArrayVertexBuffer(fontVAO, 0, quadVBO, 0, sizeof(float) * 2);
-	Shader::Data::initVertexAttrib(fontVAO, 0, 0, 2, GL_FLOAT, 0);
+	VAO::initVertexAttrib(fontVAO, 0, 0, 2, GL_FLOAT, 0);
 	//quad position and size
-	quadStorage = Shader::Data::createStorage(MAX_CHARS * sizeof(CharQuad) * 3, nullptr, GL_MAP_WRITE_BIT | Shader::Data::STREAM_FLAGS);
-	Shader::Data::createStream(quadStorage, GL_MAP_WRITE_BIT);
-	Shader::Data::bindVertexArrayVertexStorage(quadStorage, fontVAO, GL_ARRAY_BUFFER, 1, sizeof(float) * 4);
-	Shader::Data::initVertexAttrib(fontVAO, 1, 1, 4, GL_FLOAT, 0);
+	quadStorage = VAO::createStorage(MAX_CHARS * sizeof(CharQuad) * 3, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+	VAO::createStream(quadStorage, GL_MAP_WRITE_BIT);
+	VAO::bindVertexArrayVertexStorage(fontVAO, 1, quadStorage, sizeof(float) * 4);
+	VAO::initVertexAttrib(fontVAO, 1, 1, 4, GL_FLOAT, 0);
 	
 	//glyph index
-	charStorage = Shader::Data::createStorage(MAX_CHARS * sizeof(unsigned int) * 3, nullptr, GL_MAP_WRITE_BIT | Shader::Data::STREAM_FLAGS);
-	Shader::Data::createStream(charStorage, GL_MAP_WRITE_BIT);
-	Shader::Data::bindVertexArrayVertexStorage(charStorage, fontVAO, GL_ARRAY_BUFFER, 2, sizeof(unsigned int));
-	Shader::Data::initVertexAttrib(fontVAO, 2, 2, 1, GL_UNSIGNED_INT, 0);
+	charStorage = VAO::createStorage(MAX_CHARS * sizeof(unsigned int) * 3, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+	VAO::createStream(charStorage, GL_MAP_WRITE_BIT);
+	VAO::bindVertexArrayVertexStorage(fontVAO, 2, charStorage, sizeof(unsigned int));
+	VAO::initVertexAttrib(fontVAO, 2, 2, 1, GL_UNSIGNED_INT, 0);
 
 	glVertexArrayBindingDivisor(fontVAO, 1, 1);
 	glVertexArrayBindingDivisor(fontVAO, 2, 1);

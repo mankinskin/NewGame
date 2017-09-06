@@ -1,6 +1,6 @@
 #include "Global\stdafx.h"
 #include "Render.h"
-#include <App\Entity.h>
+#include "BaseGL\VAO.h"
 
 unsigned int gl::Render::meshVAO;
 unsigned int gl::Render::meshVBO;
@@ -31,13 +31,11 @@ void gl::Render::storeMaterials()
 	glNamedBufferStorage(materialUBO, sizeof(Material)*allMaterials.size(), &allMaterials[0], 0);
 }
 
-unsigned int gl::Render::newMesh(std::vector<Vertex> pVerts, std::vector<unsigned int> pIndices)
+gl::Render::Geometry gl::Render::newGeometry(std::vector<Vertex> pVerts, std::vector<unsigned int> pIndices)
 {
-	
-	Mesh mesh(allIndices.size(), pIndices.size());
+	Geometry geom(allIndices.size(), pIndices.size());
 	allIndices.insert(allIndices.end(), pIndices.begin(), pIndices.end());
 	allVertices.insert(allVertices.end(), pVerts.begin(), pVerts.end());
-	allMeshes.push_back(mesh);
-	return allMeshes.size()-1;
+	return geom;
 }
 

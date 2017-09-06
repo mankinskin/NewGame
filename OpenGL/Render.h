@@ -37,7 +37,7 @@ namespace gl {
 		void initMeshVAO();
 		void fillMeshVAO();
 		void storeMaterials();
-		unsigned int newMesh(std::vector<Vertex> pVerts, std::vector<unsigned int> pIndices);
+		Geometry newGeometry(std::vector<Vertex> pVerts, std::vector<unsigned int> pIndices);
 		extern unsigned int meshVAO;
 		extern unsigned int meshVBO;
 		extern unsigned int meshIBO;

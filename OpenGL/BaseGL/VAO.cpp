@@ -3,7 +3,6 @@
 #include "..\Global\glDebug.h"
 #include <algorithm>
 #include <App\Global\Debug.h>
-#include "Shader.h"
 #include <glm\gtc\type_ptr.hpp>
 
 
@@ -19,15 +18,27 @@ std::unordered_map<unsigned int, unsigned int> gl::VAO::bufferTargetBinds;
 
 
 
-unsigned int gl::VAO::createStorage(unsigned int pCapacity, const void* pData, unsigned int pFlags)
+unsigned int gl::VAO::createStorage()
 {
 	Storage storage;
-	size_t ind = allStorages.size();
-	storage.capacity = pCapacity;
-	storage.bufferFlags = pFlags;
+	unsigned ind = allStorages.size();
 	glCreateBuffers(1, &storage.ID);
-	glNamedBufferStorage(storage.ID, pCapacity, pData, pFlags);
 	allStorages.push_back(storage);
+	return ind;
+}
+
+void gl::VAO::initStorageData(unsigned int pStorage, unsigned int pCapacity, const void* pData, unsigned int pFlags)
+{
+	Storage& stor = allStorages[pStorage];
+	glNamedBufferStorage(stor.ID, pCapacity, pData, pFlags);
+	stor.capacity = pCapacity;
+	stor.bufferFlags = pFlags;
+}
+
+unsigned int gl::VAO::createStorage(unsigned int pCapacity, const void* pData, unsigned int pFlags)
+{
+	unsigned ind = createStorage();
+	initStorageData(ind, pCapacity, pData, pFlags);
 	Debug::getGLError("createStorage");
 	return ind;
 }
@@ -138,140 +149,22 @@ void gl::VAO::bindStorage(unsigned int pTarget, Storage& pStorage)
 	App::Debug::printErrors();
 }
 
-void gl::VAO::bindVertexArrayVertexStorage(unsigned int pStorageIndex, unsigned int pVAO, unsigned int pTarget, unsigned int pBinding, unsigned int pStride)
+void gl::VAO::bindVertexArrayVertexStorage(unsigned int pVAO, unsigned int pBinding, unsigned int pStorageIndex, unsigned int pStride)
 {
-	bindVertexArrayVertexStorage(allStorages[pStorageIndex], pVAO, pTarget, pBinding, pStride);
+	bindVertexArrayVertexStorage(pVAO, pBinding, allStorages[pStorageIndex], pStride);
 }
 
-void gl::VAO::bindVertexArrayVertexStorage(Storage & pStorage, unsigned int pVAO, unsigned int pTarget, unsigned int pBinding, unsigned int pStride)
+void gl::VAO::bindVertexArrayVertexStorage(unsigned int pVAO, unsigned int pBinding, Storage & pStorage, unsigned int pStride)
 {
 	pStorage.vaoID = pVAO;
-	pStorage.target = pTarget;
+	pStorage.target = GL_ARRAY_BUFFER;
 	pStorage.binding = pBinding;
 	pStorage.stride = pStride;
-	if (pTarget == GL_ARRAY_BUFFER) {
-		glVertexArrayVertexBuffer(pVAO, pBinding, pStorage.ID, 0, pStride);
-	}
-}
-
-
-void gl::VAO::addVertexAttribute(unsigned int pProgramID, std::string pAttributeName, unsigned int pAttributeIndex)
-{
-	//binds a in variable symbol out of a shader to an attribute index
-	glBindAttribLocation(pProgramID, pAttributeIndex, pAttributeName.c_str());
-}
-
-void gl::Shader::addVertexAttribute(std::string pProgramName, std::string pAttributeName, unsigned int pAttributeIndex)
-{
-	auto it = shaderProgramLookup.find(pProgramName.c_str());
-	if (it == shaderProgramLookup.end()) {
-		App::Debug::pushError("addVertexAttribute():\nCould not find shader Program " + pProgramName + "!\n");
-		return;
-	}
-	addVertexAttribute(it->second.ID, pAttributeName, pAttributeIndex);
-
+	glVertexArrayVertexBuffer(pVAO, pBinding, pStorage.ID, 0, pStride);
+	
 }
 
 
 
 
-void gl::VAO::setUniform(unsigned int pProgram, std::string pUniformName, int& pValue) {
-	if (pProgram < 1) {
-		App::Debug::pushError("Uniform variable binding failed: No ShaderProgram in use", App::Debug::Error::Fatal);
-		return;
-	}
-	glUniform1i(glGetUniformLocation(pProgram, pUniformName.c_str()), pValue);
-	gl::Debug::getGLError("glUniform1i()");
-}
 
-void gl::VAO::setUniform(unsigned int pProgram, std::string pUniformName, unsigned int& pValue) {
-	if (pProgram < 1) {
-		App::Debug::pushError("Uniform variable binding failed: No ShaderProgram in use", App::Debug::Error::Fatal);
-		return;
-	}
-	glUniform1ui(glGetUniformLocation(pProgram, pUniformName.c_str()), pValue);
-	gl::Debug::getGLError("glUniform1ui()");
-}
-
-void gl::VAO::setUniform(unsigned int pProgram, std::string pUniformName, float& pValue) {
-	if (pProgram < 1) {
-		App::Debug::pushError("Uniform variable binding failed: No ShaderProgram in use", App::Debug::Error::Fatal);
-		return;
-	}
-	glUniform1f(glGetUniformLocation(pProgram, pUniformName.c_str()), pValue);
-	gl::Debug::getGLError("glUniform1f()");
-}
-
-void gl::VAO::setUniform(unsigned int pProgram, std::string pUniformName, glm::vec3& pValue) {
-	if (pProgram < 1) {
-		App::Debug::pushError("Uniform variable binding failed: No ShaderProgram in use", App::Debug::Error::Fatal);
-		return;
-	}
-	glUniform3f(glGetUniformLocation(pProgram, pUniformName.c_str()), pValue.x, pValue.y, pValue.z);
-	gl::Debug::getGLError("glUniform3f()");
-}
-
-void gl::VAO::setUniform(unsigned int pProgram, std::string pUniformName, glm::vec4& pValue) {
-	if (currentShaderProgram.ID < 1) {
-		App::Debug::pushError("Uniform variable binding failed: No ShaderProgram in use", App::Debug::Error::Fatal);
-		return;
-	}
-
-	glUniform4f(glGetUniformLocation(pProgram, pUniformName.c_str()), pValue.x, pValue.y, pValue.z, pValue.w);
-	gl::Debug::getGLError("glUniform3f()");
-}
-
-void gl::VAO::setUniform(unsigned int pProgram, std::string pUniformName, glm::uvec4& pValue) {
-	if (pProgram < 1) {
-		App::Debug::pushError("Uniform variable binding failed: No ShaderProgram in use", App::Debug::Error::Fatal);
-		return;
-	}
-	glUniform4ui(glGetUniformLocation(pProgram, pUniformName.c_str()), pValue.x, pValue.y, pValue.z, pValue.w);
-	gl::Debug::getGLError("glUniform4ui()");
-}
-
-void gl::VAO::setUniform(unsigned int pProgram, std::string pUniformName, glm::uvec3& pValue) {
-	if (pProgram < 1) {
-		App::Debug::pushError("Uniform variable binding failed: No ShaderProgram in use", App::Debug::Error::Fatal);
-		return;
-	}
-	glUniform3ui(glGetUniformLocation(pProgram, pUniformName.c_str()), pValue.x, pValue.y, pValue.z);
-	gl::Debug::getGLError("glUniform3ui()");
-}
-
-void gl::VAO::setUniform(unsigned int pProgram, std::string pUniformName, glm::ivec4& pValue) {
-	if (pProgram < 1) {
-		App::Debug::pushError("Uniform variable binding failed: No ShaderProgram in use", App::Debug::Error::Fatal);
-		return;
-	}
-	glUniform4i(glGetUniformLocation(pProgram, pUniformName.c_str()), pValue.x, pValue.y, pValue.z, pValue.w);
-	gl::Debug::getGLError("setUniform4i()");
-}
-
-void gl::VAO::setUniform(unsigned int pProgram, std::string pUniformName, glm::ivec3& pValue) {
-	if (pProgram < 1) {
-		App::Debug::pushError("Uniform variable binding failed: No ShaderProgram in use", App::Debug::Error::Fatal);
-		return;
-	}
-	glUniform3i(glGetUniformLocation(pProgram, pUniformName.c_str()), pValue.x, pValue.y, pValue.z);
-	gl::Debug::getGLError("setUniform3i()");
-}
-
-void gl::VAO::setUniform(unsigned int pProgram, std::string pUniformName, glm::mat4& pValue, bool pTranspose) {
-	if (pProgram < 1) {
-		App::Debug::pushError("Uniform variable binding failed: No ShaderProgram in use", App::Debug::Error::Fatal);
-		return;
-	}
-	unsigned int loc = glGetUniformLocation(currentShaderProgram.ID, pUniformName.c_str());
-	glUniformMatrix4fv(loc, 1, pTranspose, glm::value_ptr(pValue));
-	gl::Debug::getGLError("setUniformMatrix4fv()");
-}
-
-void gl::VAO::setUniform(unsigned int pProgram, std::string pUniformName, glm::mat3& pValue, bool pTranspose) {
-	if (pProgram < 1) {
-		App::Debug::pushError("Uniform variable binding failed: No ShaderProgram in use", App::Debug::Error::Fatal);
-		return;
-	}
-	glUniformMatrix3fv(glGetUniformLocation(pProgram, pUniformName.c_str()), 1, pTranspose, glm::value_ptr(pValue));
-	gl::Debug::getGLError("setUniformMatrix3f()");
-}

@@ -1,6 +1,6 @@
-assets
-deps
-Debug
+assets/
+deps/
+Debug/
 NewGame.VC.db
 x64
 .vs/
@@ -8,6 +8,7 @@ x64
 *.log
 *.vcxproj
 *.tlog
+*.tlog/
 *.vcxproj.filters
 *.idb
 *.pdb
