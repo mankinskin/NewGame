@@ -32,6 +32,7 @@ void gl::Render::initMeshShader()
 
 void gl::Render::fillMeshVAO()
 {
+	//hardcoded cube
 	std::vector<Vertex> verts = {
 		Vertex(-1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
 		Vertex(1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
@@ -51,6 +52,8 @@ void gl::Render::fillMeshVAO()
 		2, 6, 1, 1, 6, 5  //right
 	};
 	allMeshes.push_back(Mesh(newGeometry(verts, inds)));
+
+	//-------------------------------
 	unsigned vbo = VAO::createStorage(sizeof(Vertex)*allVertices.size(), &allVertices[0], 0);
 	meshVBO = VAO::getStorageID(vbo);
 	unsigned ibo = VAO::createStorage(sizeof(unsigned int)*allIndices.size(), &allIndices[0], 0);
