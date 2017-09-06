@@ -8,12 +8,12 @@
     <ClCompile Include="Global\glDebug.cpp" />
     <ClCompile Include="Utility\dt\dt.cpp" />
     <ClCompile Include="BaseGL\Shader.cpp" />
-    <ClCompile Include="BaseGL\Shader_Data.cpp" />
     <ClCompile Include="BaseGL\Shader_Loader.cpp" />
     <ClCompile Include="UI\Font_Loader.cpp" />
     <ClCompile Include="UI\GUI.cpp" />
     <ClCompile Include="UI\Text.cpp" />
-    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Render.cpp" />
+    <ClCompile Include="BaseGL\VAO.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -30,11 +30,11 @@
     <ClInclude Include="Utility\dt\pnmfile.h" />
     <ClInclude Include="BaseGL\Shader_Loader.h" />
     <ClInclude Include="BaseGL\Shader.h" />
-    <ClInclude Include="BaseGL\Shader_Data.h" />
     <ClInclude Include="UI\Font_Loader.h" />
     <ClInclude Include="UI\GUI.h" />
     <ClInclude Include="UI\Text.h" />
-    <ClInclude Include="Scene.h" />
+    <ClInclude Include="Render.h" />
+    <ClInclude Include="BaseGL\VAO.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Text">

@@ -4,6 +4,12 @@ Debug
 NewGame.VC.db
 x64
 .vs/
+*.obj
+*.log
+*.vcxproj
+*.tlog
+*.vcxproj.filters
+*.idb
 *.pdb
 *.lib
 *.dll

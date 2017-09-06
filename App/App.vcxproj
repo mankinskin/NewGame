@@ -138,6 +138,7 @@
   <ItemGroup>
     <ClInclude Include="ContextWindow.h" />
     <ClInclude Include="edid.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="Global\Debug.h" />
     <ClInclude Include="Global\stdafx.h" />

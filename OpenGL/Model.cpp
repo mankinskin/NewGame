@@ -3,7 +3,8 @@
 #include <App\Global\Debug.h>
 #define DEFAULT_MODEL_DIR "..//assets//models//"
 std::string gl::ModelLoader::MODEL_DIR = DEFAULT_MODEL_DIR;
-
+std::vector<std::string> gl::ModelLoader::usedModels;
+Assimp::Importer gl::ModelLoader::imp;
 using std::vector;
 
 void gl::ModelLoader::addModel(std::string pFilename)
