@@ -13,7 +13,7 @@
 #include "..\BaseGL\Texture.h"
 #include "..\UI\Font_Loader.h"
 #include "..\UI\GUI.h"
-
+#include "../Render.h"
 
 int gl::MAX_WORK_GROUP_COUNT = 0;
 glm::ivec3 gl::MAX_WORK_GROUP_SIZE = {};
@@ -45,10 +45,13 @@ void gl::init()
 	Debug::initCoordinateSystem("coord");
 	Debug::init();
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glEnable(GL_BLEND);
+	glEnable(GL_CULL_FACE);
+	//glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-
+	Render::initMeshVAO();
+	Render::fillMeshVAO();
+	Render::initMeshShader();
 	//glEnable(GL_CULL_FACE);
 	//glEnable(GL_DEPTH_TEST);
 	Camera::init();
@@ -91,8 +94,8 @@ void gl::init()
 	initGeneralUniformBuffer();
 	
 	Shader::bindBufferToShader(GUI::Text::glyphShapeProgram, generalUniformBuffer, "GeneralUniformBuffer");
-	
 	Shader::bindBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
+	Shader::bindBufferToShader(Render::meshShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
 	
 	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiPositionBuffer, "PositionBuffer");
 	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiSizeBuffer, "SizeBuffer");
@@ -209,6 +212,7 @@ void gl::frame()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	Debug::drawGrid();
+	Render::render();
 	GUI::renderGUI();
 	GUI::Text::renderGlyphs();
 	

@@ -1,5 +1,2 @@
-﻿  Text.cpp
-  GUI.cpp
-  glDebug.cpp
-  Generating Code...
+﻿  Render.cpp
   OpenGL.vcxproj -> C:\Users\Linus\source\repos\NewGame\Debug\OpenGL.lib
