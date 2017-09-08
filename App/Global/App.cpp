@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "App.h"
 #include "Debug.h"
-#include "..\Input.h"
+#include "..\Input\Input.h"
 #include <conio.h>
 #include <thread>
 #include <chrono>

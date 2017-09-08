@@ -131,20 +131,21 @@
     <ClCompile Include="ContextWindow.cpp" />
     <ClCompile Include="edid-parse.c" />
     <ClCompile Include="Global\Debug.cpp" />
-    <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Input\Event.cpp" />
+    <ClCompile Include="Input\Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Global\App.cpp" />
+    <ClCompile Include="World\EntityRegistry.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ContextWindow.h" />
     <ClInclude Include="edid.h" />
-    <ClInclude Include="Entity.h" />
-    <ClInclude Include="Event.h" />
+    <ClInclude Include="World\EntityRegistry.h" />
+    <ClInclude Include="Input\Event.h" />
     <ClInclude Include="Global\Debug.h" />
     <ClInclude Include="Global\stdafx.h" />
-    <ClInclude Include="Input.h" />
+    <ClInclude Include="Input\Input.h" />
     <ClInclude Include="Global\App.h" />
-    <ClInclude Include="managed_vector.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -3,7 +3,6 @@
 #include <App\Global\Debug.h>
 #include <conio.h>
 #include <App\Global\App.h>
-#include <App\Input.h>
 #include <array>
 #include "..\BaseGL\Shader_Loader.h"
 #include "..\Camera.h"
@@ -13,7 +12,7 @@
 #include "..\BaseGL\Texture.h"
 #include "..\UI\Font_Loader.h"
 #include "..\UI\GUI.h"
-#include "../Render.h"
+#include "../Render/Render.h"
 
 int gl::MAX_WORK_GROUP_COUNT = 0;
 glm::ivec3 gl::MAX_WORK_GROUP_SIZE = {};
@@ -58,6 +57,7 @@ void gl::init()
 	Camera::init();
 	initQuadBuffers();
 	gl::Debug::getGLError("gl::init():");
+	App::Debug::printErrors();
 	//init framebuffers
 	
 	

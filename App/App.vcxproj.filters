@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Input.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Global\App.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -33,11 +30,17 @@
     <ClCompile Include="edid-parse.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="World\EntityRegistry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\Input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\Event.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Global\App.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -53,13 +56,13 @@
     <ClInclude Include="edid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="managed_vector.h">
+    <ClInclude Include="World\EntityRegistry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Event.h">
+    <ClInclude Include="Input\Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Entity.h">
+    <ClInclude Include="Input\Event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
