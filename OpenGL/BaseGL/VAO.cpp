@@ -149,6 +149,16 @@ void gl::VAO::bindStorage(unsigned int pTarget, Storage& pStorage)
 	App::Debug::printErrors();
 }
 
+void gl::VAO::bindStorageRange(Storage& pStorage, unsigned int pOffset, unsigned int pSize)
+{
+	glBindBufferRange(pStorage.target, pStorage.binding, pStorage.ID, pOffset, pSize);
+}
+void gl::VAO::bindStorageRange(unsigned int pStorageIndex, unsigned int pOffset, unsigned int pSize)
+{
+	Storage& stor = allStorages[pStorageIndex];
+	glBindBufferRange(stor.target, stor.binding, stor.ID, pOffset, pSize);
+}
+
 void gl::VAO::bindVertexArrayVertexStorage(unsigned int pVAO, unsigned int pBinding, unsigned int pStorageIndex, unsigned int pStride)
 {
 	bindVertexArrayVertexStorage(pVAO, pBinding, allStorages[pStorageIndex], pStride);

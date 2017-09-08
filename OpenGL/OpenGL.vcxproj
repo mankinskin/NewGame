@@ -137,6 +137,7 @@
     <ClInclude Include="Global\glDebug.h" />
     <ClInclude Include="Global\stdafx.h" />
     <ClInclude Include="Render\Model.h" />
+    <ClInclude Include="Render\Model_Loader.h" />
     <ClInclude Include="Render\Render.h" />
     <ClInclude Include="UI\Font_Loader.h" />
     <ClInclude Include="UI\GUI.h" />
@@ -157,6 +158,7 @@
     <ClCompile Include="Global\gl.cpp" />
     <ClCompile Include="Global\glDebug.cpp" />
     <ClCompile Include="Render\Model.cpp" />
+    <ClCompile Include="Render\Model_Loader.cpp" />
     <ClCompile Include="Render\Render.cpp" />
     <ClCompile Include="UI\Font_Loader.cpp" />
     <ClCompile Include="UI\GUI.cpp" />

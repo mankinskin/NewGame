@@ -15,6 +15,7 @@ App::Input::KeyCondition App::Input::mouseButtons[3];
 int App::Input::scroll;
 glm::vec2 App::Input::cursorFrameDelta;
 int App::Input::centerCursor;
+int App::Input::track_mouse;
 std::vector<App::Input::ButtonCondition> App::Input::allButtonStates;
 std::vector<glm::vec4> App::Input::allDetectors;
 std::vector<void(*)()> App::Input::callbackBuffer;
@@ -70,7 +71,7 @@ void App::Input::init()
 	FuncSlot<void> stopYSlot(gl::Camera::stop_y);
 	
 	FuncSlot<void> exitProgramSlot(App::quit);
-	FuncSlot<void> setCameraModeSlot(toggleCenterCursor);
+	FuncSlot<void> setCameraModeSlot(toggleTrackMouse);
 	FuncSlot<void> togglePrintInfoSlot(App::Debug::togglePrintInfo);
 	FuncSlot<void> toggleCoordinateSysSlot(gl::Debug::toggleCoord);
 	FuncSlot<void> toggleGridSlot(gl::Debug::toggleGrid);
@@ -79,15 +80,16 @@ void App::Input::init()
 	//Mouse Buttons
 	mouseSignalOffset = 0;
 	mouseSignalCount = 2;
-	setCameraModeSlot.listen({ TOTAL_SIGNAL_COUNT , TOTAL_SIGNAL_COUNT+1});//setCameraMode
-	EventSlot<KeyEvent>::create(KeyEvent(GLFW_MOUSE_BUTTON_2, 1, 0));
-	EventSlot<KeyEvent>::create(KeyEvent(GLFW_MOUSE_BUTTON_2, 0, 0));
+	
+	unsigned int rmb_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_MOUSE_BUTTON_2, 1, 0));
+	unsigned int rmb_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_MOUSE_BUTTON_2, 0, 0));
 	//-----------------------------------------
 	//Keys
 	//Movement
 	keySignalOffset = mouseSignalOffset + mouseSignalCount;
-	keySignalCount = 16;
-	
+	keySignalCount = 18;
+	unsigned int c_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_C, 1, 0));
+	unsigned int c_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_C, 0, 0));
 	unsigned int w_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_W, 1, 0));
 	unsigned int w_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_W, 0, 0));
 	unsigned int s_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_S, 1, 0));
@@ -100,8 +102,12 @@ void App::Input::init()
 	unsigned int space_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_SPACE, 0, 0));
 	unsigned int z_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_Z, 1, 0));
 	unsigned int z_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_Z, 0, 0));
+	unsigned int esc_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_ESCAPE, 1, 0));
+	unsigned int i_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_I, 1, 0));
+	unsigned int h_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_H, 1, 0));
+	unsigned int g_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_G, 1, 0));
 
-
+	setCameraModeSlot.listen({ rmb_press , rmb_release, c_press});//setCameraMode
 	moveForwardSlot.listen({ w_press });//forward
 	stopZSlot.listen({ w_release, s_release });//stop_z
 	moveBackwardSlot.listen({ s_press});//back
@@ -127,10 +133,10 @@ void App::Input::init()
 	signal_unlock(z_release, { space_press, space_release });
 
 	//Misc
-	exitProgramSlot.listen({ EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_ESCAPE, 1, 0)) });//exit
-	togglePrintInfoSlot.listen({ EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_I, 1, 0)) });//togglePrintInfo
-	toggleCoordinateSysSlot.listen({ EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_H, 1, 0)) });//toggleCoordSys
-	toggleGridSlot.listen({ EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_G, 1, 0)) });//toggleGrid
+	exitProgramSlot.listen({ esc_press });//exit
+	togglePrintInfoSlot.listen({ i_press });//togglePrintInfo
+	toggleCoordinateSysSlot.listen({ h_press });//toggleCoordSys
+	toggleGridSlot.listen({ g_press });//toggleGrid
 	
 	//--------------------------------
 	//Buttons
@@ -221,7 +227,7 @@ void App::Input::checkEvents() {
 void App::Input::end()
 {
 	scroll = 0;
-	if (!centerCursor) {
+	if (!track_mouse) {
 		cursorFrameDelta = glm::vec2();
 	}
 	if (glfwWindowShouldClose(App::mainWindow.window)) {
@@ -321,7 +327,7 @@ void App::Input::scroll_Callback(GLFWwindow * window, double pX, double pY)
 	scroll = (int)pY;
 }
 
-void App::Input::toggleCenterCursorRef(int* pMode)
+void App::Input::toggleTrackMouseRef(int* pMode)
 {
 	*pMode = !*pMode;
 	if (*pMode) {
@@ -333,8 +339,8 @@ void App::Input::toggleCenterCursorRef(int* pMode)
 	
 }
 
-void App::Input::toggleCenterCursor()
+void App::Input::toggleTrackMouse()
 {
-	toggleCenterCursorRef(&centerCursor);
+	toggleTrackMouseRef(&track_mouse);
 }
 

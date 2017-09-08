@@ -11,8 +11,8 @@
 #include <OpenGL\Global\glDebug.h>
 #include <OpenGL\UI\Font_Loader.h>
 #include <OpenGL\UI\GUI.h>
-
-
+#include "../World/EntityRegistry.h"
+#include <OpenGL\Render\Model.h>
 App::State App::state = App::State::Init;
 App::ContextWindow::Window App::mainWindow = App::ContextWindow::Window();
 double App::timeFactor = 1.0;
@@ -35,8 +35,10 @@ void App::init()
 	Input::init();
 	gl::init();
 	gl::configure();
-
+	EntityRegistry::initEntities();
 	
+	gl::Model::addModelInstances(0, { 0 });
+
 	Debug::printErrors();
 }
 

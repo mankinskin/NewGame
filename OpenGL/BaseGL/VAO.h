@@ -42,6 +42,8 @@ namespace gl {
 		void * mapStorage(Storage& pStorage, unsigned int pFlags);
 		void bindStorage(unsigned int pStorageIndex, unsigned int pTarget);
 		void bindStorage(unsigned int pTarget, Storage& pStorage);
+		void bindStorageRange(Storage& pStorage, unsigned int pOffset, unsigned int pSize);
+		void bindStorageRange(unsigned int pStorageIndex, unsigned int pOffset, unsigned int pSize);
 		void bindVertexArrayVertexStorage(unsigned int pVAO, unsigned int pBinding, unsigned int pStorageIndex, unsigned int pStride);
 		void bindVertexArrayVertexStorage(unsigned int pVAO, unsigned int pBinding, Storage& pStorage, unsigned int pStride);
 		void initVertexAttrib(unsigned int pVAO, unsigned int pBindingIndex, unsigned int pAttributeIndex, unsigned int pCount, unsigned int pType, unsigned int pOffset, unsigned int pNormalize = false);

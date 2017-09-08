@@ -5,6 +5,13 @@
 std::vector<glm::mat4> EntityRegistry::allMatrices;
 unsigned EntityRegistry::num_entities;
 
+void EntityRegistry::initEntities()
+{
+	unsigned int first_entity = 0;
+	createEntities(1, &first_entity);
+	setPos(first_entity, glm::vec3(3.0f, 2.0f, 1.0f));
+}
+
 void EntityRegistry::createEntities(unsigned int pCount, unsigned int * pEntities)
 {
 	unsigned int beg = num_entities;
@@ -16,7 +23,7 @@ void EntityRegistry::createEntities(unsigned int pCount, unsigned int * pEntitie
 
 void EntityRegistry::setPos(unsigned int pEntityID, glm::vec3 pPos)
 {
-	
+	glm::translate(allMatrices[pEntityID], pPos);
 }
 
 void EntityRegistry::translate(unsigned int pEntityID, glm::vec3 pPos)

@@ -108,13 +108,13 @@ namespace App {
 		extern glm::uvec2 absoluteCursorPosition;
 		extern glm::vec2 cursorFrameDelta;
 		extern int scroll;
+		extern int track_mouse;
 		extern int centerCursor;
-		
 		void init();
 		void end();
 		void callFunctions();
-		void toggleCenterCursorRef(int* pMode);
-		void toggleCenterCursor();
+		void toggleTrackMouseRef(int* pMode);
+		void toggleTrackMouse();
 		void checkEvents();
 		//KEYS
 
@@ -129,10 +129,10 @@ namespace App {
 		}
 		void calculateDetectionRanges();
 		void clearDetectionRanges();
+		void fetchButtonEvents();
 		
 		//GLFW base
 		void fetchGLFWEvents();
-		void fetchButtonEvents();
 		static void key_Callback(GLFWwindow* window, int pKey, int pScancode, int pAction, int pMods);
 		static void char_Callback(GLFWwindow* window, unsigned int pCodepoint);
 		static void cursorPosition_Callback(GLFWwindow* window, double pX, double pY);

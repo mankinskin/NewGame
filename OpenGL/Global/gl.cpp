@@ -13,7 +13,7 @@
 #include "..\UI\Font_Loader.h"
 #include "..\UI\GUI.h"
 #include "../Render/Render.h"
-
+#include "../Render/Model.h"
 int gl::MAX_WORK_GROUP_COUNT = 0;
 glm::ivec3 gl::MAX_WORK_GROUP_SIZE = {};
 unsigned int gl::MAX_LIGHT_COUNT = 100;
@@ -50,6 +50,7 @@ void gl::init()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	Render::initMeshVAO();
+	loadModels();
 	Render::fillMeshVAO();
 	Render::initMeshShader();
 	//glEnable(GL_CULL_FACE);
@@ -95,14 +96,18 @@ void gl::init()
 	initGeneralUniformBuffer();
 	
 	Shader::bindBufferToShader(GUI::Text::glyphShapeProgram, generalUniformBuffer, "GeneralUniformBuffer");
+
 	Shader::bindBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
+
 	Shader::bindBufferToShader(Render::meshShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
-	
+	Shader::bindBufferToShader(Render::meshShaderProgram, Render::entityTransformBuffer, "EntityTransformBuffer");
+	Shader::bindBufferToShader(Render::meshShaderProgram, Render::transformIndexBuffer, "TransformIndexBuffer");
+
+
 	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiPositionBuffer, "PositionBuffer");
 	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiSizeBuffer, "SizeBuffer");
 	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiUVBuffer, "UVBuffer");
 	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiColorBuffer, "ColorBuffer");
-	
 	
 	
 	
@@ -219,6 +224,32 @@ void gl::frame()
 	
 	glfwSwapBuffers(App::mainWindow.window);
 	Debug::getGLError("Frame");
+}
+
+void gl::loadModels()
+{
+	//hardcoded cube
+	std::vector<Vertex> verts = {
+		Vertex(-1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+		Vertex(1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+		Vertex(1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+		Vertex(-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+		Vertex(-1.0f, 1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+		Vertex(1.0f,  1.0f, 1.0f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+		Vertex(1.0f,  1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+		Vertex(-1.0f, 1.0f,  -1.0,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+	};
+	std::vector<unsigned> inds = {
+		0, 3, 1, 1, 3, 2, //downside
+		0, 4, 3, 3, 4, 7, //left side
+		0, 5, 4, 0, 1, 5, //front
+		4, 5, 6, 4, 6, 7, //upside
+		7, 6, 3, 3, 6, 2, //back
+		2, 6, 1, 1, 6, 5  //right
+	};
+
+	Model::createModel(Model::createMesh(Model::newGeometry(verts, inds), 0, 0), 1);
+	
 }
 
 

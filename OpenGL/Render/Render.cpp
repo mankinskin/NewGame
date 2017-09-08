@@ -2,17 +2,16 @@
 #include "Render.h"
 #include "..\BaseGL\VAO.h"
 #include "..\BaseGL\Shader.h"
-
-
+#include "Model.h"
+#include <App/World/EntityRegistry.h>
 unsigned int gl::Render::meshShaderProgram = 0;
 unsigned int gl::Render::meshVAO = 0;
 unsigned int gl::Render::meshVBO = 0;
 unsigned int gl::Render::meshIBO = 0;
 unsigned int gl::Render::materialUBO = 0;
-std::vector<gl::Render::Material> gl::Render::allMaterials;
-std::vector<gl::Render::Mesh> gl::Render::allMeshes;
-std::vector<unsigned int> gl::Render::allIndices;
-std::vector<gl::Render::Vertex> gl::Render::allVertices;
+unsigned int gl::Render::entityTransformBuffer;
+unsigned int gl::Render::transformIndexBuffer;
+
 
 
 void gl::Render::initMeshVAO()
@@ -20,6 +19,10 @@ void gl::Render::initMeshVAO()
 	glCreateVertexArrays(1, &meshVAO);
 	meshVBO = VAO::createStorage() + 1;
 	meshIBO = VAO::createStorage() + 1;
+	entityTransformBuffer = VAO::createStorage();
+	VAO::createStream(entityTransformBuffer, GL_MAP_WRITE_BIT);
+	transformIndexBuffer = VAO::createStorage();
+	VAO::createStream(transformIndexBuffer, GL_MAP_WRITE_BIT);
 }
 
 void gl::Render::initMeshShader()
@@ -32,30 +35,13 @@ void gl::Render::initMeshShader()
 
 void gl::Render::fillMeshVAO()
 {
-	//hardcoded cube
-	std::vector<Vertex> verts = {
-		Vertex(-1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(-1.0f, 1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(1.0f,  1.0f, 1.0f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(1.0f,  1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(-1.0f, 1.0f,  -1.0,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-	};
-	std::vector<unsigned> inds = {
-		0, 3, 1, 1, 3, 2, //downside
-		0, 4, 3, 3, 4, 7, //left side
-		0, 5, 4, 0, 1, 5, //front
-		4, 5, 6, 4, 6, 7, //upside
-		7, 6, 3, 3, 6, 2, //back
-		2, 6, 1, 1, 6, 5  //right
-	};
-	allMeshes.push_back(Mesh(newGeometry(verts, inds)));
-
+	VAO::initStorageData(entityTransformBuffer, sizeof(glm::mat4)*EntityRegistry::MAX_ENTITIES, nullptr, GL_MAP_WRITE_BIT);
+	VAO::initStorageData(transformIndexBuffer, sizeof(unsigned int)*EntityRegistry::MAX_ENTITIES*Model::MAX_MODELS, nullptr, GL_MAP_WRITE_BIT);
+	
+	
 	//-------------------------------
-	VAO::initStorageData(meshVBO - 1, sizeof(Vertex)*allVertices.size(), &allVertices[0], 0);
-	VAO::initStorageData(meshIBO - 1, sizeof(unsigned int)*allIndices.size(), &allIndices[0], 0);
+	VAO::initStorageData(meshVBO - 1, sizeof(Vertex)*Model::allVertices.size(), &Model::allVertices[0], 0);
+	VAO::initStorageData(meshIBO - 1, sizeof(unsigned int)*Model::allIndices.size(), &Model::allIndices[0], 0);
 	glVertexArrayElementBuffer(meshVAO, meshIBO);
 	glVertexArrayVertexBuffer(meshVAO, 0, meshVBO, 0, sizeof(Vertex));
 	VAO::initVertexAttrib(meshVAO, 0, 0, 3, GL_FLOAT, offsetof(Vertex, pos));
@@ -65,7 +51,7 @@ void gl::Render::fillMeshVAO()
 
 void gl::Render::storeMaterials()
 {
-	glNamedBufferStorage(materialUBO, sizeof(Material)*allMaterials.size(), &allMaterials[0], 0);
+	glNamedBufferStorage(materialUBO, sizeof(Model::Material)*Model::allMaterials.size(), &Model::allMaterials[0], 0);
 }
 
 void gl::Render::render()
@@ -73,16 +59,25 @@ void gl::Render::render()
 	Shader::use(meshShaderProgram);
 	glBindVertexArray(meshVAO);
 
-	glDrawElements(GL_TRIANGLES, allMeshes[0].geometry.indexCount, GL_UNSIGNED_INT, 0);
+	for (unsigned int modl = 0; modl < Model::allMeshes.size(); ++modl) {
+		Model::Model& model = Model::allModels[modl];
+		VAO::bindStorageRange(transformIndexBuffer, model.entityOffset, model.entityCount);
+		for (unsigned int msh = 0; msh < model.meshCount; ++msh) {
+			glDrawElements(GL_TRIANGLES, Model::allMeshes[model.meshOffset + msh].geometry.indexCount, GL_UNSIGNED_INT, 0);
+		}
+		
+	}
+
 	glBindVertexArray(0);
 	Shader::unuse();
 }
 
-gl::Render::Geometry gl::Render::newGeometry(std::vector<Vertex> pVerts, std::vector<unsigned int> pIndices)
+void gl::Render::updateBuffers()
 {
-	Geometry geom(allIndices.size(), pIndices.size());
-	allIndices.insert(allIndices.end(), pIndices.begin(), pIndices.end());
-	allVertices.insert(allVertices.end(), pVerts.begin(), pVerts.end());
-	return geom;
+	VAO::streamStorage(entityTransformBuffer, sizeof(glm::mat4)*EntityRegistry::allMatrices.size(), &EntityRegistry::allMatrices[0]);
+	VAO::streamStorage(transformIndexBuffer, sizeof(unsigned int)*Model::allInstanceEntities.size(), &Model::allInstanceEntities[0]);
+
 }
+
+
 

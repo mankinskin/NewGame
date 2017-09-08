@@ -63,6 +63,14 @@ struct Index {
 
 	};
 
+struct Vertex {
+	Vertex() {}
+	Vertex(float pPosX, float pPosY, float pPosZ, float pNormX, float pNormY, float pNormZ, float pUVCoordS, float pUVCoordT)
+		:pos(glm::vec3(pPosX, pPosY, pPosZ)), normal(glm::vec3(pNormX, pNormY, pNormZ)), uv(glm::vec2(pUVCoordS, pUVCoordT)) {}
+	glm::vec3 pos;
+	glm::vec3 normal;
+	glm::vec2 uv;
+};
 
 struct LineVertex {
 	LineVertex() {
@@ -110,6 +118,7 @@ void initGLEW();
 void initQuadBuffers();
 void updateGeneralUniformBuffer();
 void frame();
+void loadModels();
 
 void initGeneralUniformBuffer();
 }
