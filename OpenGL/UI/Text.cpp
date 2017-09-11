@@ -268,10 +268,10 @@ renderGlyphs()
 		for (unsigned int fo = 0; fo < allFonts.size(); ++fo) {
 			Font& font = allFonts[fo];
 			glBindTexture(GL_TEXTURE_2D, font.atlasID);
-			//Shader::bindBufferToShader(glyphShapeProgram, font.glyphStorageIndex, "GlyphBuffer");
+			Shader::bindBufferToShader(glyphShapeProgram, font.glyphStorageIndex, "GlyphBuffer");
 			gl::Debug::getGLError("renderGlyphs()2:");
 			for (unsigned int s = 0; s < font.stringCount; ++s) {
-				String& str = allStrings[font.stringOffset + s];
+				String& str = allStrings[fontStringIndices[font.stringOffset + s]];
 				//Shader::setUniform(glyphShapeProgram, "styleIndex", (unsigned int)str.style);
 				gl::Debug::getGLError("renderGlyphs()3:");
 				glDrawElementsInstancedBaseInstance(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, str.charCount, str.charOffset);

@@ -31,14 +31,14 @@ initFontVAO() {
 	glVertexArrayVertexBuffer(fontVAO, 0, quadVBO, 0, sizeof(float) * 2);
 	VAO::initVertexAttrib(fontVAO, 0, 0, 2, GL_FLOAT, 0);
 	//quad position and size
-	quadStorage = VAO::createStorage(MAX_CHARS * sizeof(CharQuad) * 3, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
-	VAO::createStream(quadStorage, GL_MAP_WRITE_BIT);
+	quadStorage = VAO::createStorage(charQuadBuffer.size() * sizeof(CharQuad), &charQuadBuffer[0], GL_MAP_WRITE_BIT);// | VAO::STREAM_FLAGS);
+	//VAO::createStream(quadStorage, GL_MAP_WRITE_BIT);
 	VAO::bindVertexArrayVertexStorage(fontVAO, 1, quadStorage, sizeof(float) * 4);
 	VAO::initVertexAttrib(fontVAO, 1, 1, 4, GL_FLOAT, 0);
 
 	//glyph index
-	charStorage = VAO::createStorage(MAX_CHARS * sizeof(unsigned int) * 3, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
-	VAO::createStream(charStorage, GL_MAP_WRITE_BIT);
+	charStorage = VAO::createStorage(glyphIndexBuffer.size() * sizeof(unsigned int), &glyphIndexBuffer[0], GL_MAP_WRITE_BIT);// | VAO::STREAM_FLAGS);
+	//VAO::createStream(charStorage, GL_MAP_WRITE_BIT);
 	VAO::bindVertexArrayVertexStorage(fontVAO, 2, charStorage, sizeof(unsigned int));
 	VAO::initVertexAttrib(fontVAO, 2, 2, 1, GL_UNSIGNED_INT, 0);
 

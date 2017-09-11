@@ -91,6 +91,7 @@ void App::mainMenu()
 	
 	gl::GUI::Text::loadChars();
 	gl::GUI::Text::updateCharStorage();
+	gl::GUI::Text::initFontVAO();
 	while (state == App::MainMenu) {
 
 		App::Input::fetchGLFWEvents();

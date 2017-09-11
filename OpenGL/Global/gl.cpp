@@ -67,7 +67,7 @@ void gl::init()
 	GUI::Text::Initializer::initFreeType();
 	gl::Debug::getGLError("gl::init()1:");
 	App::Debug::printErrors();
-	GUI::Text::initFontVAO();
+	
 	GUI::Text::initFontShader();
 	Debug::initDebugShader();
 	Shader::Loader::buildShaderPrograms();
