@@ -7,27 +7,24 @@ namespace gl {
 		typedef unsigned int Pos;
 		typedef unsigned int Size;
 		typedef unsigned int Color;
-		typedef unsigned int UV;
-		//TEST
 
-		struct QuadElement{
-			QuadElement():pos(-1), size(-1), color(-1), uv(-1){}
-			QuadElement(Pos pPos, Size pSize, Color pColor, UV pUV)
-				:pos(pPos), size(pSize), color(pColor), uv(pUV){}
+		struct RefQuad{
+			RefQuad():pos(-1), size(-1), color(-1){}
+			RefQuad(Pos pPos, Size pSize, Color pColor)
+				:pos(pPos), size(pSize), color(pColor){}
 
 			Pos pos;
 			Size size;
 			Color color;
-			UV uv;
-			
 		};
 		
-		inline bool operator==(const QuadElement& aq, const QuadElement& bq) { return std::memcmp(&aq, &bq, sizeof(QuadElement)) == 0; }
+		inline bool operator==(const RefQuad& aq, const RefQuad& bq) { return std::memcmp(&aq, &bq, sizeof(RefQuad)) == 0; }
 		
-
-		void createQuads();
+		Quad createQuad(Pos pPos, Size pSize, Color pColor);
+		Quad createQuad(glm::vec2 pPos, glm::vec2 pSize, glm::vec4 pColor);
+		Quad createQuad(float pPosX, float pPosY, float pWidth, float pHeight, float pR, float pG, float pB, float pA);
+		void reserveQuadSpace(unsigned int pCount);
 		void clearBuffers();
-		Quad createQuad(Pos pPos, Size pSize, Color pColor, UV pUVRange = -1);
 		void initGUIBuffers();
 		void updateGUI();
 		void initGUIShaders();
@@ -52,7 +49,7 @@ namespace gl {
 		void offsetColor(Quad pQuad, const glm::vec4& pColor);
 		
 		
-		extern std::vector<QuadElement> allQuads;
+		extern std::vector<RefQuad> allQuads;
 		extern unsigned int guiQuadBuffer;
 		
 		extern std::vector<glm::vec2> allPositions;
@@ -64,7 +61,5 @@ namespace gl {
 		extern std::vector<glm::vec4> allColors;
 		extern unsigned int guiColorBuffer;
 
-		extern std::vector<glm::vec4> allUVRanges;
-		extern unsigned int guiUVBuffer;
 	}
 }

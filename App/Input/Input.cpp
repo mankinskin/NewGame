@@ -70,6 +70,7 @@ void App::Input::init()
 	FuncSlot<void> stopXSlot(gl::Camera::stop_x);
 	FuncSlot<void> stopYSlot(gl::Camera::stop_y);
 	
+	FuncSlot<void> startProgramSlot(App::run);
 	FuncSlot<void> exitProgramSlot(App::quit);
 	FuncSlot<void> setCameraModeSlot(toggleTrackMouse);
 	FuncSlot<void> togglePrintInfoSlot(App::Debug::togglePrintInfo);
@@ -132,15 +133,19 @@ void App::Input::init()
 	signal_lock(z_press, { space_press, space_release });
 	signal_unlock(z_release, { space_press, space_release });
 
+	
+	//--------------------------------
+	//Buttons
+	unsigned int play_button_press = EventSlot<ButtonEvent>::create(ButtonEvent(0, 1, 0));
+	unsigned int quit_button_press = EventSlot<ButtonEvent>::create(ButtonEvent(1, 1, 0));
+	
 	//Misc
-	exitProgramSlot.listen({ esc_press });//exit
+	startProgramSlot.listen({ play_button_press });
+	exitProgramSlot.listen({ esc_press, quit_button_press });//exit
 	togglePrintInfoSlot.listen({ i_press });//togglePrintInfo
 	toggleCoordinateSysSlot.listen({ h_press });//toggleCoordSys
 	toggleGridSlot.listen({ g_press });//toggleGrid
 	
-	//--------------------------------
-	//Buttons
-
 	//--------------------------------
 	//bind signals to slots
 	allSignals.reserve(TOTAL_SIGNAL_COUNT);//for ordered access
@@ -176,6 +181,7 @@ void App::Input::checkEvents() {
 	//TODO find a way to manage ranges of different element types
 	size_t keyEventCount = keyEventBuffer.size();
 	size_t mouseKeyEventCount = mouseButtonEventBuffer.size();
+	size_t buttonEventCount = buttonEventBuffer.size();
 	size_t keyEventSignalCount = EventSlot<KeyEvent>::instance_count();
 	
 	static std::vector<unsigned int> signalBuffer;
@@ -206,6 +212,19 @@ void App::Input::checkEvents() {
 
 	}
 	mouseButtonEventBuffer.clear();
+
+	for (unsigned int e = 0; e < buttonEventCount; ++e) {
+		ButtonEvent& kev = buttonEventBuffer[e];
+		for (unsigned int ks = 0; ks < mouseSignalCount; ++ks) {
+			EventSlot<ButtonEvent>& slot = EventSlot<ButtonEvent>::get(ks);
+			if (slot.evnt == kev) {
+				signals[signalCount++] = slot.index;
+			}
+		}
+
+	}
+	buttonEventBuffer.clear();
+
 	signals.resize(signalCount);
 
 	signalBuffer.insert(signalBuffer.end(), signals.begin(), signals.end());
@@ -222,6 +241,12 @@ void App::Input::checkEvents() {
 	}
 	signals.resize(signalCount);
 	signalBuffer = signals;
+}
+
+unsigned int App::Input::addButton(unsigned int pQuadIndex)
+{
+	quadLoadBuffer.push_back(pQuadIndex);
+	return quadLoadBuffer.size() - 1;
 }
 
 void App::Input::end()

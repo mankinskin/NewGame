@@ -26,12 +26,14 @@ namespace gl {
 			unsigned texture;
 		};
 		struct Model {
+			Model()
+				:meshOffset(0), meshCount(0), entityOffset(0), entityCount(0) {}
 			Model(unsigned pMeshOffset, unsigned pMeshCount)
 				:meshOffset(pMeshOffset), meshCount(pMeshCount){}
-			unsigned int meshOffset;
-			unsigned int meshCount;
-			unsigned int entityOffset;
-			unsigned int entityCount;
+			unsigned int meshOffset = 0;
+			unsigned int meshCount = 0;
+			unsigned int entityOffset = 0;
+			unsigned int entityCount = 0;
 		};
 		class Scene {
 			std::vector<glm::mat4> sceneInstances;

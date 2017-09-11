@@ -20,9 +20,7 @@ void gl::Render::initMeshVAO()
 	meshVBO = VAO::createStorage() + 1;
 	meshIBO = VAO::createStorage() + 1;
 	entityTransformBuffer = VAO::createStorage();
-	VAO::createStream(entityTransformBuffer, GL_MAP_WRITE_BIT);
 	transformIndexBuffer = VAO::createStorage();
-	VAO::createStream(transformIndexBuffer, GL_MAP_WRITE_BIT);
 }
 
 void gl::Render::initMeshShader()
@@ -35,9 +33,12 @@ void gl::Render::initMeshShader()
 
 void gl::Render::fillMeshVAO()
 {
-	VAO::initStorageData(entityTransformBuffer, sizeof(glm::mat4)*EntityRegistry::MAX_ENTITIES, nullptr, GL_MAP_WRITE_BIT);
-	VAO::initStorageData(transformIndexBuffer, sizeof(unsigned int)*EntityRegistry::MAX_ENTITIES*Model::MAX_MODELS, nullptr, GL_MAP_WRITE_BIT);
-	
+	VAO::initStorageData(entityTransformBuffer, sizeof(glm::mat4)*EntityRegistry::MAX_ENTITIES, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+	VAO::initStorageData(transformIndexBuffer, sizeof(unsigned int)*EntityRegistry::MAX_ENTITIES*Model::MAX_MODELS, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+	VAO::bindStorage(GL_UNIFORM_BUFFER, entityTransformBuffer);
+	VAO::bindStorage(GL_UNIFORM_BUFFER, transformIndexBuffer);
+	VAO::createStream(entityTransformBuffer, GL_MAP_WRITE_BIT);
+	VAO::createStream(transformIndexBuffer, GL_MAP_WRITE_BIT);
 	
 	//-------------------------------
 	VAO::initStorageData(meshVBO - 1, sizeof(Vertex)*Model::allVertices.size(), &Model::allVertices[0], 0);
@@ -56,20 +57,17 @@ void gl::Render::storeMaterials()
 
 void gl::Render::render()
 {
-	Shader::use(meshShaderProgram);
 	glBindVertexArray(meshVAO);
-
-	for (unsigned int modl = 0; modl < Model::allMeshes.size(); ++modl) {
+	Shader::use(meshShaderProgram);
+	for (unsigned int modl = 0; modl < Model::allModels.size(); ++modl) {
 		Model::Model& model = Model::allModels[modl];
 		VAO::bindStorageRange(transformIndexBuffer, model.entityOffset, model.entityCount);
 		for (unsigned int msh = 0; msh < model.meshCount; ++msh) {
-			glDrawElements(GL_TRIANGLES, Model::allMeshes[model.meshOffset + msh].geometry.indexCount, GL_UNSIGNED_INT, 0);
+			glDrawElementsInstanced(GL_TRIANGLES, Model::allMeshes[model.meshOffset + msh].geometry.indexCount, GL_UNSIGNED_INT, 0, model.entityCount);
 		}
-		
 	}
-
-	glBindVertexArray(0);
 	Shader::unuse();
+	glBindVertexArray(0);
 }
 
 void gl::Render::updateBuffers()

@@ -139,6 +139,7 @@
     <ClInclude Include="Render\Model.h" />
     <ClInclude Include="Render\Model_Loader.h" />
     <ClInclude Include="Render\Render.h" />
+    <ClInclude Include="UI\Font.h" />
     <ClInclude Include="UI\Font_Loader.h" />
     <ClInclude Include="UI\GUI.h" />
     <ClInclude Include="UI\Text.h" />
@@ -160,6 +161,7 @@
     <ClCompile Include="Render\Model.cpp" />
     <ClCompile Include="Render\Model_Loader.cpp" />
     <ClCompile Include="Render\Render.cpp" />
+    <ClCompile Include="UI\Font.cpp" />
     <ClCompile Include="UI\Font_Loader.cpp" />
     <ClCompile Include="UI\GUI.cpp" />
     <ClCompile Include="UI\Text.cpp" />

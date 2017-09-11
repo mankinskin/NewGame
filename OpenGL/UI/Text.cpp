@@ -6,245 +6,290 @@
 #include "..\Camera.h"
 #include <App\Global\Debug.h>
 #include <glm\gtc\matrix_transform.hpp>
-
+#include "Font.h"
 
 std::vector<gl::GUI::Text::Textbox> gl::GUI::Text::allTextboxes;
-std::vector<gl::GUI::Text::TextMetrics> gl::GUI::Text::allTextMetrics;
-unsigned int gl::GUI::Text::glyphShapeProgram = 0;
-unsigned int gl::GUI::Text::fontCount = 0;
-unsigned int gl::GUI::Text::MAX_CHARS = 1000;
+std::vector<gl::GUI::Text::TextboxMetrics> gl::GUI::Text::allTextboxMetrics;
+std::vector<gl::GUI::Text::TextStyle> gl::GUI::Text::allTextStyles;
+std::vector<gl::GUI::Text::String> gl::GUI::Text::allStrings;
+std::vector<unsigned char> gl::GUI::Text::allChars;
+std::vector<unsigned int> gl::GUI::Text::textboxStringIndices;
+std::vector<unsigned int> gl::GUI::Text::fontStringIndices;
 std::vector<gl::GUI::Text::CharQuad> gl::GUI::Text::charQuadBuffer;
 std::vector<unsigned int> gl::GUI::Text::glyphIndexBuffer;
-std::vector<unsigned char> gl::GUI::Text::charBuffer;
-std::vector<gl::GUI::Text::Font> gl::GUI::Text::allFonts;
-unsigned int gl::GUI::Text::quadStorage = 0;
-unsigned int gl::GUI::Text::charStorage = 0;
-std::vector<gl::GUI::Text::LoadString> gl::GUI::Text::loadStringBuffer;
-std::vector<gl::GUI::Text::String> gl::GUI::Text::stringBuffer;
-std::vector<float> gl::GUI::Text::allKerning;
-std::vector<gl::GUI::Text::GlyphMetrics> gl::GUI::Text::allMetrics;
-unsigned int gl::GUI::Text::fontVAO = 0;
-std::vector<gl::GUI::Text::FontInstructions> gl::GUI::Text::allFontInstructions;
-std::vector<gl::GUI::Text::StringRenderInstructions> gl::GUI::Text::allStrRenderInstructions;
-
-
+unsigned int gl::GUI::Text::styleStorage = 0;
+std::vector<glm::vec2> gl::GUI::Text::allTextboxPositions;
+std::vector<glm::vec2> gl::GUI::Text::allTextboxSizes;
 /*USAGE
-- create a texbox by specifying a position and size etc
-- 
-- calculate the string layout of each textbox
-- transform each character and add them to the rendering buffer
+- create textbox: set pos, size, render_instructions and font
+- set textbox string: set chars to write on screen
+- parse textbox strings
+   - extract render instructions
+   - split strings 
+   - create RenderStates
 
 */
-gl::GUI::Text::Textbox* gl::GUI::Text::
-createTextbox(glm::vec2* pTopLeft, glm::vec2* pSize, TextMetrics* pMetrics, int pFlags, float pMarging) {
+
+
+unsigned int gl::GUI::Text::
+createTextbox(unsigned int pPosIndex, unsigned int pSizeIndex, unsigned int pMetrics, int pFlags, float pMarging) {
 	Textbox tb;
-	
-	tb.pos = pTopLeft;
-	tb.size = pSize;
+	tb.pos = pPosIndex;
+	tb.size = pSizeIndex;
 	tb.metrics = pMetrics;
 	tb.marging = pMarging;
 	tb.flags = pFlags;
 	allTextboxes.push_back(tb);
-	return &allTextboxes.back();
+	return allTextboxes.size() - 1;
 }
 
-gl::GUI::Text::Textbox *
-gl::GUI::Text::createTextbox(Quad pQuad, TextMetrics * pMetrics, int pFlags, float pMarging)
+void gl::GUI::Text::setStringFont(unsigned int pStringIndex, unsigned int pFontIndex)
 {
-	return createTextbox(&gl::GUI::allPositions[gl::GUI::allQuads[pQuad].pos], &gl::GUI::allSizes[gl::GUI::allQuads[pQuad].size], pMetrics, pFlags, pMarging);
+	String& string = allStrings[pStringIndex];
+	string.font = pFontIndex;
+}
+
+void gl::GUI::Text::setStringStyle(unsigned int pStringIndex, unsigned int pStyleIndex)
+{
+	String& string = allStrings[pStringIndex];
+	string.style = pStyleIndex;
+}
+
+unsigned int
+gl::GUI::Text::createTextbox(glm::vec2 pTopLeft, glm::vec2 pSize, unsigned int pMetrics, int pFlags, float pMarging)
+{
+	allTextboxPositions.push_back(pTopLeft);
+	allTextboxSizes.push_back(pSize);
+	return createTextbox(allTextboxPositions.size()-1, allTextboxSizes.size()-1, pMetrics, pFlags, pMarging);
 }
 
 void gl::GUI::Text::
-insertTextboxString(Textbox* pTextbox, LoadString pString)
+appendTextboxString(unsigned int pTextbox, unsigned int pStringIndex)
 {
-	pString.textbox = pTextbox;
-	if (!pTextbox->stringCount++) {
-		pTextbox->stringOffset = loadStringBuffer.size();
-		loadStringBuffer.push_back(pString);
-		return;
+	Textbox& tb = allTextboxes[pTextbox];
+	if (!tb.stringCount) {
+		tb.stringOffset = textboxStringIndices.size();
 	}
-	loadStringBuffer.insert(loadStringBuffer.begin() + pTextbox->stringOffset, pString);
+	++tb.stringCount;
+	textboxStringIndices.insert(textboxStringIndices.begin() + tb.stringOffset, pStringIndex);
 }
 
-gl::GUI::Text::LoadString gl::GUI::Text::createString(std::string pChars, StringRenderInstructions * pInstructions, unsigned int pFontIndex)
+void gl::GUI::Text::
+appendTextboxString(unsigned int pTextbox, String pString)
 {
-	LoadString fs = LoadString(String(charBuffer.size(), pChars.size(), pInstructions), pFontIndex);
-	charBuffer.insert(charBuffer.end(), pChars.begin(), pChars.end());
-	return fs;
+	appendTextboxString(pTextbox, allStrings.size());
+	allStrings.push_back(pString);
+}
+
+void gl::GUI::Text::
+appendTextboxString(unsigned int pTextbox, std::string pString)
+{
+	appendTextboxString(pTextbox, String(pString));
+}
+
+void gl::GUI::Text::revalidateTextboxStringIndices()
+{
+	unsigned int off = 0;
+	for (Textbox& tb : allTextboxes) {
+		tb.stringOffset = off;
+		off += tb.stringCount;
+	}
 }
 
 
-
-
-gl::GUI::Text::TextMetrics* gl::GUI::Text::createTextMetrics(float pGlyphScaleX, float pGlyphScaleY, float pAdvanceScale, float pLineGapScale)
+unsigned int gl::GUI::Text::createTextboxMetrics(float pGlyphScaleX, float pGlyphScaleY, float pAdvanceScale, float pLineGapScale)
 {
-	allTextMetrics.push_back(TextMetrics(glm::vec2(pGlyphScaleX, pGlyphScaleY), pAdvanceScale, pLineGapScale));
-	return &allTextMetrics.back();
+	allTextboxMetrics.push_back(TextboxMetrics(glm::vec2(pGlyphScaleX, pGlyphScaleY), pAdvanceScale, pLineGapScale));
+	return allTextboxMetrics.size() - 1;
 }
 
-gl::GUI::Text::String gl::GUI::Text::
-loadString(LoadString& pString)
+unsigned int gl::GUI::Text::createTextStyle(TextStyle & pStyle)
 {
-	Font& font = allFonts[pString.fontIndex];
-	FontInstructions& inst = allFontInstructions[font.instructions];
+	allTextStyles.push_back(pStyle);
+	return allTextStyles.size() - 1;
+}
+
+unsigned int gl::GUI::Text::createTextStyle(float pThickness, float pHardness, glm::vec4 pFrontColor, glm::vec4 pBackColor)
+{
+	return createTextStyle(TextStyle(pThickness, pHardness, pFrontColor, pBackColor));
+}
+
+void gl::GUI::Text::initStyleBuffer() {
+
+	allTextStyles.reserve(2);
+	createTextStyle(1.0f, 1.0f, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	createTextStyle(1.2f, 0.8f, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	styleStorage = VAO::createStorage(sizeof(TextStyle)*allTextStyles.size(), &allTextStyles[0], 0);
 	
-	Textbox& tb = *pString.textbox;
-	TextMetrics& textMetrics = *tb.metrics;
-	StringRenderInstructions& r_inst = *pString.string.render_instructions;
+	Shader::bindBufferToShader(glyphShapeProgram, styleStorage, "StyleBuffer");
+}
 
+void gl::GUI::Text::
+loadChars()
+{
+
+	for (unsigned int t = 0; t < allTextboxes.size(); ++t) {
+		loadTextboxGlyphs(allTextboxes[t]);
+
+	}
+}
+
+void gl::GUI::Text::
+loadTextboxGlyphs(Textbox& pTextbox)
+{
+	glm::vec2 cursor = glm::vec2();
+	TextboxMetrics& textMetrics = allTextboxMetrics[pTextbox.metrics];
+	//get total char count
+	unsigned int total_char_count = 0;
+	for (unsigned int s = 0; s < pTextbox.stringCount; ++s) {
+		total_char_count += allStrings[textboxStringIndices[pTextbox.stringOffset + s]].charCount;
+	}
+	std::vector<unsigned int> glyphIndices(total_char_count);
+	std::vector<CharQuad> quads(total_char_count);
 	
-	std::vector<unsigned int> charIndices(pString.string.charCount);//for glyph textures
-
-	//calculate string size
-	unsigned int charCount = pString.string.charCount;
-	glm::vec2 cursor = glm::vec2(0.0f, 0.0f);
-	unsigned int leftIndex = 0;
-	unsigned int rightIndex = 0;
-	unsigned int nonCharCount = 0;
-	float string_width = 0.0f;
-	float string_height = 0.0f;
-	for (unsigned int c = 0; c < charCount; ++c) {
-		//prevent right to be less than 0 or more than (glyphCount - 1)
-		unsigned char charCode = charBuffer[pString.string.charOffset + c];
-		rightIndex = std::max((unsigned int)0, std::min(charCode - inst.startCode, inst.glyphCount - 1));
-		GlyphMetrics& met = allMetrics[font.metricOffset + rightIndex];
-		if (charCode == '\n' || (cursor.x + met.advanceX * textMetrics.advanceScale)*!(tb.flags & TEXT_LAYOUT_FORCE_X_FIT) > (tb.size->x - tb.marging*2.0f)) {
-			if (charCode == '\n') {
-				++nonCharCount;
-				leftIndex = 0;
+	std::vector<String> lines;
+	std::vector<float> line_widths;
+	line_widths.resize(total_char_count);
+	lines.resize(total_char_count);
+	unsigned int line_count = 0;
+	unsigned int buffer_off = 0;
+	for (unsigned int s = 0; s < pTextbox.stringCount; ++s) {
+		
+		unsigned int leftIndex = 0;
+		unsigned int rightIndex = 0;
+		unsigned int nonCharCount = 0;
+		const unsigned int stringIndex = textboxStringIndices[pTextbox.stringOffset + s];
+		String& str = allStrings[stringIndex];
+		Font& font = allFonts[str.font];
+		
+		if (!font.stringCount) {
+			font.stringOffset = fontStringIndices.size();
+		}
+		++font.stringCount;
+		fontStringIndices.insert(fontStringIndices.begin() + font.stringOffset, stringIndex);
+		FontInstructions& font_inst = allFontInstructions[font.instructions];
+		//iterate string chars
+		for (unsigned int c = 0; c < str.charCount; ++c) {
+			//get glyph metrics
+			unsigned int charCode = allChars[str.charOffset + c];
+			rightIndex = std::max((unsigned int)0, std::min(charCode - font_inst.startCode, font_inst.glyphCount - 1));
+			GlyphMetrics& met = allMetrics[font.metricOffset + rightIndex];
+			//if newline
+			if (charCode == '\n' || (cursor.x + met.advanceX * textMetrics.advanceScale) * !(pTextbox.flags & TEXT_LAYOUT_FORCE_X_FIT) >(allTextboxSizes[pTextbox.size].x - pTextbox.marging*2.0f)) {
+				if (charCode == '\n') {
+					leftIndex = 0;
+					++nonCharCount;
+				}
+				line_widths[line_count] = cursor.x;
+				lines[line_count].charCount = (buffer_off + c) - lines[line_count].charOffset;
+				lines[++line_count].charOffset = buffer_off + c;
+				
+				cursor = glm::vec2(0.0f, cursor.y - font.fontMetric.lineGap*textMetrics.lineGapScale);
 			}
-			string_width = std::max(string_width, cursor.x);
-			string_height += font.fontMetric.lineGap*textMetrics.lineGapScale;
-			cursor = glm::vec2(0.0f, cursor.y - font.fontMetric.lineGap*textMetrics.lineGapScale);
-			continue;
+			else {
+				glyphIndices[buffer_off + c - nonCharCount] = rightIndex;
+				quads[buffer_off + c - nonCharCount] = CharQuad(cursor.x, cursor.y, met.width, met.height);
+				cursor.x += met.advanceX * textMetrics.advanceScale;
+			}
+
+			leftIndex = rightIndex;
 		}
-		
-		charIndices[c - nonCharCount] = rightIndex;
-		
-		leftIndex = rightIndex;
-		cursor.x += met.advanceX * textMetrics.advanceScale;
-		string_width = std::max(string_width, cursor.x);
-		string_height = std::max(string_height, met.bearingY*textMetrics.glyphScale.y);
+		buffer_off += str.charCount;
 	}
-	charCount -= nonCharCount;
-	std::vector<CharQuad> quads(charCount);//for positioning
-	charIndices.resize(charCount);
+	glyphIndices.resize(buffer_off);
+	quads.resize(buffer_off);
+	line_widths.resize(++line_count);
+	lines.resize(line_count);
+	//transformations here
 
-	//transform glyphs
-	cursor = *tb.pos;
-	float fit_x = 1.0f;
-	float fit_y = 1.0f;
-	if (!(tb.flags ^ TEXT_LAYOUT_FORCE_X_FIT)) {
-		fit_x = std::min(1.0f, (tb.size->x + tb.marging*2.0f) / string_width);
-	}
-	if (!(tb.flags ^ TEXT_LAYOUT_FORCE_Y_FIT)) {
-		fit_y = std::min(1.0f, tb.size->y / string_height);
-	}
+	unsigned int buffer_offset = charQuadBuffer.size();
+	charQuadBuffer.resize(buffer_offset + buffer_off);
+	glyphIndexBuffer.resize(buffer_offset + buffer_off);
 
-	if (!(tb.flags ^ TEXT_LAYOUT_CENTER)) {
-		cursor = glm::vec2(cursor.x + tb.marging + (tb.size->x / 2.0f) - string_width / 2.0f , cursor.y - (tb.size->y / 2.0f) - string_height/2.5f);
-	}
-	else if (!(tb.flags ^ TEXT_LAYOUT_BOUND_LEFT)) {
-		cursor = glm::vec2(cursor.x + tb.marging, cursor.y - (tb.size->y / 2.0f) - string_height / 2.5f);
-	}
-	else if (!(tb.flags ^ TEXT_LAYOUT_BOUND_RIGHT)) {
-		cursor = glm::vec2((cursor.x + tb.size->x) - string_width + tb.marging, cursor.y - (tb.size->y / 2.0f) - string_height / 2.5f);
-	}
-	for (unsigned int g = 0; g < charCount; ++g) {
-		unsigned char charindex = charIndices[g];
-		GlyphMetrics& met = allMetrics[charindex];//may be unsafe(?) look here for bugs ... ;D
-		
-		//float kern = allKerning[font.kerningOffset + leftIndex*inst.glyphCount + rightIndex] * textMetrics.advanceScale;
-		quads[g] = CharQuad(cursor.x + met.bearingX*textMetrics.advanceScale*fit_x, cursor.y + met.bearingY*textMetrics.glyphScale.y*fit_y, met.width*textMetrics.glyphScale.x*fit_x, met.height*textMetrics.glyphScale.y*fit_y);
-		cursor.x += met.advanceX * textMetrics.advanceScale * fit_x;
-		
-	}
+	std::memcpy(&charQuadBuffer[buffer_offset], &quads[0], sizeof(CharQuad)*buffer_off);
+	std::memcpy(&glyphIndexBuffer[buffer_offset], &glyphIndices[0], sizeof(unsigned int)*buffer_off);
 
-	
-
-	pString.string.charOffset = charQuadBuffer.size();
-	pString.string.charCount -= nonCharCount;
-	
-	charQuadBuffer.resize(pString.string.charOffset + pString.string.charCount);
-	glyphIndexBuffer.resize(pString.string.charOffset + pString.string.charCount);
-
-	std::memcpy(&charQuadBuffer[pString.string.charOffset], &quads[0], sizeof(CharQuad)*pString.string.charCount);
-	std::memcpy(&glyphIndexBuffer[pString.string.charOffset], &charIndices[0], sizeof(unsigned int)*pString.string.charCount);
-
-	return pString.string;
-}
-
-void gl::GUI::Text::
-loadStrings()
-{
-	stringBuffer.reserve(loadStringBuffer.size());
-	for (unsigned int s = 0; s < loadStringBuffer.size(); ++s) {
-		
-		LoadString& str = loadStringBuffer[s];
-		Font& font = allFonts[str.fontIndex];
-		String ostr = loadString(str);
-		if (!font.stringCount++) {
-			font.stringOffset = stringBuffer.size();
-			stringBuffer.push_back(ostr);
-			continue;
-		}
-		stringBuffer.insert(stringBuffer.begin() + font.stringOffset, ostr);
-	}
-	loadStringBuffer.clear();
 }
 
 
-
-gl::GUI::Text::StringRenderInstructions* gl::GUI::Text::createStringRenderInstructions(StringRenderInstructions & pInstructions)
-{
-	allStrRenderInstructions.push_back(pInstructions);
-	return &allStrRenderInstructions.back();
-}
-
-gl::GUI::Text::StringRenderInstructions * gl::GUI::Text::createStringRenderInstructions(float pThickness, float pHardness, float pDepth, glm::vec4 pColor)
-{
-	return createStringRenderInstructions(StringRenderInstructions(pThickness, pHardness, pDepth, pColor));
-}
+//void gl::GUI::Text::translateTextbox(Textbox & pTextbox)
+//{
+//	//transform glyphs
+//	glm::vec2 cursor = *pTextbox.pos;
+//	//force fit by 
+//	float fit_x = 1.0f;
+//	float fit_y = 1.0f;
+//	if (!(pTextbox.flags ^ TEXT_LAYOUT_FORCE_X_FIT)) {
+//		fit_x = std::min(1.0f, (pTextbox.size->x + pTextbox.marging*2.0f) / string_width);
+//	}
+//	if (!(pTextbox.flags ^ TEXT_LAYOUT_FORCE_Y_FIT)) {
+//		fit_y = std::min(1.0f, pTextbox.size->y / string_height);
+//	}
+//
+//	if (!(pTextbox.flags ^ TEXT_LAYOUT_CENTER)) {
+//		cursor = glm::vec2(cursor.x + pTextbox.marging + (pTextbox.size->x / 2.0f) - string_width / 2.0f, cursor.y - (pTextbox.size->y / 2.0f) - string_height / 2.5f);
+//	}
+//	else if (!(pTextbox.flags ^ TEXT_LAYOUT_BOUND_LEFT)) {
+//		cursor = glm::vec2(cursor.x + pTextbox.marging, cursor.y - (pTextbox.size->y / 2.0f) - string_height / 2.5f);
+//	}
+//	else if (!(pTextbox.flags ^ TEXT_LAYOUT_BOUND_RIGHT)) {
+//		cursor = glm::vec2((cursor.x + pTextbox.size->x) - string_width + pTextbox.marging, cursor.y - (pTextbox.size->y / 2.0f) - string_height / 2.5f);
+//	}
+//	for (unsigned int s = 0; s < pTextbox.stringCount; ++s) {
+//		String& string = allStrings[textboxStringIndices[pTextbox.stringOffset + s]];
+//		std::vector<CharQuad> quads(string.charCount);//for positioning
+//		for (unsigned int g = 0; g < string.charCount; ++g) {
+//			unsigned char charindex = charIndices[g];
+//			GlyphMetrics& met = allMetrics[charindex];//may be unsafe(?) look here for bugs ... ;D
+//
+//													  //float kern = allKerning[font.kerningOffset + leftIndex*inst.glyphCount + rightIndex] * textMetrics.advanceScale;
+//			quads[g] = CharQuad(cursor.x + met.bearingX*textMetrics.advanceScale*fit_x, cursor.y + met.bearingY*textMetrics.glyphScale.y*fit_y, met.width*textMetrics.glyphScale.x*fit_x, met.height*textMetrics.glyphScale.y*fit_y);
+//			cursor.x += met.advanceX * textMetrics.advanceScale * fit_x;
+//
+//		}
+//	}
+//
+//	string.charOffset = charQuadBuffer.size();
+//	string.charCount -= nonCharCount;
+//}
 
 void gl::GUI::Text::
 renderGlyphs()
-{		
+{
+	if (allTextboxes.size()) {
+		glBindVertexArray(fontVAO);
+		Shader::use(glyphShapeProgram);
 
-	glBindVertexArray(fontVAO);
-	Shader::use(glyphShapeProgram);
+		glActiveTexture(GL_TEXTURE0);
 
-	glActiveTexture(GL_TEXTURE0);
+		Shader::setUniform(GUI::Text::glyphShapeProgram, "atlas", (int)0);
+		//VAO::setUniform(glyphShapeProgram, "ortho", ortho);
+		gl::Debug::getGLError("renderGlyphs()1:");
+		for (unsigned int fo = 0; fo < allFonts.size(); ++fo) {
+			Font& font = allFonts[fo];
+			glBindTexture(GL_TEXTURE_2D, font.atlasID);
+			//Shader::bindBufferToShader(glyphShapeProgram, font.glyphStorageIndex, "GlyphBuffer");
+			gl::Debug::getGLError("renderGlyphs()2:");
+			for (unsigned int s = 0; s < font.stringCount; ++s) {
+				String& str = allStrings[font.stringOffset + s];
+				//Shader::setUniform(glyphShapeProgram, "styleIndex", (unsigned int)str.style);
+				gl::Debug::getGLError("renderGlyphs()3:");
+				glDrawElementsInstancedBaseInstance(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, str.charCount, str.charOffset);
 
-	glm::mat4 ortho = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);
-	static float ref = 0.5f;
-	Shader::setUniform(glyphShapeProgram, "atlas", 0);
-	//VAO::setUniform(glyphShapeProgram, "ortho", ortho);
-	for (unsigned int fo = 0; fo < allFonts.size(); ++fo) {
-		Font& font = allFonts[fo];
-		glBindTexture(GL_TEXTURE_2D, font.atlasID);
-		Shader::bindBufferToShader(glyphShapeProgram, font.glyphStorageIndex, "GlyphBuffer");
-		for (unsigned int s = 0; s < font.stringCount; ++s) {
-			String& str = stringBuffer[font.stringOffset + s];
-			StringRenderInstructions& inst = *str.render_instructions;
-			Shader::setUniform(glyphShapeProgram, "hardness", inst.hardness);
-			Shader::setUniform(glyphShapeProgram, "thickness", inst.thickness);
-			Shader::setUniform(glyphShapeProgram, "color", inst.color);
-			Shader::setUniform(glyphShapeProgram, "depth", inst.depth);
+				gl::Debug::getGLError("renderGlyphs()4:");
+			}
+		}
 
-
-
-			glDrawElementsInstancedBaseInstance(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, str.charCount, str.charOffset);
-
-			gl::Debug::getGLError("renderAtlas():");
-			
-		}		
+		Shader::unuse();
+		glBindVertexArray(0);
+		App::Debug::printErrors();
 	}
-	
-	Shader::unuse();
-	glBindVertexArray(0);
 }
 
-
+gl::GUI::Text::String::String(std::string pString, unsigned int pFont, unsigned int pStyle)
+:charOffset(allChars.size()), charCount(pString.size()), font(pFont), style(pStyle) {
+	allChars.insert(allChars.end(), pString.begin(), pString.end());
+}
 
 void gl::GUI::Text::
 updateCharStorage()
@@ -254,9 +299,9 @@ updateCharStorage()
 	if (charQuadBuffer.size()) {
 		charQuadPtr = &charQuadBuffer[0];
 		glyphIndexPtr = &glyphIndexBuffer[0];
-	
-	VAO::streamStorage(quadStorage, sizeof(CharQuad)*charQuadBuffer.size(), charQuadPtr);
-	VAO::streamStorage(charStorage, sizeof(unsigned int)*glyphIndexBuffer.size(), glyphIndexPtr);
+
+		VAO::streamStorage(quadStorage, sizeof(CharQuad)*charQuadBuffer.size(), charQuadPtr);
+		VAO::streamStorage(charStorage, sizeof(unsigned int)*glyphIndexBuffer.size(), glyphIndexPtr);
 	}
 }
 
@@ -268,44 +313,9 @@ clearCharStorage()
 		font.stringCount = 0;
 	}
 	allTextboxes.clear();
-	charBuffer.clear();
+	allChars.clear();
 	glyphIndexBuffer.clear();
 	charQuadBuffer.clear();
-	stringBuffer.clear();
-	
+	allStrings.clear();
+
 }
-
-void gl::GUI::Text::
-initFontShader()
-{
-	glyphShapeProgram = Shader::newProgram("glyphShapeShader", Shader::newModule("glyphShapeShader.vert"), Shader::newModule("glyphShapeShader.frag")).ID;
-	Shader::addVertexAttribute(glyphShapeProgram, "pos", 0);
-	Shader::addVertexAttribute(glyphShapeProgram, "quad", 1);
-	Shader::addVertexAttribute(glyphShapeProgram, "index", 2);
-}
-
-void gl::GUI::Text::
-initFontVAO() {
-	glCreateVertexArrays(1, &fontVAO);
-	//Quad triangles 
-	glVertexArrayVertexBuffer(fontVAO, 0, quadVBO, 0, sizeof(float) * 2);
-	VAO::initVertexAttrib(fontVAO, 0, 0, 2, GL_FLOAT, 0);
-	//quad position and size
-	quadStorage = VAO::createStorage(MAX_CHARS * sizeof(CharQuad) * 3, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
-	VAO::createStream(quadStorage, GL_MAP_WRITE_BIT);
-	VAO::bindVertexArrayVertexStorage(fontVAO, 1, quadStorage, sizeof(float) * 4);
-	VAO::initVertexAttrib(fontVAO, 1, 1, 4, GL_FLOAT, 0);
-	
-	//glyph index
-	charStorage = VAO::createStorage(MAX_CHARS * sizeof(unsigned int) * 3, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
-	VAO::createStream(charStorage, GL_MAP_WRITE_BIT);
-	VAO::bindVertexArrayVertexStorage(fontVAO, 2, charStorage, sizeof(unsigned int));
-	VAO::initVertexAttrib(fontVAO, 2, 2, 1, GL_UNSIGNED_INT, 0);
-
-	glVertexArrayBindingDivisor(fontVAO, 1, 1);
-	glVertexArrayBindingDivisor(fontVAO, 2, 1);
-
-	glVertexArrayElementBuffer(fontVAO, quadEBO);
-}
-
-

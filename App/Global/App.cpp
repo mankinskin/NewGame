@@ -13,6 +13,7 @@
 #include <OpenGL\UI\GUI.h>
 #include "../World/EntityRegistry.h"
 #include <OpenGL\Render\Model.h>
+#include <OpenGL/Render/Render.h>
 App::State App::state = App::State::Init;
 App::ContextWindow::Window App::mainWindow = App::ContextWindow::Window();
 double App::timeFactor = 1.0;
@@ -24,7 +25,7 @@ double App::targetFrameMS = 16.0;
 
 void App::init()
 {
-	state = Running;
+	state = MainMenu;
 	initGLFW();
 	//Windows and gl Context
 	ContextWindow::initMonitors();
@@ -39,6 +40,7 @@ void App::init()
 	
 	gl::Model::addModelInstances(0, { 0 });
 
+	gl::Model::revalidateEntityOffsets();
 	Debug::printErrors();
 }
 
@@ -56,31 +58,38 @@ void App::initGLFW()
 void App::mainMenu()
 {
 	using gl::GUI::Text::Textbox;
-	using gl::GUI::Text::LoadString;
-	using gl::GUI::Text::TextMetrics;
-	using gl::GUI::Text::StringRenderInstructions;
+	using gl::GUI::Text::String;
 	using gl::GUI::Text::createTextbox;
-	using gl::GUI::Text::insertTextboxString;
-	using gl::GUI::Text::createString;
-	using gl::GUI::Text::createStringRenderInstructions;
+	using gl::GUI::Text::appendTextboxString;
+	using gl::GUI::Text::createTextStyle;
 	glClearColor(0.05f, 0.0f, 0.0f, 1.0f);
-	gl::GUI::createQuads();
-	
-	gl::GUI::Text::allTextboxes.reserve(2);
-	gl::GUI::Text::allTextMetrics.reserve(1);
-	gl::GUI::Text::allStrRenderInstructions.reserve(1);
-	StringRenderInstructions* basicStringRenderInst = createStringRenderInstructions(1.5f, 0.8f, 1.0f, glm::vec4(0.1f, 0.05f, 0.05f, 0.91f));
-	LoadString runProgramStr = createString("PLAY", basicStringRenderInst, 0);
-	LoadString quitProgramStr = createString("QUIT", basicStringRenderInst, 0);
-	TextMetrics* basicTextMetrics = gl::GUI::Text::createTextMetrics(1.0f, 1.0f, 1.0f, 1.0f);
-	
-	Textbox* tb1 = createTextbox(0, basicTextMetrics, TEXT_LAYOUT_BOUND_LEFT, 0.003f);
-	Textbox* tb2 = createTextbox(1, basicTextMetrics, TEXT_LAYOUT_BOUND_LEFT, 0.003f);
-	insertTextboxString(tb1, runProgramStr);
-	insertTextboxString(tb2, quitProgramStr);
+
+	gl::GUI::reserveQuadSpace(2);
+	unsigned int startButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.8f), glm::vec2(0.2f, 0.05f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	unsigned int quitButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.9f), glm::vec2(0.2f, 0.05f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	Input::addButton(startButtonQuad);
+	Input::addButton(quitButtonQuad);
 	App::Input::calculateDetectionRanges();
 	gl::GUI::updateGUI();
-	gl::GUI::Text::loadStrings();
+
+	gl::GUI::Text::allTextboxes.reserve(2);
+	gl::GUI::Text::allTextboxPositions.reserve(2);
+	gl::GUI::Text::allTextboxSizes.reserve(2);
+	gl::GUI::Text::allTextboxMetrics.reserve(2);
+	
+	
+	//gl::GUI::Text::initStyleBuffer();
+	String quitProgramStr("QUIT");
+	String runProgramStr("PLAY");
+	
+	unsigned int tb_met = gl::GUI::Text::createTextboxMetrics(1.0f, 1.0f, 1.0f, 1.0f);
+	
+	unsigned int tb1 = createTextbox(glm::vec2(-1.0f, -0.8f), glm::vec2(0.2f, 0.05f), tb_met, TEXT_LAYOUT_BOUND_LEFT, 0.003f);
+	unsigned int tb2 = createTextbox(glm::vec2(-1.0f, -0.9f), glm::vec2(0.2f, 0.05f), tb_met, TEXT_LAYOUT_BOUND_LEFT, 0.003f);
+	appendTextboxString(tb1, runProgramStr);
+	appendTextboxString(tb2, quitProgramStr);
+	
+	gl::GUI::Text::loadChars();
 	gl::GUI::Text::updateCharStorage();
 	while (state == App::MainMenu) {
 
@@ -118,11 +127,12 @@ void App::frameLoop()
 {
 	glClearColor(0.01f, 0.01f, 0.01f, 1.0f);
 	
-
-	gl::GUI::Text::loadStrings();
+	
+	gl::GUI::Text::loadChars();
 	gl::GUI::Text::updateCharStorage();
 
 	gl::GUI::updateGUI();
+	Debug::printErrors();
 	while (state == App::State::Running) {
 
 		
@@ -134,13 +144,14 @@ void App::frameLoop()
 		gl::Camera::look(Input::cursorFrameDelta);
 		gl::Camera::update();
 		gl::GUI::updateGUI();
-		gl::updateGeneralUniformBuffer();
-		
-		
+		Debug::printErrors();
+		EntityRegistry::setPos(0, glm::vec3(gl::Camera::pos.x, 0.0f, gl::Camera::pos.z));
+ 		gl::updateGeneralUniformBuffer();
+		gl::Render::updateBuffers();
+		Debug::printErrors();
+
 		gl::frame();
 
-		
-		Debug::printErrors();
 		updateTime();
 		updateTimeFactor();
 		limitFPS();

@@ -9,7 +9,7 @@ void EntityRegistry::initEntities()
 {
 	unsigned int first_entity = 0;
 	createEntities(1, &first_entity);
-	setPos(first_entity, glm::vec3(3.0f, 2.0f, 1.0f));
+	setPos(first_entity, glm::vec3(3.0f, 5.0f, 1.0f));
 }
 
 void EntityRegistry::createEntities(unsigned int pCount, unsigned int * pEntities)
@@ -23,10 +23,10 @@ void EntityRegistry::createEntities(unsigned int pCount, unsigned int * pEntitie
 
 void EntityRegistry::setPos(unsigned int pEntityID, glm::vec3 pPos)
 {
-	glm::translate(allMatrices[pEntityID], pPos);
+	std::memcpy(&allMatrices[pEntityID][3].x, &pPos, sizeof(glm::vec3));
 }
 
 void EntityRegistry::translate(unsigned int pEntityID, glm::vec3 pPos)
 {
-	glm::translate(allMatrices[pEntityID], pPos);
+	allMatrices[pEntityID] = glm::translate(allMatrices[pEntityID], pPos);
 }

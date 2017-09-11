@@ -37,6 +37,7 @@ loadFonts()
 {
 	
 	unsigned int queueCount = loadFontBuffer.size();
+	unsigned int fontCount = allFonts.size();
 	allFonts.resize(fontCount + queueCount);
 	for (unsigned int f = 0; f < queueCount; ++f) {
 		LoadFont load_font = loadFontBuffer[f];

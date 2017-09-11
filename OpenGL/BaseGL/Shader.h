@@ -80,7 +80,6 @@ namespace gl {
 		void setUniform(unsigned int pProgram, std::string pUniformName, T pValue)
 		{
 			setUniform(pProgram, pUniformName, pValue);
-			gl::Debug::getGLError("setUniform");
 		}
 	
 	}

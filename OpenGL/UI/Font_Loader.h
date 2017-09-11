@@ -6,7 +6,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <glm\glm.hpp>
-#include "Text.h"
+#include "Font.h"
 
 namespace gl {
 	namespace GUI {

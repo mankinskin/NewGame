@@ -56,8 +56,8 @@ unsigned int gl::VAO::createStream(unsigned int pStorageIndex, unsigned int pMap
 	//else if (storage.target == GL_ARRAY_BUFFER) {
 	//
 	//}
-	stream.mapFlags = pMapFlags | storage.bufferFlags;
-	stream.mappedPtr = mapStorage(pStorageIndex, pMapFlags | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+	stream.mapFlags = pMapFlags | storage.bufferFlags | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+	stream.mappedPtr = mapStorage(pStorageIndex, pMapFlags);
 	allStreams.push_back(stream);
 	Debug::getGLError("gl::createStream():");
 	return ind;

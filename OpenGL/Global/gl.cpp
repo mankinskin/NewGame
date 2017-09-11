@@ -14,6 +14,7 @@
 #include "..\UI\GUI.h"
 #include "../Render/Render.h"
 #include "../Render/Model.h"
+#include "../UI/Text.h"
 int gl::MAX_WORK_GROUP_COUNT = 0;
 glm::ivec3 gl::MAX_WORK_GROUP_SIZE = {};
 unsigned int gl::MAX_LIGHT_COUNT = 100;
@@ -49,9 +50,7 @@ void gl::init()
 	//glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	Render::initMeshVAO();
-	loadModels();
-	Render::fillMeshVAO();
+	
 	Render::initMeshShader();
 	//glEnable(GL_CULL_FACE);
 	//glEnable(GL_DEPTH_TEST);
@@ -72,6 +71,7 @@ void gl::init()
 	GUI::Text::initFontShader();
 	Debug::initDebugShader();
 	Shader::Loader::buildShaderPrograms();
+	
 	Debug::getGLError("gl::init()3");
 	App::Debug::printErrors();
 	/*FONTS
@@ -94,7 +94,10 @@ void gl::init()
 	
 	//bind uniform buffers to shaders
 	initGeneralUniformBuffer();
-	
+	Render::initMeshVAO();
+	loadModels();
+	Render::fillMeshVAO();
+
 	Shader::bindBufferToShader(GUI::Text::glyphShapeProgram, generalUniformBuffer, "GeneralUniformBuffer");
 
 	Shader::bindBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
@@ -106,7 +109,6 @@ void gl::init()
 
 	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiPositionBuffer, "PositionBuffer");
 	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiSizeBuffer, "SizeBuffer");
-	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiUVBuffer, "UVBuffer");
 	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiColorBuffer, "ColorBuffer");
 	
 	
@@ -216,14 +218,17 @@ void gl::updateGeneralUniformBuffer()
 void gl::frame()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
 	Debug::drawGrid();
+	App::Debug::printErrors();
 	Render::render();
+	App::Debug::printErrors();
 	GUI::renderGUI();
+	App::Debug::printErrors();
 	GUI::Text::renderGlyphs();
 	
 	glfwSwapBuffers(App::mainWindow.window);
 	Debug::getGLError("Frame");
+	App::Debug::printErrors();
 }
 
 void gl::loadModels()

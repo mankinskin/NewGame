@@ -48,8 +48,9 @@ namespace App {
 		class EventSlot {
 		public:
 			static unsigned int create(EventType pEvent) {
-				instances.push_back(EventSlot<EventType>(pEvent));
-				return instances.size() - 1;
+				EventSlot<EventType> slt(pEvent);
+				instances.push_back(slt);
+				return slt.index;
 			}
 			static unsigned int instance_count() {
 				return instances.size();

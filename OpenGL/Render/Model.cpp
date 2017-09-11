@@ -76,6 +76,6 @@ void gl::Model::addModelInstances(unsigned int pModelIndex, std::vector<unsigned
 		model.entityOffset = allInstanceEntities.size();
 	}
 	model.entityCount += pEntityIDs.size();
-	allInstanceEntities.insert(allInstanceEntities.begin() + model.entityOffset + model.entityCount, pEntityIDs.begin(), pEntityIDs.end());
+	allInstanceEntities.insert(allInstanceEntities.begin() + model.entityOffset, pEntityIDs.begin(), pEntityIDs.end());
 	
 }

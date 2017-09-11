@@ -120,6 +120,7 @@ namespace App {
 
 
 		//BUTTONS
+		unsigned int addButton(unsigned int pQuadIndex);
 		inline bool is_inside_quad(glm::vec2& pPoint, glm::vec2& pTopLeft, glm::vec2& pLowerRight) {
 			return (pPoint.x > pTopLeft.x) && (pPoint.x < pLowerRight.x) &&
 				(pPoint.y < pTopLeft.y) && (pPoint.y > pLowerRight.y);

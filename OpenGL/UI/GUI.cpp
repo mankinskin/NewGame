@@ -8,9 +8,8 @@
 std::vector<glm::vec2> gl::GUI::allPositions;
 std::vector<glm::vec2> gl::GUI::allSizes;
 std::vector<glm::vec4> gl::GUI::allColors;
-std::vector<glm::vec4> gl::GUI::allUVRanges;
 
-std::vector<gl::GUI::QuadElement> gl::GUI::allQuads;
+std::vector<gl::GUI::RefQuad> gl::GUI::allQuads;
 
 unsigned int gl::GUI::MAX_GUI_QUADS = 10000;
 
@@ -20,33 +19,10 @@ unsigned int gl::GUI::guiQuadBuffer;
 unsigned int gl::GUI::guiColorBuffer = 0;
 unsigned int gl::GUI::guiPositionBuffer = 0;
 unsigned int gl::GUI::guiSizeBuffer = 0;
-unsigned int gl::GUI::guiUVBuffer = 0;
 
 unsigned int gl::GUI::guiTexQuadShader = 0;
 unsigned int gl::GUI::guiQuadShader = 0;
 
-
-void gl::GUI::createQuads()
-{
-
-	allPositions.reserve(2);
-	Pos p1 = gl::GUI::createPos(-0.99f, -0.80f);
-	Pos p2 = gl::GUI::createPos(-0.99f,- 0.90f);
-
-	allSizes.reserve(2);
-	Size s1 = gl::GUI::createSize(0.3f, 0.07f);
-	Size s2 = gl::GUI::createSize(0.3f, 0.07f);
-
-
-	allColors.reserve(2);
-	Color c1 = gl::GUI::createColor(0.95f, 0.95f, 0.9f, 1.0f);
-	Color c2 = gl::GUI::createColor(0.95f, 0.95f, 0.9f, 1.0f);
-
-
-	allQuads.reserve(2);
-	createQuad(p1, s1, c1);
-	createQuad(p2, s2, c2);
-}
 
 void gl::GUI::clearBuffers()
 {
@@ -57,10 +33,34 @@ void gl::GUI::clearBuffers()
 }
 
 
-gl::GUI::Quad gl::GUI::createQuad(Pos pPos, Size pSize, Color pColor, UV pUVRange)
+gl::GUI::Quad gl::GUI::createQuad(Pos pPos, Size pSize, Color pColor)
 {
-	allQuads.push_back(QuadElement(pPos, pSize, pColor, pUVRange));
+	allQuads.push_back(RefQuad(pPos, pSize, pColor));
 	return allQuads.size() - 1;
+}
+
+gl::GUI::Quad gl::GUI::createQuad(glm::vec2 pPos, glm::vec2 pSize, glm::vec4 pColor)
+{
+	allQuads.push_back(RefQuad(allPositions.size(), allSizes.size(), allColors.size()));
+	allPositions.push_back(pPos);
+	allSizes.push_back(pSize);
+	allColors.push_back(pColor);
+	return allQuads.size() - 1;
+}
+
+gl::GUI::Quad gl::GUI::createQuad(float pPosX, float pPosY, float pWidth, float pHeight, float pR, float pG, float pB, float pA)
+{
+	return createQuad(glm::vec2(pPosX, pPosY), glm::vec2(pWidth, pHeight), glm::vec4(pR, pG, pB, pA));
+}
+
+
+
+void gl::GUI::reserveQuadSpace(unsigned int pCount)
+{
+	allQuads.reserve(pCount);
+	allPositions.reserve(pCount);
+	allSizes.reserve(pCount);
+	allColors.reserve(pCount);
 }
 
 void gl::GUI::initGUIBuffers()
@@ -79,9 +79,6 @@ void gl::GUI::initGUIBuffers()
 	VAO::createStream(guiColorBuffer, GL_MAP_WRITE_BIT);
 	VAO::bindStorage(GL_UNIFORM_BUFFER, guiColorBuffer);
 
-	guiUVBuffer = VAO::createStorage(MAX_GUI_QUADS * sizeof(float) * 4, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
-	VAO::createStream(guiUVBuffer, GL_MAP_WRITE_BIT);
-	VAO::bindStorage(GL_UNIFORM_BUFFER, guiUVBuffer);
 
 	
 
@@ -117,7 +114,7 @@ void gl::GUI::updateGUI() {
 	std::vector<glm::ivec4> indexQuads(quad_count);
 	std::vector<glm::ivec4>::iterator it = indexQuads.begin();
 	for (unsigned int q = 0; q < quad_count; ++q) {
-		QuadElement& quad = allQuads[q];
+		RefQuad& quad = allQuads[q];
 		*(it++) = glm::ivec4(
 			&allPositions[quad.pos] - &allPositions[0], &allSizes[quad.size] - &allSizes[0],
 			&allColors[quad.color] - &allColors[0], 0);
@@ -143,13 +140,18 @@ void gl::GUI::initGUIShaders()
 
 void gl::GUI::renderGUI()
 {
-	glBindVertexArray(guiVAO);
+	if (allQuads.size()) {
+		glBindVertexArray(guiVAO);
 
-	Shader::use(guiQuadShader);
-	
-	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, allQuads.size());
-	
-	Shader::unuse();
+		Shader::use(guiQuadShader);
+
+		glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, allQuads.size());
+
+
+		Shader::unuse();
+		glBindVertexArray(0);
+		Debug::getGLError("renderGUI");
+	}
 }
 
 gl::GUI::Pos gl::GUI::createPos(glm::vec2 pPos)
