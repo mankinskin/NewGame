@@ -93,12 +93,12 @@ void gl::Shader::unuse()
 	glUseProgram(0);
 }
 
-void gl::Shader::bindBufferToShader(unsigned int pProgram, unsigned int pStorageIndex, std::string pBlockName)
+void gl::Shader::bindUniformBufferToShader(unsigned int pProgram, unsigned int pStorageIndex, std::string pBlockName)
 {
-	bindBufferToShader(pProgram, VAO::allStorages[pStorageIndex], pBlockName);
+	bindUniformBufferToShader(pProgram, VAO::allStorages[pStorageIndex], pBlockName);
 }
 
-void gl::Shader::bindBufferToShader(unsigned int pProgram, VAO::Storage& pStorage, std::string pBlockName)
+void gl::Shader::bindUniformBufferToShader(unsigned int pProgram, VAO::Storage& pStorage, std::string pBlockName)
 {
 	int blockIndex = glGetUniformBlockIndex(pProgram, pBlockName.c_str());
 	if (blockIndex < 0) {
@@ -109,14 +109,14 @@ void gl::Shader::bindBufferToShader(unsigned int pProgram, VAO::Storage& pStorag
 	gl::Debug::getGLError("bindBufferToShader()");
 }
 
-void gl::Shader::bindBufferToShader(std::string pProgramName, unsigned int pTargetStorageIndex, std::string pBlockName)
+void gl::Shader::bindUniformBufferToShader(std::string pProgramName, unsigned int pTargetStorageIndex, std::string pBlockName)
 {
 	auto it = shaderProgramLookup.find(pProgramName);
 	if (it == shaderProgramLookup.end()) {
 		App::Debug::pushError("bindUniformBlockBuffer(): Tried to access invalid shader program!");
 		return;
 	}
-	bindBufferToShader(it->second.ID, pTargetStorageIndex, pBlockName);
+	bindUniformBufferToShader(it->second.ID, pTargetStorageIndex, pBlockName);
 }
 
 void gl::Shader::addVertexAttribute(unsigned int pProgramID, std::string pAttributeName, unsigned int pAttributeIndex)

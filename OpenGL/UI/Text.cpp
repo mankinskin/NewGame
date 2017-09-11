@@ -121,7 +121,7 @@ void gl::GUI::Text::initStyleBuffer() {
 	createTextStyle(1.2f, 0.8f, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 	styleStorage = VAO::createStorage(sizeof(TextStyle)*allTextStyles.size(), &allTextStyles[0], 0);
 	
-	Shader::bindBufferToShader(glyphShapeProgram, styleStorage, "StyleBuffer");
+	Shader::bindUniformBufferToShader(glyphShapeProgram, styleStorage, "StyleBuffer");
 }
 
 void gl::GUI::Text::
@@ -138,6 +138,7 @@ void gl::GUI::Text::
 loadTextboxGlyphs(Textbox& pTextbox)
 {
 	glm::vec2 cursor = glm::vec2();
+	glm::vec2 tb_pos = allTextboxPositions[pTextbox.pos];
 	TextboxMetrics& textMetrics = allTextboxMetrics[pTextbox.metrics];
 	//get total char count
 	unsigned int total_char_count = 0;
@@ -161,13 +162,13 @@ loadTextboxGlyphs(Textbox& pTextbox)
 		const unsigned int stringIndex = textboxStringIndices[pTextbox.stringOffset + s];
 		String& str = allStrings[stringIndex];
 		Font& font = allFonts[str.font];
-		
+		FontInstructions& font_inst = allFontInstructions[font.instructions];
 		if (!font.stringCount) {
 			font.stringOffset = fontStringIndices.size();
 		}
 		++font.stringCount;
 		fontStringIndices.insert(fontStringIndices.begin() + font.stringOffset, stringIndex);
-		FontInstructions& font_inst = allFontInstructions[font.instructions];
+		
 		//iterate string chars
 		for (unsigned int c = 0; c < str.charCount; ++c) {
 			//get glyph metrics
@@ -180,6 +181,7 @@ loadTextboxGlyphs(Textbox& pTextbox)
 					leftIndex = 0;
 					++nonCharCount;
 				}
+				//transforming,  do this somewhere before
 				line_widths[line_count] = cursor.x;
 				lines[line_count].charCount = (buffer_off + c) - lines[line_count].charOffset;
 				lines[++line_count].charOffset = buffer_off + c;
@@ -188,7 +190,7 @@ loadTextboxGlyphs(Textbox& pTextbox)
 			}
 			else {
 				glyphIndices[buffer_off + c - nonCharCount] = rightIndex;
-				quads[buffer_off + c - nonCharCount] = CharQuad(cursor.x + met.bearingX, cursor.y + met.bearingY, met.width * textMetrics.glyphScale.x, met.height * textMetrics.glyphScale.y);
+				quads[buffer_off + c - nonCharCount] = CharQuad(tb_pos.x + pTextbox.marging + cursor.x + met.bearingX, tb_pos.y + cursor.y - font.fontMetric.lineGap*textMetrics.lineGapScale + met.bearingY, met.width * textMetrics.glyphScale.x, met.height * textMetrics.glyphScale.y);
 				cursor.x += met.advanceX * textMetrics.advanceScale;
 			}
 
@@ -257,31 +259,31 @@ void gl::GUI::Text::
 renderGlyphs()
 {
 	if (allTextboxes.size()) {
+		glDisable(GL_DEPTH_TEST);
 		glBindVertexArray(fontVAO);
 		Shader::use(glyphShapeProgram);
-
 		glActiveTexture(GL_TEXTURE0);
 
 		Shader::setUniform(GUI::Text::glyphShapeProgram, "atlas", (int)0);
 		//VAO::setUniform(glyphShapeProgram, "ortho", ortho);
-		gl::Debug::getGLError("renderGlyphs()1:");
+		
 		for (unsigned int fo = 0; fo < allFonts.size(); ++fo) {
 			Font& font = allFonts[fo];
 			glBindTexture(GL_TEXTURE_2D, font.atlasID);
-			Shader::bindBufferToShader(glyphShapeProgram, font.glyphStorageIndex, "GlyphBuffer");
-			gl::Debug::getGLError("renderGlyphs()2:");
+			Shader::bindUniformBufferToShader(glyphShapeProgram, font.glyphStorageIndex, "GlyphBuffer");
+			
 			for (unsigned int s = 0; s < font.stringCount; ++s) {
 				String& str = allStrings[fontStringIndices[font.stringOffset + s]];
 				//Shader::setUniform(glyphShapeProgram, "styleIndex", (unsigned int)str.style);
-				gl::Debug::getGLError("renderGlyphs()3:");
+				
 				glDrawElementsInstancedBaseInstance(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, str.charCount, str.charOffset);
 
-				gl::Debug::getGLError("renderGlyphs()4:");
 			}
 		}
-
+		Debug::getGLError("renderGlyphs():");
 		Shader::unuse();
 		glBindVertexArray(0);
+		glEnable(GL_DEPTH_TEST);
 	}
 }
 

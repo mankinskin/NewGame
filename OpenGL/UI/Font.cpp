@@ -27,23 +27,22 @@ initFontShader()
 void gl::GUI::Text::
 initFontVAO() {
 	glCreateVertexArrays(1, &fontVAO);
-	//Quad triangles 
+	//Quad triangles
+	glVertexArrayElementBuffer(fontVAO, quadEBO);
 	glVertexArrayVertexBuffer(fontVAO, 0, quadVBO, 0, sizeof(float) * 2);
 	VAO::initVertexAttrib(fontVAO, 0, 0, 2, GL_FLOAT, 0);
 	//quad position and size
 	quadStorage = VAO::createStorage(MAX_CHARS * sizeof(CharQuad), nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
 	VAO::createStream(quadStorage, GL_MAP_WRITE_BIT);
-	VAO::bindVertexArrayVertexStorage(fontVAO, 1, quadStorage, sizeof(CharQuad));
+	VAO::setVertexArrayVertexStorage(fontVAO, 1, quadStorage, sizeof(CharQuad));
 	VAO::initVertexAttrib(fontVAO, 1, 1, 4, GL_FLOAT, 0);
 
 	//glyph index
 	charStorage = VAO::createStorage(MAX_CHARS * sizeof(unsigned int), nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
 	VAO::createStream(charStorage, GL_MAP_WRITE_BIT);
-	VAO::bindVertexArrayVertexStorage(fontVAO, 2, charStorage, sizeof(unsigned int));
+	VAO::setVertexArrayVertexStorage(fontVAO, 2, charStorage, sizeof(unsigned int));
 	VAO::initVertexAttrib(fontVAO, 2, 2, 1, GL_UNSIGNED_INT, 0);
 
 	glVertexArrayBindingDivisor(fontVAO, 1, 1);
 	glVertexArrayBindingDivisor(fontVAO, 2, 1);
-
-	glVertexArrayElementBuffer(fontVAO, quadEBO);
 }

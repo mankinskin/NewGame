@@ -52,8 +52,6 @@ void gl::init()
 	
 	
 	Render::initMeshShader();
-	//glEnable(GL_CULL_FACE);
-	//glEnable(GL_DEPTH_TEST);
 	Camera::init();
 	initQuadBuffers();
 	gl::Debug::getGLError("gl::init():");
@@ -67,7 +65,7 @@ void gl::init()
 	GUI::Text::Initializer::initFreeType();
 	gl::Debug::getGLError("gl::init()1:");
 	App::Debug::printErrors();
-	
+	gl::GUI::Text::initFontVAO();
 	GUI::Text::initFontShader();
 	Debug::initDebugShader();
 	Shader::Loader::buildShaderPrograms();
@@ -90,7 +88,7 @@ void gl::init()
 	*/
 	GUI::Text::Initializer::includeFont("Ubuntu_Regular_Mono.ttf", 15, 30, 200, FONT_LOAD_DT, 4);
 	GUI::Text::Initializer::loadFonts();
-	gl::GUI::Text::initFontVAO();
+	
 	
 	//bind uniform buffers to shaders
 	initGeneralUniformBuffer();
@@ -98,18 +96,18 @@ void gl::init()
 	loadModels();
 	Render::fillMeshVAO();
 
-	Shader::bindBufferToShader(GUI::Text::glyphShapeProgram, generalUniformBuffer, "GeneralUniformBuffer");
+	Shader::bindUniformBufferToShader(GUI::Text::glyphShapeProgram, generalUniformBuffer, "GeneralUniformBuffer");
 
-	Shader::bindBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
+	Shader::bindUniformBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
 
-	Shader::bindBufferToShader(Render::meshShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
-	Shader::bindBufferToShader(Render::meshShaderProgram, Render::entityTransformBuffer, "EntityTransformBuffer");
-	Shader::bindBufferToShader(Render::meshShaderProgram, Render::transformIndexBuffer, "TransformIndexBuffer");
+	Shader::bindUniformBufferToShader(Render::meshShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
+	Shader::bindUniformBufferToShader(Render::meshShaderProgram, Render::entityTransformBuffer, "EntityTransformBuffer");
+	Shader::bindUniformBufferToShader(Render::meshShaderProgram, Render::transformIndexBuffer, "TransformIndexBuffer");
 
 
-	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiPositionBuffer, "PositionBuffer");
-	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiSizeBuffer, "SizeBuffer");
-	Shader::bindBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiColorBuffer, "ColorBuffer");
+	Shader::bindUniformBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiPositionBuffer, "PositionBuffer");
+	Shader::bindUniformBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiSizeBuffer, "SizeBuffer");
+	Shader::bindUniformBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiColorBuffer, "ColorBuffer");
 	
 	
 	
@@ -219,15 +217,11 @@ void gl::frame()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	GUI::Text::renderGlyphs();
-	App::Debug::printErrors();
-	Debug::drawGrid();
-	App::Debug::printErrors();
-	Render::render();
-	App::Debug::printErrors();
-	GUI::renderGUI();
-	App::Debug::printErrors();
 	
+	//Debug::drawGrid();
+	//Render::render();
+	//GUI::renderGUI();
+	GUI::Text::renderGlyphs();
 
 	glfwSwapBuffers(App::mainWindow.window);
 	Debug::getGLError("Frame");

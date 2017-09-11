@@ -96,11 +96,12 @@ void gl::VAO::streamStorage(Storage& pStorage, unsigned int pUploadSize, void* p
 	stream.lastUpdateSize = updateSize;
 
 	std::memcpy((char*)stream.mappedPtr + stream.updateOffset, pData, pUploadSize);
-
+	
 	if (pStorage.target == GL_UNIFORM_BUFFER) {
-		glBindBufferRange(pStorage.target, pStorage.binding, pStorage.ID, stream.updateOffset, updateSize);
+		glBindBufferRange(GL_UNIFORM_BUFFER, pStorage.binding, pStorage.ID, stream.updateOffset, updateSize);
 	}
 	else if (pStorage.target == GL_ARRAY_BUFFER) {
+		
 		glVertexArrayVertexBuffer(pStorage.vaoID, pStorage.binding, pStorage.ID, stream.updateOffset, pStorage.stride);
 	}
 	
@@ -159,18 +160,18 @@ void gl::VAO::bindStorageRange(unsigned int pStorageIndex, unsigned int pOffset,
 	glBindBufferRange(stor.target, stor.binding, stor.ID, pOffset, pSize);
 }
 
-void gl::VAO::bindVertexArrayVertexStorage(unsigned int pVAO, unsigned int pBinding, unsigned int pStorageIndex, unsigned int pStride)
+void gl::VAO::setVertexArrayVertexStorage(unsigned int pVAO, unsigned int pBinding, unsigned int pStorageIndex, unsigned int pStride)
 {
-	bindVertexArrayVertexStorage(pVAO, pBinding, allStorages[pStorageIndex], pStride);
+	setVertexArrayVertexStorage(pVAO, pBinding, allStorages[pStorageIndex], pStride);
 }
 
-void gl::VAO::bindVertexArrayVertexStorage(unsigned int pVAO, unsigned int pBinding, Storage & pStorage, unsigned int pStride)
+void gl::VAO::setVertexArrayVertexStorage(unsigned int pVAO, unsigned int pBinding, Storage & pStorage, unsigned int pStride)
 {
 	pStorage.vaoID = pVAO;
 	pStorage.target = GL_ARRAY_BUFFER;
 	pStorage.binding = pBinding;
 	pStorage.stride = pStride;
-	glVertexArrayVertexBuffer(pVAO, pBinding, pStorage.ID, 0, pStride);
+	//glVertexArrayVertexBuffer(pVAO, pBinding, pStorage.ID, 0, pStride);
 	
 }
 

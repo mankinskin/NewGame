@@ -170,6 +170,7 @@ void App::Input::calculateDetectionRanges()
 			allPositions[allQuads[quadLoadBuffer[q]].pos].x + allSizes[allQuads[quadLoadBuffer[q]].size].x,
 			allPositions[allQuads[quadLoadBuffer[q]].pos].y - allSizes[allQuads[quadLoadBuffer[q]].size].y);
 	}
+	quadLoadBuffer.clear();
 }
 
 void App::Input::clearDetectionRanges()

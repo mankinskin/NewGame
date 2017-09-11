@@ -90,17 +90,16 @@ void App::mainMenu()
 	appendTextboxString(tb2, quitProgramStr);
 	
 	gl::GUI::Text::loadChars();
-	
-	
+	//gl::GUI::updateGUI();
 	while (state == App::MainMenu) {
+
 		gl::GUI::Text::updateCharStorage();//why does this only work if i update it each frame?!
-		
 		App::Input::fetchGLFWEvents();
 		Input::fetchButtonEvents();
 		App::Input::checkEvents();
 		App::Input::callFunctions();
 		Input::end();
-		gl::GUI::updateGUI();
+		
 
 		gl::frame();
 
@@ -128,18 +127,31 @@ void App::quit() {
 void App::frameLoop()
 {
 	glClearColor(0.01f, 0.01f, 0.01f, 1.0f);
-	
-	
-	gl::GUI::Text::loadChars();
-	gl::GUI::Text::updateCharStorage();
-
+	using gl::GUI::Text::Textbox;
+	using gl::GUI::Text::String;
+	using gl::GUI::Text::createTextbox;
+	using gl::GUI::Text::appendTextboxString;
+	using gl::GUI::Text::createTextStyle;
+	gl::GUI::reserveQuadSpace(1);
+	unsigned int quitButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.9f), glm::vec2(0.2f, 0.05f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	Input::addButton(quitButtonQuad);
+	App::Input::calculateDetectionRanges();
 	gl::GUI::updateGUI();
+	
+	
+	String quitProgramStr("QUIT");
+	unsigned int tb_met = gl::GUI::Text::createTextboxMetrics(1.0f, 1.0f, 1.0f, 1.0f);
+	unsigned int tb1 = createTextbox(glm::vec2(-1.0f, -0.9f), glm::vec2(0.2f, 0.05f), tb_met, TEXT_LAYOUT_BOUND_LEFT, 0.003f);
+	appendTextboxString(tb1, quitProgramStr);
+	gl::GUI::Text::loadChars();
+	
+
 	Debug::printErrors();
 	while (state == App::State::Running) {
-
+		gl::GUI::Text::updateCharStorage();
 		
 		Input::fetchGLFWEvents();
-		
+		Input::fetchButtonEvents();
 		App::Input::checkEvents();
 		App::Input::callFunctions();
 		Input::end();

@@ -92,7 +92,8 @@ void gl::GUI::initGUIBuffers()
 	//quad indices
 	guiQuadBuffer = VAO::createStorage(MAX_GUI_QUADS * sizeof(glm::ivec4), nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
 	VAO::createStream(guiQuadBuffer, GL_MAP_WRITE_BIT);
-	VAO::bindVertexArrayVertexStorage(guiVAO, 1, guiQuadBuffer, sizeof(glm::ivec4));
+	VAO::setVertexArrayVertexStorage(guiVAO, 1, guiQuadBuffer, sizeof(glm::ivec4));
+	glVertexArrayVertexBuffer(guiVAO, 0, VAO::getStorageID(guiQuadBuffer), 0, sizeof(glm::ivec4));
 	glVertexArrayBindingDivisor(guiVAO, 1, 1);
 
 	VAO::initVertexAttrib(guiVAO, 0, 0, 2, GL_FLOAT, 0);

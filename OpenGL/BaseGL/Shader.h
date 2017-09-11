@@ -61,9 +61,9 @@ namespace gl {
 		void addVertexAttribute(unsigned int pProgram, std::string pAttributeName, unsigned int pAttributeIndex);
 		void addVertexAttribute(std::string pProgramName, std::string pAttributeName, unsigned int pAttributeIndex);
 
-		void bindBufferToShader(std::string pProgramName, unsigned int pTargetStorageIndex, std::string pBlockName);
-		void bindBufferToShader(unsigned int pProgram, unsigned int pTargetStorageIndex, std::string pBlockName);
-		void bindBufferToShader(unsigned int pProgram, VAO::Storage& pStorage, std::string pBlockName);
+		void bindUniformBufferToShader(std::string pProgramName, unsigned int pTargetStorageIndex, std::string pBlockName);
+		void bindUniformBufferToShader(unsigned int pProgram, unsigned int pTargetStorageIndex, std::string pBlockName);
+		void bindUniformBufferToShader(unsigned int pProgram, VAO::Storage& pStorage, std::string pBlockName);
 		
 		void setUniform(unsigned int pProgram, std::string pUniformName, int& pValue);
 		void setUniform(unsigned int pProgram, std::string pUniformName, unsigned int& pValue);
