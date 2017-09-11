@@ -90,10 +90,11 @@ void App::mainMenu()
 	appendTextboxString(tb2, quitProgramStr);
 	
 	gl::GUI::Text::loadChars();
-	gl::GUI::Text::updateCharStorage();
-	gl::GUI::Text::initFontVAO();
+	
+	
 	while (state == App::MainMenu) {
-
+		gl::GUI::Text::updateCharStorage();//why does this only work if i update it each frame?!
+		
 		App::Input::fetchGLFWEvents();
 		Input::fetchButtonEvents();
 		App::Input::checkEvents();

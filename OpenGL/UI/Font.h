@@ -82,7 +82,6 @@ namespace gl {
 			extern std::vector<float> allKerning;
 			extern std::vector<GlyphMetrics> allMetrics;
 			
-			extern std::vector<unsigned char> charBuffer;
 		}
 	}
 }

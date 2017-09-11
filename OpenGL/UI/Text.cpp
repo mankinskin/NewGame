@@ -188,7 +188,7 @@ loadTextboxGlyphs(Textbox& pTextbox)
 			}
 			else {
 				glyphIndices[buffer_off + c - nonCharCount] = rightIndex;
-				quads[buffer_off + c - nonCharCount] = CharQuad(cursor.x, cursor.y, met.width, met.height);
+				quads[buffer_off + c - nonCharCount] = CharQuad(cursor.x + met.bearingX, cursor.y + met.bearingY, met.width * textMetrics.glyphScale.x, met.height * textMetrics.glyphScale.y);
 				cursor.x += met.advanceX * textMetrics.advanceScale;
 			}
 
@@ -282,7 +282,6 @@ renderGlyphs()
 
 		Shader::unuse();
 		glBindVertexArray(0);
-		App::Debug::printErrors();
 	}
 }
 
@@ -294,14 +293,9 @@ gl::GUI::Text::String::String(std::string pString, unsigned int pFont, unsigned 
 void gl::GUI::Text::
 updateCharStorage()
 {
-	CharQuad* charQuadPtr = nullptr;
-	unsigned int* glyphIndexPtr = nullptr;
 	if (charQuadBuffer.size()) {
-		charQuadPtr = &charQuadBuffer[0];
-		glyphIndexPtr = &glyphIndexBuffer[0];
-
-		VAO::streamStorage(quadStorage, sizeof(CharQuad)*charQuadBuffer.size(), charQuadPtr);
-		VAO::streamStorage(charStorage, sizeof(unsigned int)*glyphIndexBuffer.size(), glyphIndexPtr);
+		VAO::streamStorage(quadStorage, sizeof(CharQuad)*charQuadBuffer.size(), &charQuadBuffer[0]);
+		VAO::streamStorage(charStorage, sizeof(unsigned int)*glyphIndexBuffer.size(), &glyphIndexBuffer[0]);
 	}
 }
 

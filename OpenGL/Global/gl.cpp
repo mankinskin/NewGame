@@ -47,7 +47,7 @@ void gl::init()
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_BLEND);
+	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	
@@ -90,7 +90,7 @@ void gl::init()
 	*/
 	GUI::Text::Initializer::includeFont("Ubuntu_Regular_Mono.ttf", 15, 30, 200, FONT_LOAD_DT, 4);
 	GUI::Text::Initializer::loadFonts();
-	
+	gl::GUI::Text::initFontVAO();
 	
 	//bind uniform buffers to shaders
 	initGeneralUniformBuffer();
@@ -218,14 +218,17 @@ void gl::updateGeneralUniformBuffer()
 void gl::frame()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	GUI::Text::renderGlyphs();
+	App::Debug::printErrors();
 	Debug::drawGrid();
 	App::Debug::printErrors();
 	Render::render();
 	App::Debug::printErrors();
 	GUI::renderGUI();
 	App::Debug::printErrors();
-	GUI::Text::renderGlyphs();
 	
+
 	glfwSwapBuffers(App::mainWindow.window);
 	Debug::getGLError("Frame");
 	App::Debug::printErrors();
