@@ -1,33 +1,24 @@
 #include "..\Global\stdafx.h"
 #include "Input.h"
 #include "..\Global\App.h"
-#include "..\ContextWindow.h"
 #include "..\Global\Debug.h"
 #include <OpenGL\Camera.h>
 #include <OpenGL\Global\glDebug.h>
 #include <functional>
+#include "Keys.h"
+#include "Mouse.h"
+#include "Buttons.h"
 
 
-glm::dvec2 App::Input::relativeCursorPosition;
-glm::uvec2 App::Input::absoluteCursorPosition;
-
-App::Input::KeyCondition App::Input::mouseButtons[3];
-int App::Input::scroll;
-glm::vec2 App::Input::cursorFrameDelta;
-int App::Input::centerCursor;
-int App::Input::track_mouse;
-std::vector<App::Input::ButtonCondition> App::Input::allButtonStates;
-std::vector<glm::vec4> App::Input::allDetectors;
 std::vector<void(*)()> App::Input::callbackBuffer;
-std::vector<App::Input::KeyEvent> App::Input::keyEventBuffer;
-std::vector<App::Input::KeyEvent> App::Input::mouseButtonEventBuffer;
-std::vector<App::Input::ButtonEvent> App::Input::buttonEventBuffer;
-std::vector<int> App::Input::allButtonFlags;
-std::vector<unsigned int> App::Input::allButtonQuads;
-unsigned int App::Input::mouseSignalOffset;
-unsigned int App::Input::mouseSignalCount;
-unsigned int App::Input::keySignalOffset;
-unsigned int App::Input::keySignalCount;
+std::vector<unsigned int> App::Input::signalBuffer;
+std::vector<unsigned int> App::Input::rejectedSignals;
+std::unordered_map<unsigned int, std::vector<unsigned int>> App::Input::signalLockBindings;
+std::unordered_map<unsigned int, std::vector<unsigned int>> App::Input::signalUnlockBindings;
+std::vector<int> App::Input::allSignalLocks;
+std::vector<unsigned int> App::Input::allSignalSlots;
+unsigned App::Input::TOTAL_SIGNAL_COUNT;
+
 /*
 button-pipeline
 to set up
@@ -45,19 +36,33 @@ every frame
 - callButtons
 */
 
-
-void App::Input::init()
-{
-
-	//initializes GLFW input and defines the keys to track
-	glfwSetInputMode(App::mainWindow.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	glfwSetKeyCallback(App::mainWindow.window, key_Callback);
-	glfwSetCharCallback(App::mainWindow.window, char_Callback);
-	glfwSetCursorPosCallback(App::mainWindow.window, cursorPosition_Callback);
-	glfwSetCursorEnterCallback(App::mainWindow.window, cursorEnter_Callback);
-	glfwSetMouseButtonCallback(App::mainWindow.window, mouseButton_Callback);
-	glfwSetScrollCallback(App::mainWindow.window, scroll_Callback);
+void App::Input::initMenuSignals() {
+	Input::clearSignals();
+	App::Input::FuncSlot<void>::reserve_slots(12);
+	FuncSlot<void> startProgramSlot(App::run);
+	FuncSlot<void> exitProgramSlot(App::quit);
+	FuncSlot<void> togglePrintInfoSlot(App::Debug::togglePrintInfo);
+	mouseEventSlotOffset = 0;
+	mouseEventSlotCount = 0;
+	keyEventSlotOffset = 0;
+	unsigned int rmb_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_MOUSE_BUTTON_2, 1, 0));
+	unsigned int rmb_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_MOUSE_BUTTON_2, 0, 0));
+	unsigned int esc_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_ESCAPE, 1, 0));
+	unsigned int i_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_I, 1, 0));
+	keyEventSlotCount = 4;
+	unsigned int play_button_press = EventSlot<ButtonEvent>::create(ButtonEvent(0, 1, 0));
+	unsigned int quit_button_press = EventSlot<ButtonEvent>::create(ButtonEvent(1, 1, 0));
 	
+	startProgramSlot.listen({ play_button_press });
+	exitProgramSlot.listen({ esc_press, quit_button_press });//exit
+	togglePrintInfoSlot.listen({ i_press });//togglePrintInfo
+
+	allSignalSlots.resize(TOTAL_SIGNAL_COUNT);
+	allSignalLocks.resize(TOTAL_SIGNAL_COUNT);
+}
+
+void App::Input::initGameGUISignals() {
+	Input::clearSignals();
 	//Init function slots
 	App::Input::FuncSlot<void>::reserve_slots(12);
 
@@ -70,26 +75,25 @@ void App::Input::init()
 	FuncSlot<void> stopZSlot(gl::Camera::stop_z);
 	FuncSlot<void> stopXSlot(gl::Camera::stop_x);
 	FuncSlot<void> stopYSlot(gl::Camera::stop_y);
-	
-	FuncSlot<void> startProgramSlot(App::run);
+
 	FuncSlot<void> exitProgramSlot(App::quit);
 	FuncSlot<void> setCameraModeSlot(toggleTrackMouse);
 	FuncSlot<void> togglePrintInfoSlot(App::Debug::togglePrintInfo);
 	FuncSlot<void> toggleCoordinateSysSlot(gl::Debug::toggleCoord);
 	FuncSlot<void> toggleGridSlot(gl::Debug::toggleGrid);
+	
+	
 	//init Event Signals
 	//-----------------------
 	//Mouse Buttons
-	mouseSignalOffset = 0;
-	mouseSignalCount = 2;
-	
+	mouseEventSlotOffset = EventSlot<KeyEvent>::instance_count();
 	unsigned int rmb_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_MOUSE_BUTTON_2, 1, 0));
 	unsigned int rmb_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_MOUSE_BUTTON_2, 0, 0));
+	mouseEventSlotCount = EventSlot<KeyEvent>::instance_count() - mouseEventSlotOffset;
 	//-----------------------------------------
 	//Keys
 	//Movement
-	keySignalOffset = mouseSignalOffset + mouseSignalCount;
-	keySignalCount = 18;
+	keyEventSlotOffset = mouseEventSlotOffset + mouseEventSlotCount;
 	unsigned int c_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_C, 1, 0));
 	unsigned int c_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_C, 0, 0));
 	unsigned int w_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_W, 1, 0));
@@ -108,16 +112,18 @@ void App::Input::init()
 	unsigned int i_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_I, 1, 0));
 	unsigned int h_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_H, 1, 0));
 	unsigned int g_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_G, 1, 0));
-
-	setCameraModeSlot.listen({ rmb_press , rmb_release, c_press});//setCameraMode
+	
+	keyEventSlotCount = EventSlot<KeyEvent>::instance_count() - keyEventSlotOffset;
+	
+	setCameraModeSlot.listen({ rmb_press , rmb_release, c_press });//setCameraMode
 	moveForwardSlot.listen({ w_press });//forward
 	stopZSlot.listen({ w_release, s_release });//stop_z
-	moveBackwardSlot.listen({ s_press});//back
+	moveBackwardSlot.listen({ s_press });//back
 	signal_lock(w_press, { s_press, s_release });
 	signal_unlock(w_release, { s_press, s_release });
 	signal_lock(s_press, { w_press, w_release });
 	signal_unlock(s_release, { w_press, w_release });
-	
+
 	moveLeftSlot.listen({ a_press });//left
 	moveRightSlot.listen({ d_press });//right
 	stopXSlot.listen({ a_release, d_release });//stop_x
@@ -125,144 +131,85 @@ void App::Input::init()
 	signal_unlock(a_release, { d_press, d_release });
 	signal_lock(d_press, { a_press, a_release });
 	signal_unlock(d_release, { a_press, a_release });
-	
+
 	moveUpSlot.listen({ space_press });//up
 	moveDownSlot.listen({ z_press });//down
-	stopYSlot.listen({ space_release, z_release});//stop_y
+	stopYSlot.listen({ space_release, z_release });//stop_y
 	signal_lock(space_press, { z_press, z_release });
 	signal_unlock(space_release, { z_press, z_release });
 	signal_lock(z_press, { space_press, space_release });
 	signal_unlock(z_release, { space_press, space_release });
 
-	
+
 	//--------------------------------
 	//Buttons
-	unsigned int play_button_press = EventSlot<ButtonEvent>::create(ButtonEvent(0, 1, 0));
-	unsigned int quit_button_press = EventSlot<ButtonEvent>::create(ButtonEvent(1, 1, 0));
-	
+	unsigned int quit_button_press = EventSlot<ButtonEvent>::create(ButtonEvent(0, 1, 0));
+
 	//Misc
-	startProgramSlot.listen({ play_button_press });
 	exitProgramSlot.listen({ esc_press, quit_button_press });//exit
 	togglePrintInfoSlot.listen({ i_press });//togglePrintInfo
 	toggleCoordinateSysSlot.listen({ h_press });//toggleCoordSys
 	toggleGridSlot.listen({ g_press });//toggleGrid
-	
-	//--------------------------------
-	//bind signals to slots
-	allSignals.reserve(TOTAL_SIGNAL_COUNT);//for ordered access
+
+
 	allSignalSlots.resize(TOTAL_SIGNAL_COUNT);
 	allSignalLocks.resize(TOTAL_SIGNAL_COUNT);
 }
 
-void App::Input::toggleButton(unsigned int pButtonIndex) {
-	allButtonFlags[pButtonIndex] = !allButtonFlags[pButtonIndex];
-}
-
-void App::Input::hideButton(unsigned int pButtonIndex) {
-	allButtonFlags[pButtonIndex] = 0;
-}
-
-void App::Input::unhideButton(unsigned int pButtonIndex) {
-	allButtonFlags[pButtonIndex] = 1;
-}
-
-void App::Input::loadButtons()
+void App::Input::init()
 {
-	using gl::GUI::allSizes;
-	using gl::GUI::allPositions;
-	using gl::GUI::allQuads;
-	size_t quadCount = allButtonQuads.size();
-	allDetectors.resize(quadCount);
-	allButtonStates.resize(quadCount);
-	allButtonFlags.resize(quadCount, 1);
-	for (unsigned int q = 0; q < quadCount; ++q) {
-		allDetectors[q] = glm::vec4(
-			allPositions[allQuads[allButtonQuads[q]].pos].x, 
-			allPositions[allQuads[allButtonQuads[q]].pos].y, 
-			allPositions[allQuads[allButtonQuads[q]].pos].x + allSizes[allQuads[allButtonQuads[q]].size].x,
-			allPositions[allQuads[allButtonQuads[q]].pos].y - allSizes[allQuads[allButtonQuads[q]].size].y);
-	}
+
+	//initializes GLFW input and defines the keys to track
+	glfwSetInputMode(App::mainWindow.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	glfwSetKeyCallback(App::mainWindow.window, key_Callback);
+	glfwSetCharCallback(App::mainWindow.window, char_Callback);
+	glfwSetCursorPosCallback(App::mainWindow.window, cursorPosition_Callback);
+	glfwSetCursorEnterCallback(App::mainWindow.window, cursorEnter_Callback);
+	glfwSetMouseButtonCallback(App::mainWindow.window, mouseButton_Callback);
+	glfwSetScrollCallback(App::mainWindow.window, scroll_Callback);
+	
+	
 }
 
-void App::Input::clearButtons()
-{
-	allButtonQuads.clear();
-	allButtonStates.clear();
-	allButtonFlags.clear();
-	allDetectors.clear();
+
+
+void App::Input::clearSignals() {
+	EventSlot<KeyEvent>::clear();
+	EventSlot<ButtonEvent>::clear();
+	FuncSlot<void>::clear();
+	TOTAL_SIGNAL_COUNT = 0;
+	allSignalSlots.clear();
+	allSignalLocks.clear();
 }
+
+
 
 void App::Input::checkEvents() {
 	//TODO find a way to manage ranges of different element types
-	size_t keyEventCount = keyEventBuffer.size();
-	size_t mouseKeyEventCount = mouseButtonEventBuffer.size();
-	size_t buttonEventCount = buttonEventBuffer.size();
-	size_t keyEventSignalCount = EventSlot<KeyEvent>::instance_count();
 	
-	static std::vector<unsigned int> signalBuffer;
-	std::vector<unsigned int> signals;
-	signals.resize(keyEventCount + mouseKeyEventCount);
-	unsigned int signalCount = 0;
-	
-	for (unsigned int e = 0; e < keyEventCount; ++e) {
-		KeyEvent& kev = keyEventBuffer[e];
-		for (unsigned int ks = 0; ks < keySignalCount; ++ks) {
-			EventSlot<KeyEvent>& slot = EventSlot<KeyEvent>::get(keySignalOffset + ks);
-			if (slot.evnt == kev) {
-				signals[signalCount++] = slot.index;
-			}
-		}
-	}
-	keyEventBuffer.clear();
+	checkKeyEvents();
+	checkMouseEvents();
+	checkButtonEvents();
 
-
-	for (unsigned int e = 0; e < mouseKeyEventCount; ++e) {
-		KeyEvent& kev = mouseButtonEventBuffer[e];
-		for (unsigned int ks = 0; ks < mouseSignalCount; ++ks) {
-			EventSlot<KeyEvent>& slot = EventSlot<KeyEvent>::get(ks);
-			if (slot.evnt == kev) {
-				signals[signalCount++] = slot.index;
-			}
-		}
-
-	}
-	mouseButtonEventBuffer.clear();
-
-	for (unsigned int e = 0; e < buttonEventCount; ++e) {
-		ButtonEvent& kev = buttonEventBuffer[e];
-		for (unsigned int ks = 0; ks < mouseSignalCount; ++ks) {
-			EventSlot<ButtonEvent>& slot = EventSlot<ButtonEvent>::get(ks);
-			if (slot.evnt == kev) {
-				signals[signalCount++] = slot.index;
-			}
-		}
-
-	}
-	buttonEventBuffer.clear();
-
-	signals.resize(signalCount);
-
-	signalBuffer.insert(signalBuffer.end(), signals.begin(), signals.end());
-	signalCount = 0;
-	signals.resize(signalBuffer.size());
-	for (unsigned int& sig : signalBuffer) {
-		if (allSignalLocks[sig]) {
-			signals[signalCount++] = sig;
+	//set signals if they are not locked
+	rejectedSignals.insert(rejectedSignals.end(), signalBuffer.begin(), signalBuffer.end());
+	std::vector<unsigned int> rejected;
+	rejected.reserve(rejectedSignals.size());
+	unsigned int passed_signals = 0;
+	for (unsigned int& sig : rejectedSignals) {
+		if (!allSignalLocks[sig]) {
+			allSignalSlots[sig] = 1;
+			signalBuffer[passed_signals++] = sig;
 		}
 		else {
-			allSignals.push_back(sig);
-			allSignalSlots[sig] = 1;
+			rejected.push_back(sig);
 		}
 	}
-	signals.resize(signalCount);
-	signalBuffer = signals;
+	signalBuffer.resize(passed_signals);
+	rejectedSignals = rejected;
 }
 
-unsigned int App::Input::addButton(unsigned int pQuadIndex)
-{
-	allButtonQuads.push_back(pQuadIndex);
-	return allButtonQuads.size() - 1;
-}
+
 
 void App::Input::end()
 {
@@ -277,7 +224,7 @@ void App::Input::end()
 
 void App::Input::callFunctions()
 {
-	for (unsigned int& sig : allSignals) {
+	for (unsigned int& sig : signalBuffer) {
 		for (FuncSlot<void>& inst : FuncSlot<void>::instances) {
 			for (unsigned s : inst.signal_bindings) {
 				if (s == sig) {
@@ -288,15 +235,22 @@ void App::Input::callFunctions()
 		}
 		//any other function template here
 	}
+	
 	//reset signals and lock signals
-	for (unsigned int s = 0; s < allSignals.size(); ++s) {
-		unsigned int& sig = allSignals[s];
+	for (unsigned int& sig : signalBuffer) {
 		auto& to_lock = signalLockBindings[sig];
-		for (unsigned int l = 0; l < to_lock.second.size() * allSignalSlots[sig]; ++l) {
-			allSignalLocks[to_lock.second[l]] = to_lock.first;
+		for (unsigned int l = 0; l < to_lock.size(); ++l) {
+			allSignalLocks[to_lock[l]] = 1;
 		}
 	}
-	allSignals.clear();
+	for (unsigned int& sig : signalBuffer) {
+		auto& to_unlock = signalUnlockBindings[sig];
+			for (unsigned int l = 0; l < to_unlock.size(); ++l) {
+				allSignalLocks[to_unlock[l]] = 0;
+			}
+	}
+	signalBuffer.clear();
+	std::fill(allSignalSlots.begin(), allSignalSlots.end(), 0);
 }
 
 void App::Input::fetchGLFWEvents()
@@ -306,32 +260,7 @@ void App::Input::fetchGLFWEvents()
 	glfwPollEvents();
 }
 
-void App::Input::fetchButtonEvents()
-{
-	size_t button_count = allDetectors.size();
-	std::vector<ButtonEvent> evnts(button_count);
-	unsigned int evnt_count = 0;
-	for (size_t b = 0; b < button_count; ++b) {
-		if (allButtonFlags[b]) {
-			//compare all previous button states to all new ones
-			ButtonCondition& prevState = allButtonStates[b];
-			int inside = is_inside_quad((glm::vec2)relativeCursorPosition, allDetectors[b]);
-			ButtonCondition& newState =
-				ButtonCondition(mouseButtons[0].action * inside, inside);
-			if (prevState != newState) {
-				ButtonCondition change;
-				change.action = prevState.action == newState.action ? 0 : newState.action;
-				change.in = prevState.in == newState.in ? 0 : newState.in;
-				evnts[evnt_count++] = ButtonEvent(b, change);
-			}
-			prevState = newState;
-		}
-	}
-	if (!evnt_count)
-		return;
-	buttonEventBuffer.resize(evnt_count);
-	std::memcpy(&buttonEventBuffer[0], &evnts[0], sizeof(ButtonEvent)*evnt_count);
-}
+
 void App::Input::key_Callback(GLFWwindow * window, int pKey, int pScancode, int pAction, int pMods)
 {
 	keyEventBuffer.push_back(KeyEvent(pKey, pAction, pMods));
@@ -369,20 +298,5 @@ void App::Input::scroll_Callback(GLFWwindow * window, double pX, double pY)
 	scroll = (int)pY;
 }
 
-void App::Input::toggleTrackMouseRef(int* pMode)
-{
-	*pMode = !*pMode;
-	if (*pMode) {
-		glfwSetInputMode(App::mainWindow.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	}
-	else {
-		glfwSetInputMode(App::mainWindow.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	}
-	
-}
 
-void App::Input::toggleTrackMouse()
-{
-	toggleTrackMouseRef(&track_mouse);
-}
 

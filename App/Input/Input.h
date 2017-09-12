@@ -10,133 +10,50 @@
 #include "Event.h"
 namespace App {
 	namespace Input {
-
-		using Key = int;
-		using Detector = unsigned int;
-
-		class ButtonCondition {
-		public:
-			ButtonCondition()
-				:action(0), // 0 = release, 1 = press
-				in(0) {}
-			ButtonCondition(int pAction, int pIn)
-				:action(pAction),
-				in(pIn)
-			{}
-			int action;
-			int in;
-		};
-		inline bool operator==(ButtonCondition const & l, ButtonCondition const& r) {
-			return l.action == r.action && l.in == r.in;
-		}
-		inline bool operator!=(ButtonCondition const & l, ButtonCondition const& r) {
-			return l.action != r.action || l.in != r.in;
-		}
-
-		class KeyCondition {
-		public:
-			KeyCondition()
-				:action(0), // 0 = release, 1 = press
-				mods(0) {}
-			KeyCondition(int pAction, int pMods)
-				:action(pAction),
-				mods(pMods)
-			{}
-			KeyCondition(ButtonCondition pCondition)
-				:action(pCondition.action),
-				mods(pCondition.in)
-			{}
-
-			int action;
-			int mods;
-		};
-		inline bool operator==(KeyCondition const & l, KeyCondition const& r) {
-			return l.action == r.action && l.mods == r.mods;
-		}
-
-		class KeyEvent {
-		public:
-			KeyEvent()
-				:key(-1), change(KeyCondition()) {}
-			KeyEvent(Key pKey, KeyCondition pChange)
-				:key(pKey), change(pChange) {}
-			KeyEvent(Key pKey, int pAction, int pMods)
-				:key(pKey), change(KeyCondition(pAction, pMods)) {}
-
-			Key key;
-			KeyCondition change;
-		};
-		inline bool operator==(KeyEvent const & l, KeyEvent const& r) {
-			return l.key == r.key && l.change == r.change;
-		}
-		extern unsigned int keySignalOffset;
-		extern unsigned int keySignalCount;
-
-		class ButtonEvent {
-		public:
-			ButtonEvent()
-				:button(-1), change(ButtonCondition()) {}
-			ButtonEvent(Key pButton, ButtonCondition pChange)
-				:button(pButton), change(pChange) {}
-			ButtonEvent(Key pButton, unsigned pAction, unsigned pIn)
-				:button(pButton), change(ButtonCondition(pAction, pIn)) {}
-
-			Detector button;
-			ButtonCondition change;
-		};
-		extern std::vector<EventSlot<ButtonEvent>> allButtonSignals;
-		inline bool operator==(ButtonEvent const & l, ButtonEvent const& r) {
-			return l.button == r.button && l.change == r.change;
-		}
-
-		extern std::vector<KeyEvent> keyEventBuffer;
-		extern std::vector<ButtonEvent> buttonEventBuffer;		
 		
-		extern std::vector<void(*)()> callbackBuffer;
-		//Buttons
-		extern std::vector<ButtonCondition> allButtonStates;
-		extern std::vector<glm::vec4> allDetectors;
-		//Keys
-		//Mouse
-		extern std::vector<KeyEvent> mouseButtonEventBuffer;
-		extern std::vector<EventSlot<KeyEvent>> allMouseButtonSignals;
-		extern KeyCondition mouseButtons[3];
-		extern unsigned int mouseSignalOffset;
-		extern unsigned int mouseSignalCount;
-		extern glm::dvec2 relativeCursorPosition;
-		extern glm::uvec2 absoluteCursorPosition;
-		extern glm::vec2 cursorFrameDelta;
-		extern int scroll;
-		extern int track_mouse;
-		extern int centerCursor;
+
 		void init();
 		void end();
 		void callFunctions();
-		void toggleTrackMouseRef(int* pMode);
-		void toggleTrackMouse();
+		
 		void checkEvents();
-		//KEYS
+		
+		extern std::vector<void(*)()> callbackBuffer;
+		
+		extern std::vector<unsigned> allSignalSlots; // 1 = signaled
+		extern std::vector<int> allSignalLocks; // 1 = locked 
 
+		extern std::vector<unsigned int> rejectedSignals;
+		extern std::vector<unsigned int> signalBuffer; //signal indices to trigger if not locked
+		extern unsigned TOTAL_SIGNAL_COUNT;
 
-		//BUTTONS
-		unsigned int addButton(unsigned int pQuadIndex);
-		inline bool is_inside_quad(glm::vec2& pPoint, glm::vec2& pTopLeft, glm::vec2& pLowerRight) {
-			return (pPoint.x > pTopLeft.x) && (pPoint.x < pLowerRight.x) &&
-				(pPoint.y < pTopLeft.y) && (pPoint.y > pLowerRight.y);
+		//this might be kinda slow. it should store an array of indices for each "LockSignal" which is a signal which either lock or unlock the array of other signals
+		extern std::unordered_map<unsigned int, std::vector<unsigned int>> signalLockBindings;
+		extern std::unordered_map<unsigned int, std::vector<unsigned int>> signalUnlockBindings;
+
+		// set pLockSignal to set the locks of pTargetSignals to pLock
+		static void signal_unlock(unsigned int pLockSignal, std::initializer_list<unsigned int> pTargetSignals) {
+			auto it = signalUnlockBindings.find(pLockSignal);
+			if (it == signalUnlockBindings.end()) {
+				signalUnlockBindings.insert(std::pair<unsigned int, std::vector<unsigned int>>(pLockSignal, std::vector<unsigned int>(pTargetSignals)));
+				return;
+			}
+			it->second.insert(it->second.end(), pTargetSignals.begin(), pTargetSignals.end());
 		}
-		inline bool is_inside_quad(glm::vec2& pPoint, glm::vec4& pQuad) {
-			return is_inside_quad(pPoint, glm::vec2(pQuad.x, pQuad.y), glm::vec2(pQuad.z, pQuad.w));
+		static void signal_lock(unsigned int pLockSignal, std::initializer_list<unsigned int> pTargetSignals) {
+			auto it = signalLockBindings.find(pLockSignal);
+			if (it == signalLockBindings.end()) {
+				signalLockBindings.insert(std::pair<unsigned int, std::vector<unsigned int>>(pLockSignal, std::vector<unsigned int>(pTargetSignals)));
+				return;
+			}
+			it->second.insert(it->second.end(), pTargetSignals.begin(), pTargetSignals.end());
 		}
-		void loadButtons();
-		void clearButtons();
-		void fetchButtonEvents();
-		void hideButton(unsigned int pButtonIndex);
-		void unhideButton(unsigned int pButtonIndex);
-		void toggleButton(unsigned int pButtonIndex);
-		extern std::vector<int> allButtonFlags;
-		extern std::vector<unsigned int> allButtonQuads;
-		//GLFW base
+		
+		void clearSignals();
+		void initMenuSignals();
+		void initGameGUISignals();
 		void fetchGLFWEvents();
+
 		static void key_Callback(GLFWwindow* window, int pKey, int pScancode, int pAction, int pMods);
 		static void char_Callback(GLFWwindow* window, unsigned int pCodepoint);
 		static void cursorPosition_Callback(GLFWwindow* window, double pX, double pY);

@@ -30,6 +30,16 @@ std::vector<glm::vec2> gl::GUI::Text::allTextboxSizes;
 
 */
 
+void gl::GUI::Text::reserveTextboxSpace(unsigned int pCount) {
+
+	gl::GUI::Text::allTextboxes.reserve(pCount);
+	gl::GUI::Text::allTextboxPositions.reserve(pCount);
+	gl::GUI::Text::allTextboxSizes.reserve(pCount);
+}
+unsigned int gl::GUI::Text::createTextbox(unsigned int pQuadIndex, unsigned int pMetrics, int pFlags, float pMarging) {
+	RefQuad qd = allQuads[pQuadIndex];
+	return createTextbox(allPositions[qd.pos], allSizes[qd.size], pMetrics, pFlags, pMarging);
+}
 
 unsigned int gl::GUI::Text::
 createTextbox(unsigned int pPosIndex, unsigned int pSizeIndex, unsigned int pMetrics, int pFlags, float pMarging) {
@@ -41,6 +51,14 @@ createTextbox(unsigned int pPosIndex, unsigned int pSizeIndex, unsigned int pMet
 	tb.flags = pFlags;
 	allTextboxes.push_back(tb);
 	return allTextboxes.size() - 1;
+}
+
+unsigned int
+gl::GUI::Text::createTextbox(glm::vec2 pTopLeft, glm::vec2 pSize, unsigned int pMetrics, int pFlags, float pMarging)
+{
+	allTextboxPositions.push_back(pTopLeft);
+	allTextboxSizes.push_back(pSize);
+	return createTextbox(allTextboxPositions.size() - 1, allTextboxSizes.size() - 1, pMetrics, pFlags, pMarging);
 }
 
 void gl::GUI::Text::setStringFont(unsigned int pStringIndex, unsigned int pFontIndex)
@@ -55,13 +73,7 @@ void gl::GUI::Text::setStringStyle(unsigned int pStringIndex, unsigned int pStyl
 	string.style = pStyleIndex;
 }
 
-unsigned int
-gl::GUI::Text::createTextbox(glm::vec2 pTopLeft, glm::vec2 pSize, unsigned int pMetrics, int pFlags, float pMarging)
-{
-	allTextboxPositions.push_back(pTopLeft);
-	allTextboxSizes.push_back(pSize);
-	return createTextbox(allTextboxPositions.size()-1, allTextboxSizes.size()-1, pMetrics, pFlags, pMarging);
-}
+
 
 void gl::GUI::Text::
 appendTextboxString(unsigned int pTextbox, unsigned int pStringIndex)

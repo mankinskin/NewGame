@@ -15,6 +15,8 @@ namespace App {
 	void init();
 	void initGLFW();
 	void frameLoop();
+	void initMainMenu();
+	void initGameGUI();
 	void mainMenu();
 	void run();
 	void quit();

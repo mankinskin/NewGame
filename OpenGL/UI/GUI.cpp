@@ -24,6 +24,7 @@ unsigned int gl::GUI::guiTexQuadShader = 0;
 unsigned int gl::GUI::guiQuadShader = 0;
 std::vector<int> gl::GUI::allQuadFlags;
 
+
 void gl::GUI::clearBuffers()
 {
 	allQuads.clear();

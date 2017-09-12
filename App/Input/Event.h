@@ -11,7 +11,11 @@ namespace App {
 			std::tuple<Args...> args;
 
 			unsigned int slot_index;
+			
 		public:
+			std::vector<unsigned int> signal_bindings;
+			static std::vector<FuncSlot<R, Args...>> instances;
+			
 			FuncSlot() : fun(nullptr), args(std::tuple<Args...>()), signal_bindings(std::vector<unsigned>())
 			{}
 
@@ -22,7 +26,6 @@ namespace App {
 			}
 			static void clear() {
 				instances.clear();
-				signalBindings.clear();
 			}
 			static void reserve_slots(unsigned int pCount) {
 				instances.reserve(pCount);
@@ -41,8 +44,7 @@ namespace App {
 			R callFunc(Args... pArgs) const {
 				return fun(pArgs...);
 			}
-			static std::vector<FuncSlot<R, Args...>> instances;
-			std::vector<unsigned int> signal_bindings;
+			
 		};
 		template<typename R, typename... Args>
 		std::vector<FuncSlot<R, Args...>> FuncSlot<R, Args...>::instances = std::vector<FuncSlot<R, Args...>>();
@@ -58,7 +60,9 @@ namespace App {
 			static unsigned int instance_count() {
 				return instances.size();
 			}
-
+			static void clear() {
+				instances.clear();
+			}
 			static EventSlot<EventType>& get(unsigned int index) {
 				return instances[index];
 			}
@@ -68,28 +72,11 @@ namespace App {
 			EventSlot(EventType pEvent) :index(TOTAL_SIGNAL_COUNT++), evnt(pEvent) {}
 
 			static std::vector<EventSlot<EventType>> instances;
+			
 		};
 		template<class EventType>
 		std::vector<EventSlot<EventType>> EventSlot<EventType>::instances = std::vector<EventSlot<EventType>>();
-
-
-		extern std::vector<int> allSignalLocks;
-		extern std::vector<unsigned> allSignalSlots;
-		extern std::vector<unsigned> allSignals;//for ordered access
-		extern unsigned TOTAL_SIGNAL_COUNT;
-		extern std::unordered_map<unsigned int, std::pair<int, std::vector<unsigned int>>> signalLockBindings;
-		
-		static void signal_lock(unsigned int pLockSignal, std::initializer_list<unsigned int> pSignal, int pLock = 1) {
-			auto it = signalLockBindings.find(pLockSignal);
-			if (it == signalLockBindings.end()) {
-				signalLockBindings.insert(std::pair<unsigned int, std::pair<int, std::vector<unsigned int>>>(pLockSignal, std::pair<int, std::vector<unsigned int>>(pLock, pSignal)));
-				return;
-			}
-			it->second.second.insert(it->second.second.end(), pSignal.begin(), pSignal.end());
-		}
-		static void signal_unlock(unsigned int pLockSignal, std::initializer_list<unsigned int> pSignal) {
-			signal_lock(pLockSignal, pSignal, 0);
-		}
+			
 		
 	}
 }
