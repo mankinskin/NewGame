@@ -20,7 +20,10 @@ namespace App {
 
 				instances.push_back(*this);
 			}
-
+			static void clear() {
+				instances.clear();
+				signalBindings.clear();
+			}
 			static void reserve_slots(unsigned int pCount) {
 				instances.reserve(pCount);
 			}

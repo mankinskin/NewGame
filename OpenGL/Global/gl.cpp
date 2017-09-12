@@ -44,6 +44,7 @@ void gl::init()
 	Debug::generateDebugGrid("grid0.5", 0.5f, 2000, 1.0f, 1.0f, 1.0f, 0.3f);
 	Debug::initCoordinateSystem("coord");
 	Debug::init();
+	Camera::init();
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
@@ -51,27 +52,25 @@ void gl::init()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	
-	Render::initMeshShader();
-	Camera::init();
-	initQuadBuffers();
+	
+	
+	
 	gl::Debug::getGLError("gl::init():");
 	App::Debug::printErrors();
 	//init framebuffers
-	
-	
 	//include shaders
+	Render::initMeshShader();
 	GUI::initGUIShaders();
-	GUI::initGUIBuffers();
-	GUI::Text::Initializer::initFreeType();
-	gl::Debug::getGLError("gl::init()1:");
-	App::Debug::printErrors();
-	gl::GUI::Text::initFontVAO();
 	GUI::Text::initFontShader();
 	Debug::initDebugShader();
 	Shader::Loader::buildShaderPrograms();
 	
+	//generals
+	initGeneralUniformBuffer();
+	initGeneralQuadVBO();
 	Debug::getGLError("gl::init()3");
 	App::Debug::printErrors();
+	
 	/*FONTS
 	C64_Pro_Mono,
 	times,
@@ -86,13 +85,17 @@ void gl::init()
 	SourceCodePro_Medium,
 	VCR_OSD_MONO
 	*/
+	GUI::Text::Initializer::initFreeType();
 	GUI::Text::Initializer::includeFont("Ubuntu_Regular_Mono.ttf", 15, 30, 200, FONT_LOAD_DT, 4);
 	GUI::Text::Initializer::loadFonts();
 	
 	
 	//bind uniform buffers to shaders
-	initGeneralUniformBuffer();
+	
+	gl::GUI::Text::initFontVAO();
+	GUI::initGUIVAO();
 	Render::initMeshVAO();
+	
 	loadModels();
 	Render::fillMeshVAO();
 
@@ -168,7 +171,7 @@ void gl::initGLEW() {
 	}
 }
 
-void gl::initQuadBuffers()
+void gl::initGeneralQuadVBO()
 {
 
 	/*
@@ -218,9 +221,9 @@ void gl::frame()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	
-	//Debug::drawGrid();
-	//Render::render();
-	//GUI::renderGUI();
+	Debug::drawGrid();
+	Render::render();
+	GUI::renderGUI();
 	GUI::Text::renderGlyphs();
 
 	glfwSwapBuffers(App::mainWindow.window);

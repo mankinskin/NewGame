@@ -127,8 +127,8 @@ void gl::Debug::initDebugVAOs()
 {
 	glCreateVertexArrays(1, &VAO);
 	glVertexArrayVertexBuffer(VAO, 0, vertexBuffer + 1, 0, sizeof(LineVertex));
-	VAO::initVertexAttrib(VAO, 0, 0, 4, GL_FLOAT, offsetof(LineVertex, position));
-	VAO::initVertexAttrib(VAO, 0, 1, 4, GL_FLOAT, offsetof(LineVertex, color));
+	VAO::setVertexAttrib(VAO, 0, 0, 4, GL_FLOAT, offsetof(LineVertex, position));
+	VAO::setVertexAttrib(VAO, 0, 1, 4, GL_FLOAT, offsetof(LineVertex, color));
 	glVertexArrayElementBuffer(VAO, indexBuffer + 1);
 
 	

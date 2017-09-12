@@ -22,7 +22,7 @@ unsigned int gl::GUI::guiSizeBuffer = 0;
 
 unsigned int gl::GUI::guiTexQuadShader = 0;
 unsigned int gl::GUI::guiQuadShader = 0;
-
+std::vector<int> gl::GUI::allQuadFlags;
 
 void gl::GUI::clearBuffers()
 {
@@ -32,20 +32,24 @@ void gl::GUI::clearBuffers()
 	allColors.clear();
 }
 
+void gl::GUI::setQuadVisibility(unsigned int pQuadIndex, int pHide) {
+	allQuadFlags[pQuadIndex] = pHide;
+}
 
 gl::GUI::Quad gl::GUI::createQuad(Pos pPos, Size pSize, Color pColor)
 {
 	allQuads.push_back(RefQuad(pPos, pSize, pColor));
+	allQuadFlags.push_back(1);
 	return allQuads.size() - 1;
 }
 
 gl::GUI::Quad gl::GUI::createQuad(glm::vec2 pPos, glm::vec2 pSize, glm::vec4 pColor)
 {
-	allQuads.push_back(RefQuad(allPositions.size(), allSizes.size(), allColors.size()));
+	unsigned int ret = createQuad(allPositions.size(), allSizes.size(), allColors.size());
 	allPositions.push_back(pPos);
 	allSizes.push_back(pSize);
 	allColors.push_back(pColor);
-	return allQuads.size() - 1;
+	return ret;
 }
 
 gl::GUI::Quad gl::GUI::createQuad(float pPosX, float pPosY, float pWidth, float pHeight, float pR, float pG, float pB, float pA)
@@ -58,50 +62,42 @@ gl::GUI::Quad gl::GUI::createQuad(float pPosX, float pPosY, float pWidth, float 
 void gl::GUI::reserveQuadSpace(unsigned int pCount)
 {
 	allQuads.reserve(pCount);
+	allQuadFlags.reserve(pCount);
 	allPositions.reserve(pCount);
 	allSizes.reserve(pCount);
 	allColors.reserve(pCount);
 }
 
-void gl::GUI::initGUIBuffers()
+void gl::GUI::initGUIVAO()
 {
-	//BUFFERS
-	
+	glCreateVertexArrays(1, &guiVAO);
 	guiPositionBuffer = VAO::createStorage( MAX_GUI_QUADS*sizeof(float)*2, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
-	VAO::createStream(guiPositionBuffer, GL_MAP_WRITE_BIT);
-	VAO::bindStorage(GL_UNIFORM_BUFFER, guiPositionBuffer);
-
 	guiSizeBuffer = VAO::createStorage(MAX_GUI_QUADS * sizeof(float) * 2, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+	guiColorBuffer = VAO::createStorage(MAX_GUI_QUADS * sizeof(float) * 4, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+	guiQuadBuffer = VAO::createStorage(MAX_GUI_QUADS * sizeof(glm::ivec4), nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+
+	VAO::createStream(guiPositionBuffer, GL_MAP_WRITE_BIT);
 	VAO::createStream(guiSizeBuffer, GL_MAP_WRITE_BIT);
+	VAO::createStream(guiColorBuffer, GL_MAP_WRITE_BIT);
+	VAO::createStream(guiQuadBuffer, GL_MAP_WRITE_BIT);
+
+	VAO::bindStorage(GL_UNIFORM_BUFFER, guiColorBuffer);
+	VAO::bindStorage(GL_UNIFORM_BUFFER, guiPositionBuffer);
 	VAO::bindStorage(GL_UNIFORM_BUFFER, guiSizeBuffer);
 
-	guiColorBuffer = VAO::createStorage(MAX_GUI_QUADS * sizeof(float) * 4, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
-	VAO::createStream(guiColorBuffer, GL_MAP_WRITE_BIT);
-	VAO::bindStorage(GL_UNIFORM_BUFFER, guiColorBuffer);
-
-
+	glVertexArrayElementBuffer(guiVAO, quadEBO);
+	glVertexArrayVertexBuffer(guiVAO, 0, quadVBO, 0, sizeof(glm::vec2));
+	VAO::setVertexArrayVertexStorage(guiVAO, 1, guiQuadBuffer, sizeof(glm::ivec4));
 	
 
-	//VAO
-	glCreateVertexArrays(1, &guiVAO);
-
-	//basic, per instance, quad mesh
-	glVertexArrayVertexBuffer(guiVAO, 0, quadVBO, 0, sizeof(glm::vec2));
-	glVertexArrayElementBuffer(guiVAO, quadEBO);
-
-	//quad indices
-	guiQuadBuffer = VAO::createStorage(MAX_GUI_QUADS * sizeof(glm::ivec4), nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
-	VAO::createStream(guiQuadBuffer, GL_MAP_WRITE_BIT);
-	VAO::setVertexArrayVertexStorage(guiVAO, 1, guiQuadBuffer, sizeof(glm::ivec4));
-	glVertexArrayVertexBuffer(guiVAO, 0, VAO::getStorageID(guiQuadBuffer), 0, sizeof(glm::ivec4));
 	glVertexArrayBindingDivisor(guiVAO, 1, 1);
 
-	VAO::initVertexAttrib(guiVAO, 0, 0, 2, GL_FLOAT, 0);
+	VAO::setVertexAttrib(guiVAO, 0, 0, 2, GL_FLOAT, 0);
 
-	VAO::initVertexAttrib(guiVAO, 1, 1, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, x));
-	VAO::initVertexAttrib(guiVAO, 1, 2, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, y));
-	VAO::initVertexAttrib(guiVAO, 1, 3, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, z));
-	VAO::initVertexAttrib(guiVAO, 1, 4, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, w));
+	VAO::setVertexAttrib(guiVAO, 1, 1, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, x));
+	VAO::setVertexAttrib(guiVAO, 1, 2, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, y));
+	VAO::setVertexAttrib(guiVAO, 1, 3, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, z));
+	VAO::setVertexAttrib(guiVAO, 1, 4, 1, GL_UNSIGNED_INT, offsetof(glm::ivec4, w));
 	
 	gl::Debug::getGLError("gl::GUI::initGuiBuffers()");
 }
@@ -112,20 +108,23 @@ void gl::GUI::updateGUI() {
 	if (!quad_count) {
 		return;
 	}
+	
 	std::vector<glm::ivec4> indexQuads(quad_count);
 	std::vector<glm::ivec4>::iterator it = indexQuads.begin();
 	for (unsigned int q = 0; q < quad_count; ++q) {
-		RefQuad& quad = allQuads[q];
-		*(it++) = glm::ivec4(
-			&allPositions[quad.pos] - &allPositions[0], &allSizes[quad.size] - &allSizes[0],
-			&allColors[quad.color] - &allColors[0], 0);
+		if (allQuadFlags[q]) {
+			RefQuad& quad = allQuads[q];
+			*(it++) = glm::ivec4(
+				&allPositions[quad.pos] - &allPositions[0], &allSizes[quad.size] - &allSizes[0],
+				&allColors[quad.color] - &allColors[0], 0);
+		}
 	}
 
 
-	VAO::streamStorage(guiQuadBuffer, sizeof(glm::ivec4)*indexQuads.size(), &indexQuads[0]);
-	VAO::streamStorage(guiPositionBuffer, sizeof(glm::vec2)*allPositions.size(), &allPositions[0]);
-	VAO::streamStorage(guiSizeBuffer, sizeof(glm::vec2)*allSizes.size(), &allSizes[0]);
-	VAO::streamStorage(guiColorBuffer, sizeof(glm::vec4)*allColors.size(), &allColors[0]);
+	VAO::streamStorage(guiQuadBuffer, sizeof(glm::ivec4)*(it - indexQuads.begin()), &indexQuads[0]);
+	VAO::streamStorage(guiPositionBuffer, sizeof(glm::vec2)*(it - indexQuads.begin()), &allPositions[0]);
+	VAO::streamStorage(guiSizeBuffer, sizeof(glm::vec2)*(it - indexQuads.begin()), &allSizes[0]);
+	VAO::streamStorage(guiColorBuffer, sizeof(glm::vec4)*(it - indexQuads.begin()), &allColors[0]);
 	//VAO::streamTargetStorage(guiUVBuffer, sizeof(glm::vec4)*allUVRanges.size(), &allUVRanges[0]);
 }
 

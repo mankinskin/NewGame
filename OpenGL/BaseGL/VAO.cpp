@@ -101,11 +101,8 @@ void gl::VAO::streamStorage(Storage& pStorage, unsigned int pUploadSize, void* p
 		glBindBufferRange(GL_UNIFORM_BUFFER, pStorage.binding, pStorage.ID, stream.updateOffset, updateSize);
 	}
 	else if (pStorage.target == GL_ARRAY_BUFFER) {
-		
 		glVertexArrayVertexBuffer(pStorage.vaoID, pStorage.binding, pStorage.ID, stream.updateOffset, pStorage.stride);
 	}
-	
-	
 	Debug::getGLError("updateStreamStorage():");
 }
 
@@ -114,7 +111,7 @@ unsigned int gl::VAO::getStorageID(unsigned int pStorageIndex)
 	return allStorages[pStorageIndex].ID;
 }
 
-void gl::VAO::initVertexAttrib(unsigned int pVAO, unsigned int pBindingIndex, unsigned int pAttributeIndex, unsigned int pCount, unsigned int pType, unsigned int pOffset, unsigned int pNormalize) {
+void gl::VAO::setVertexAttrib(unsigned int pVAO, unsigned int pBindingIndex, unsigned int pAttributeIndex, unsigned int pCount, unsigned int pType, unsigned int pOffset, unsigned int pNormalize) {
 	glEnableVertexArrayAttrib(pVAO, pAttributeIndex);
 	glVertexArrayAttribBinding(pVAO, pAttributeIndex, pBindingIndex);
 	if (pType == GL_FLOAT ) {

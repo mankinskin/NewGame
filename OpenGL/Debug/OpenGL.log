@@ -1,2 +1,10 @@
-﻿  VAO.cpp
+﻿  GUI.cpp
+  Generating Code...
+  Compiling...
+  Text.cpp
+  Font.cpp
+  gl.cpp
+  Generating Code...
+  Skipping... (no relevant changes detected)
+  Font_Loader.cpp
   OpenGL.vcxproj -> C:\Users\Linus\source\repos\NewGame\Debug\OpenGL.lib

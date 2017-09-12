@@ -94,7 +94,6 @@ namespace App {
 		
 		extern std::vector<void(*)()> callbackBuffer;
 		//Buttons
-		extern std::vector<gl::GUI::Quad> quadLoadBuffer;
 		extern std::vector<ButtonCondition> allButtonStates;
 		extern std::vector<glm::vec4> allDetectors;
 		//Keys
@@ -128,10 +127,14 @@ namespace App {
 		inline bool is_inside_quad(glm::vec2& pPoint, glm::vec4& pQuad) {
 			return is_inside_quad(pPoint, glm::vec2(pQuad.x, pQuad.y), glm::vec2(pQuad.z, pQuad.w));
 		}
-		void calculateDetectionRanges();
-		void clearDetectionRanges();
+		void loadButtons();
+		void clearButtons();
 		void fetchButtonEvents();
-		
+		void hideButton(unsigned int pButtonIndex);
+		void unhideButton(unsigned int pButtonIndex);
+		void toggleButton(unsigned int pButtonIndex);
+		extern std::vector<int> allButtonFlags;
+		extern std::vector<unsigned int> allButtonQuads;
 		//GLFW base
 		void fetchGLFWEvents();
 		static void key_Callback(GLFWwindow* window, int pKey, int pScancode, int pAction, int pMods);

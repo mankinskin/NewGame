@@ -19,10 +19,11 @@ int App::Input::track_mouse;
 std::vector<App::Input::ButtonCondition> App::Input::allButtonStates;
 std::vector<glm::vec4> App::Input::allDetectors;
 std::vector<void(*)()> App::Input::callbackBuffer;
-std::vector<gl::GUI::Quad> App::Input::quadLoadBuffer;
 std::vector<App::Input::KeyEvent> App::Input::keyEventBuffer;
 std::vector<App::Input::KeyEvent> App::Input::mouseButtonEventBuffer;
 std::vector<App::Input::ButtonEvent> App::Input::buttonEventBuffer;
+std::vector<int> App::Input::allButtonFlags;
+std::vector<unsigned int> App::Input::allButtonQuads;
 unsigned int App::Input::mouseSignalOffset;
 unsigned int App::Input::mouseSignalCount;
 unsigned int App::Input::keySignalOffset;
@@ -153,28 +154,41 @@ void App::Input::init()
 	allSignalLocks.resize(TOTAL_SIGNAL_COUNT);
 }
 
+void App::Input::toggleButton(unsigned int pButtonIndex) {
+	allButtonFlags[pButtonIndex] = !allButtonFlags[pButtonIndex];
+}
 
+void App::Input::hideButton(unsigned int pButtonIndex) {
+	allButtonFlags[pButtonIndex] = 0;
+}
 
-void App::Input::calculateDetectionRanges()
+void App::Input::unhideButton(unsigned int pButtonIndex) {
+	allButtonFlags[pButtonIndex] = 1;
+}
+
+void App::Input::loadButtons()
 {
 	using gl::GUI::allSizes;
 	using gl::GUI::allPositions;
 	using gl::GUI::allQuads;
-	size_t quadCount = quadLoadBuffer.size();
+	size_t quadCount = allButtonQuads.size();
 	allDetectors.resize(quadCount);
 	allButtonStates.resize(quadCount);
+	allButtonFlags.resize(quadCount, 1);
 	for (unsigned int q = 0; q < quadCount; ++q) {
 		allDetectors[q] = glm::vec4(
-			allPositions[allQuads[quadLoadBuffer[q]].pos].x, 
-			allPositions[allQuads[quadLoadBuffer[q]].pos].y, 
-			allPositions[allQuads[quadLoadBuffer[q]].pos].x + allSizes[allQuads[quadLoadBuffer[q]].size].x,
-			allPositions[allQuads[quadLoadBuffer[q]].pos].y - allSizes[allQuads[quadLoadBuffer[q]].size].y);
+			allPositions[allQuads[allButtonQuads[q]].pos].x, 
+			allPositions[allQuads[allButtonQuads[q]].pos].y, 
+			allPositions[allQuads[allButtonQuads[q]].pos].x + allSizes[allQuads[allButtonQuads[q]].size].x,
+			allPositions[allQuads[allButtonQuads[q]].pos].y - allSizes[allQuads[allButtonQuads[q]].size].y);
 	}
-	quadLoadBuffer.clear();
 }
 
-void App::Input::clearDetectionRanges()
+void App::Input::clearButtons()
 {
+	allButtonQuads.clear();
+	allButtonStates.clear();
+	allButtonFlags.clear();
 	allDetectors.clear();
 }
 
@@ -246,8 +260,8 @@ void App::Input::checkEvents() {
 
 unsigned int App::Input::addButton(unsigned int pQuadIndex)
 {
-	quadLoadBuffer.push_back(pQuadIndex);
-	return quadLoadBuffer.size() - 1;
+	allButtonQuads.push_back(pQuadIndex);
+	return allButtonQuads.size() - 1;
 }
 
 void App::Input::end()
@@ -298,18 +312,20 @@ void App::Input::fetchButtonEvents()
 	std::vector<ButtonEvent> evnts(button_count);
 	unsigned int evnt_count = 0;
 	for (size_t b = 0; b < button_count; ++b) {
-		//compare all previous button states to all new ones
-		ButtonCondition& prevState = allButtonStates[b];
-		int inside = is_inside_quad((glm::vec2)relativeCursorPosition, allDetectors[b]);
-		ButtonCondition& newState =
-			ButtonCondition(mouseButtons[0].action * inside, inside);
-		if (prevState != newState) {
-			ButtonCondition change;
-			change.action = prevState.action == newState.action ? 0 : newState.action;
-			change.in = prevState.in == newState.in ? 0 : newState.in;
-			evnts[evnt_count++] = ButtonEvent(b, change);
+		if (allButtonFlags[b]) {
+			//compare all previous button states to all new ones
+			ButtonCondition& prevState = allButtonStates[b];
+			int inside = is_inside_quad((glm::vec2)relativeCursorPosition, allDetectors[b]);
+			ButtonCondition& newState =
+				ButtonCondition(mouseButtons[0].action * inside, inside);
+			if (prevState != newState) {
+				ButtonCondition change;
+				change.action = prevState.action == newState.action ? 0 : newState.action;
+				change.in = prevState.in == newState.in ? 0 : newState.in;
+				evnts[evnt_count++] = ButtonEvent(b, change);
+			}
+			prevState = newState;
 		}
-		prevState = newState;
 	}
 	if (!evnt_count)
 		return;

@@ -46,7 +46,7 @@ namespace gl {
 		void bindStorageRange(unsigned int pStorageIndex, unsigned int pOffset, unsigned int pSize);
 		void setVertexArrayVertexStorage(unsigned int pVAO, unsigned int pBinding, unsigned int pStorageIndex, unsigned int pStride);
 		void setVertexArrayVertexStorage(unsigned int pVAO, unsigned int pBinding, Storage& pStorage, unsigned int pStride);
-		void initVertexAttrib(unsigned int pVAO, unsigned int pBindingIndex, unsigned int pAttributeIndex, unsigned int pCount, unsigned int pType, unsigned int pOffset, unsigned int pNormalize = false);
+		void setVertexAttrib(unsigned int pVAO, unsigned int pBindingIndex, unsigned int pAttributeIndex, unsigned int pCount, unsigned int pType, unsigned int pOffset, unsigned int pNormalize = false);
 		
 		extern int MIN_MAP_BUFFER_ALIGNMENT;
 		extern int STREAM_FLAGS;

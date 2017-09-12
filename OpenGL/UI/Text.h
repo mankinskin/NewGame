@@ -5,10 +5,10 @@
 
 
 #define TEXT_LAYOUT_BOUND_LEFT 00000001
-#define TEXT_LAYOUT_BOUND_RIGHT 00000011
-#define TEXT_LAYOUT_CENTER 00000111
-#define TEXT_LAYOUT_FORCE_X_FIT 00001000
-#define TEXT_LAYOUT_FORCE_Y_FIT 00010000
+#define TEXT_LAYOUT_BOUND_RIGHT 00000010
+#define TEXT_LAYOUT_CENTER_X 00001000
+#define TEXT_LAYOUT_CENTER_Y 00000100
+#define TEXT_LAYOUT_CENTER_BOTH 00001100
 namespace gl {
 	namespace GUI {
 		namespace Text {
@@ -53,27 +53,35 @@ namespace gl {
 			//Strings
 			struct TextStyle {
 				TextStyle()
-					:thickness(1.5f), hardness(0.5f), front_color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)), back_color(glm::vec4()) {}
+					:thickness(1.5f), hardness(0.5f), front_color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)) {}
 				TextStyle(float pThickness, float pHardness, float pCr, float pCg, float pCb, float pCa)
 					:thickness(pThickness), hardness(pHardness), front_color(glm::vec4(pCr, pCg, pCb, pCa)) {}
 				TextStyle(float pThickness, float pHardness, glm::vec4 pFrontColor, glm::vec4 pBackColor = glm::vec4())
-					:thickness(pThickness), hardness(pHardness), front_color(pFrontColor), back_color(pBackColor){}
+					:thickness(pThickness), hardness(pHardness), front_color(pFrontColor){}
+				glm::vec4 front_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 				float thickness = 1.0f;
 				float hardness = 1.0f;
-				glm::vec4 front_color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-				glm::vec4 back_color = glm::vec4();
+				glm::vec2 pad;
 			};
 
 			struct CharQuad {
 				CharQuad() {}
 				CharQuad(float pPosX, float pPosY, float pWidth, float pHeight)
-					:posX(pPosX), posY(pPosY), width(pWidth), height(pHeight) {}
-				float posX;
-				float posY;
-				float width;
-				float height;
+					:pos(glm::vec2(pPosX, pPosY)), size(glm::vec2(pWidth, pHeight)) {}
+				glm::vec2 pos;
+				glm::vec2 size;
 			};
 
+			struct TextboxGlyphs {
+				TextboxGlyphs(unsigned int pGlyphCount) {
+					quads.resize(pGlyphCount);
+					glyphIndices.resize(pGlyphCount);
+				}
+				std::vector<String> lines;
+				std::vector<glm::vec2> line_sizes;
+				std::vector<unsigned int> glyphIndices;
+				std::vector<CharQuad> quads;
+			};
 
 			void setStringFont(unsigned int pStringIndex, unsigned int pFontIndex);
 			void setStringStyle(unsigned int pStringIndex, unsigned int pStyleIndex);
@@ -86,8 +94,8 @@ namespace gl {
 			void appendTextboxString(unsigned int pTextbox, std::string pString);
 			
 			//internal
-			void loadTextboxGlyphs(Textbox& pTextbox);
-			void translateTextbox(Textbox & pTextbox);
+			void loadTextboxGlyphs(Textbox& pTextbox, TextboxGlyphs& pGlyphs);
+			void transformTextboxGlyphs(Textbox& pTextbox, TextboxGlyphs& pGlyphs);
 			void loadChars();
 			void renderGlyphs();
 			void revalidateTextboxStringIndices();

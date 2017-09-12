@@ -19,13 +19,13 @@ namespace gl {
 		};
 		
 		inline bool operator==(const RefQuad& aq, const RefQuad& bq) { return std::memcmp(&aq, &bq, sizeof(RefQuad)) == 0; }
-		
+		void setQuadVisibility(unsigned int pQuadIndex, int pHide);
 		Quad createQuad(Pos pPos, Size pSize, Color pColor);
 		Quad createQuad(glm::vec2 pPos, glm::vec2 pSize, glm::vec4 pColor);
 		Quad createQuad(float pPosX, float pPosY, float pWidth, float pHeight, float pR, float pG, float pB, float pA);
 		void reserveQuadSpace(unsigned int pCount);
 		void clearBuffers();
-		void initGUIBuffers();
+		void initGUIVAO();
 		void updateGUI();
 		void initGUIShaders();
 		void renderGUI();
@@ -33,7 +33,9 @@ namespace gl {
 		extern unsigned int MAX_GUI_QUADS;
 		extern unsigned int guiQuadShader;
 		extern unsigned int guiTexQuadShader;
+		extern std::vector<int> allQuadFlags;
 
+		//quad data
 		Pos createPos(glm::vec2 pPos);
 		Pos createPos(float pX, float pY);
 		Size createSize(glm::vec2 pSize);

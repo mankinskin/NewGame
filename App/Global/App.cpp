@@ -65,12 +65,14 @@ void App::mainMenu()
 	glClearColor(0.05f, 0.0f, 0.0f, 1.0f);
 
 	gl::GUI::reserveQuadSpace(2);
-	unsigned int startButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.8f), glm::vec2(0.2f, 0.05f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	unsigned int quitButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.9f), glm::vec2(0.2f, 0.05f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	unsigned int startButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.7f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	unsigned int quitButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.9f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	
+	
 	Input::addButton(startButtonQuad);
 	Input::addButton(quitButtonQuad);
-	App::Input::calculateDetectionRanges();
-	gl::GUI::updateGUI();
+	App::Input::loadButtons();
+	
 
 	gl::GUI::Text::allTextboxes.reserve(2);
 	gl::GUI::Text::allTextboxPositions.reserve(2);
@@ -78,21 +80,23 @@ void App::mainMenu()
 	gl::GUI::Text::allTextboxMetrics.reserve(2);
 	
 	
-	//gl::GUI::Text::initStyleBuffer();
+	gl::GUI::Text::initStyleBuffer();
 	String quitProgramStr("QUIT");
 	String runProgramStr("PLAY");
 	
 	unsigned int tb_met = gl::GUI::Text::createTextboxMetrics(1.0f, 1.0f, 1.0f, 1.0f);
 	
-	unsigned int tb1 = createTextbox(glm::vec2(-1.0f, -0.8f), glm::vec2(0.2f, 0.05f), tb_met, TEXT_LAYOUT_BOUND_LEFT, 0.003f);
-	unsigned int tb2 = createTextbox(glm::vec2(-1.0f, -0.9f), glm::vec2(0.2f, 0.05f), tb_met, TEXT_LAYOUT_BOUND_LEFT, 0.003f);
+	unsigned int tb1 = createTextbox(glm::vec2(-1.0f, -0.7f), glm::vec2(0.2f, 0.1f), tb_met, TEXT_LAYOUT_BOUND_LEFT|TEXT_LAYOUT_CENTER_Y, 0.003f);
+	unsigned int tb2 = createTextbox(glm::vec2(-1.0f, -0.9f), glm::vec2(0.2f, 0.1f), tb_met, TEXT_LAYOUT_BOUND_LEFT|TEXT_LAYOUT_CENTER_Y, 0.003f);
 	appendTextboxString(tb1, runProgramStr);
 	appendTextboxString(tb2, quitProgramStr);
 	
 	gl::GUI::Text::loadChars();
-	//gl::GUI::updateGUI();
+	
+	
+	unsigned int c = 4;
 	while (state == App::MainMenu) {
-
+		gl::GUI::updateGUI();
 		gl::GUI::Text::updateCharStorage();//why does this only work if i update it each frame?!
 		App::Input::fetchGLFWEvents();
 		Input::fetchButtonEvents();
@@ -112,8 +116,7 @@ void App::mainMenu()
 		Debug::printInfo();
 	}
 	gl::GUI::clearBuffers();
-	App::Input::clearDetectionRanges();
-	gl::GUI::Text::clearCharStorage();
+	Input::clearButtons();
 }
 
 void App::run() {
@@ -132,22 +135,24 @@ void App::frameLoop()
 	using gl::GUI::Text::createTextbox;
 	using gl::GUI::Text::appendTextboxString;
 	using gl::GUI::Text::createTextStyle;
+
 	gl::GUI::reserveQuadSpace(1);
-	unsigned int quitButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.9f), glm::vec2(0.2f, 0.05f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	unsigned int quitButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.85f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	Input::addButton(quitButtonQuad);
-	App::Input::calculateDetectionRanges();
-	gl::GUI::updateGUI();
+	App::Input::loadButtons();
+	
 	
 	
 	String quitProgramStr("QUIT");
 	unsigned int tb_met = gl::GUI::Text::createTextboxMetrics(1.0f, 1.0f, 1.0f, 1.0f);
-	unsigned int tb1 = createTextbox(glm::vec2(-1.0f, -0.9f), glm::vec2(0.2f, 0.05f), tb_met, TEXT_LAYOUT_BOUND_LEFT, 0.003f);
+	unsigned int tb1 = createTextbox(glm::vec2(-1.0f, -0.85f), glm::vec2(0.2f, 0.1f), tb_met, TEXT_LAYOUT_BOUND_LEFT, 0.003f);
 	appendTextboxString(tb1, quitProgramStr);
 	gl::GUI::Text::loadChars();
 	
 
 	Debug::printErrors();
 	while (state == App::State::Running) {
+		gl::GUI::updateGUI();
 		gl::GUI::Text::updateCharStorage();
 		
 		Input::fetchGLFWEvents();
@@ -157,7 +162,6 @@ void App::frameLoop()
 		Input::end();
 		gl::Camera::look(Input::cursorFrameDelta);
 		gl::Camera::update();
-		gl::GUI::updateGUI();
 		Debug::printErrors();
 		EntityRegistry::setPos(0, glm::vec3(gl::Camera::pos.x, 0.0f, gl::Camera::pos.z));
  		gl::updateGeneralUniformBuffer();

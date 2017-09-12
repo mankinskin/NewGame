@@ -115,7 +115,7 @@ void configure();
 void setViewport(App::ContextWindow::Window& pViewport);
 void getOpenGLInitValues();
 void initGLEW();
-void initQuadBuffers();
+void initGeneralQuadVBO();
 void updateGeneralUniformBuffer();
 void frame();
 void loadModels();

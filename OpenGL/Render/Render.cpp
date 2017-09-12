@@ -45,9 +45,9 @@ void gl::Render::fillMeshVAO()
 	VAO::initStorageData(meshIBO - 1, sizeof(unsigned int)*Model::allIndices.size(), &Model::allIndices[0], 0);
 	glVertexArrayElementBuffer(meshVAO, meshIBO);
 	glVertexArrayVertexBuffer(meshVAO, 0, meshVBO, 0, sizeof(Vertex));
-	VAO::initVertexAttrib(meshVAO, 0, 0, 3, GL_FLOAT, offsetof(Vertex, pos));
-	VAO::initVertexAttrib(meshVAO, 0, 1, 3, GL_FLOAT, offsetof(Vertex, normal));
-	VAO::initVertexAttrib(meshVAO, 0, 2, 2, GL_FLOAT, offsetof(Vertex, uv));
+	VAO::setVertexAttrib(meshVAO, 0, 0, 3, GL_FLOAT, offsetof(Vertex, pos));
+	VAO::setVertexAttrib(meshVAO, 0, 1, 3, GL_FLOAT, offsetof(Vertex, normal));
+	VAO::setVertexAttrib(meshVAO, 0, 2, 2, GL_FLOAT, offsetof(Vertex, uv));
 }
 
 void gl::Render::storeMaterials()
