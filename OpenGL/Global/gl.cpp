@@ -13,7 +13,7 @@
 #include "..\UI\Font_Loader.h"
 #include "..\UI\GUI.h"
 #include "../Render/Render.h"
-#include "../Render/Model.h"
+#include "../Render/Models.h"
 #include "../UI/Text.h"
 int gl::MAX_WORK_GROUP_COUNT = 0;
 glm::ivec3 gl::MAX_WORK_GROUP_SIZE = {};
@@ -253,7 +253,7 @@ void gl::loadModels()
 		2, 6, 1, 1, 6, 5  //right
 	};
 
-	Model::createModel(Model::createMesh(Model::newGeometry(verts, inds), 0, 0), 1);
+	Models::createModel(Models::createMesh(Models::newGeometry(verts, inds), 0, 0), 1);
 	
 }
 

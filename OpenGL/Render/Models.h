@@ -4,7 +4,7 @@
 #include <string>
 
 namespace gl {
-	namespace Model {
+	namespace Models {
 		struct Geometry {
 			Geometry() {}
 			Geometry(unsigned int pOffset, unsigned int pCount)
@@ -30,6 +30,9 @@ namespace gl {
 				:meshOffset(0), meshCount(0), entityOffset(0), entityCount(0) {}
 			Model(unsigned pMeshOffset, unsigned pMeshCount)
 				:meshOffset(pMeshOffset), meshCount(pMeshCount){}
+			static void revalidateMeshOffsets();
+			static void revalidateEntityOffsets();
+			void addInstances(std::vector<unsigned int> pEntityIDs);
 			unsigned int meshOffset = 0;
 			unsigned int meshCount = 0;
 			unsigned int entityOffset = 0;
@@ -42,12 +45,12 @@ namespace gl {
 		void addModel(std::string pFilename);
 		const unsigned int MAX_MODELS = 100;
 		Geometry newGeometry(std::vector<Vertex> pVerts, std::vector<unsigned int> pIndices);
-		void addModelInstances(unsigned int pModelIndex, std::vector<unsigned int> pEntityIDs);
+		
 		unsigned createMesh(unsigned int pIndexOffset, unsigned int pIndexCount, unsigned int pTextureID, unsigned int pMaterialIndex);
 		unsigned createMesh(Geometry pGeometry, unsigned int pTextureID, unsigned int pMaterialIndex);
 		unsigned createModel(unsigned pMeshOffset, unsigned pMeshCount);
-		void revalidateEntityOffsets();
-		void revalidateMeshOffsets();
+		
+		
 		extern std::vector<std::string> usedModels;
 		extern std::vector<Model> allModels;
 		extern std::vector<unsigned int> allInstanceEntities;

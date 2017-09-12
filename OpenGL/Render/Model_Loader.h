@@ -4,7 +4,7 @@
 
 
 namespace gl {
-	namespace Model {
+	namespace Models {
 		namespace Loader {
 			void init();
 			void setModelDirectory(std::string pDirectory);
