@@ -77,6 +77,7 @@ void App::Input::initGameGUISignals() {
 	FuncSlot<void> stopYSlot(gl::Camera::stop_y);
 
 	FuncSlot<void> exitProgramSlot(App::quit);
+	FuncSlot<void> menuProgramSlot(App::mainmenu);
 	FuncSlot<void> setCameraModeSlot(toggleTrackMouse);
 	FuncSlot<void> togglePrintInfoSlot(App::Debug::togglePrintInfo);
 	FuncSlot<void> toggleCoordinateSysSlot(gl::Debug::toggleCoord);
@@ -144,8 +145,9 @@ void App::Input::initGameGUISignals() {
 	//--------------------------------
 	//Buttons
 	unsigned int quit_button_press = EventSlot<ButtonEvent>::create(ButtonEvent(0, 1, 0));
-
+	unsigned int menu_button_press = EventSlot<ButtonEvent>::create(ButtonEvent(1, 1, 0));
 	//Misc
+	menuProgramSlot.listen({ menu_button_press });
 	exitProgramSlot.listen({ esc_press, quit_button_press });//exit
 	togglePrintInfoSlot.listen({ i_press });//togglePrintInfo
 	toggleCoordinateSysSlot.listen({ h_press });//toggleCoordSys
@@ -180,6 +182,8 @@ void App::Input::clearSignals() {
 	TOTAL_SIGNAL_COUNT = 0;
 	allSignalSlots.clear();
 	allSignalLocks.clear();
+	signalLockBindings.clear();
+	signalUnlockBindings.clear();
 }
 
 
@@ -195,17 +199,18 @@ void App::Input::checkEvents() {
 	rejectedSignals.insert(rejectedSignals.end(), signalBuffer.begin(), signalBuffer.end());
 	std::vector<unsigned int> rejected;
 	rejected.reserve(rejectedSignals.size());
-	unsigned int passed_signals = 0;
+	signalBuffer.resize(rejectedSignals.size());
+	unsigned int passed = 0;
 	for (unsigned int& sig : rejectedSignals) {
-		if (!allSignalLocks[sig]) {
+ 		if (!allSignalLocks[sig]) {
 			allSignalSlots[sig] = 1;
-			signalBuffer[passed_signals++] = sig;
+			signalBuffer[passed++] = sig;
 		}
 		else {
 			rejected.push_back(sig);
 		}
 	}
-	signalBuffer.resize(passed_signals);
+	signalBuffer.resize(passed);
 	rejectedSignals = rejected;
 }
 
@@ -224,6 +229,7 @@ void App::Input::end()
 
 void App::Input::callFunctions()
 {
+	printf("callFunctions(): signalBuffer.size() = %i\n", signalBuffer.size());
 	for (unsigned int& sig : signalBuffer) {
 		for (FuncSlot<void>& inst : FuncSlot<void>::instances) {
 			for (unsigned s : inst.signal_bindings) {

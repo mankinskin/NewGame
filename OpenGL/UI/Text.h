@@ -1,7 +1,7 @@
 #pragma once
 #include "..\Global\gl.h"
 #include "GUI.h"
-
+#include "Font.h"
 
 
 #define TEXT_LAYOUT_BOUND_LEFT 00000001
@@ -9,6 +9,7 @@
 #define TEXT_LAYOUT_CENTER_X 00001000
 #define TEXT_LAYOUT_CENTER_Y 00000100
 #define TEXT_LAYOUT_CENTER_BOTH 00001100
+#define TEXT_LAYOUT_FREE_LINES 00010000
 namespace gl {
 	namespace GUI {
 		namespace Text {
@@ -85,6 +86,8 @@ namespace gl {
 				TextboxGlyphs(unsigned int pGlyphCount) {
 					quads.resize(pGlyphCount);
 					glyphIndices.resize(pGlyphCount);
+					lines.reserve(pGlyphCount);
+					line_sizes.reserve(pGlyphCount);
 				}
 				std::vector<String> lines;
 				std::vector<glm::vec2> line_sizes;
@@ -105,11 +108,14 @@ namespace gl {
 			void appendTextboxString(unsigned int pTextbox, std::string pString);
 			
 			//internal
-			void loadTextboxGlyphs(Textbox& pTextbox, TextboxGlyphs& pGlyphs);
+			
+			void loadTextboxGlyphs(Textbox& pTextbox, TextboxMetrics& pTextMetrics, Font& pFont, TextboxGlyphs& pGlyphs);
 			void transformTextboxGlyphs(Textbox& pTextbox, TextboxGlyphs& pGlyphs);
 			void loadChars();
 			void renderGlyphs();
 			void revalidateTextboxStringIndices();
+			void revalidateFontStringIndices();
+			void insertFontString(Font & pFont, String pString);
 			
 			
 			unsigned int createTextStyle(TextStyle& pInstructions);
@@ -119,7 +125,7 @@ namespace gl {
 			extern unsigned int styleStorage;
 			extern std::vector<TextStyle> allTextStyles;
 			extern std::vector<Textbox> allTextboxes;
-			extern std::vector<unsigned int> fontStringIndices;
+			extern std::vector<String> allFontStrings;
 			extern std::vector<unsigned int> textboxStringIndices;
 			extern std::vector<String> allStrings;
 			extern std::vector<unsigned char> allChars;

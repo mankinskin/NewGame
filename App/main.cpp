@@ -6,7 +6,7 @@ int main() {
 
 	App::init();
 	while (App::state != App::State::Exit) {
-		App::mainMenu();
+		App::mainMenuLoop();
 		App::frameLoop();
 	}
 	return 0;

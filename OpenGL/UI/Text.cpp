@@ -6,7 +6,7 @@
 #include "..\Camera.h"
 #include <App\Global\Debug.h>
 #include <glm\gtc\matrix_transform.hpp>
-#include "Font.h"
+
 
 std::vector<gl::GUI::Text::Textbox> gl::GUI::Text::allTextboxes;
 std::vector<gl::GUI::Text::TextboxMetrics> gl::GUI::Text::allTextboxMetrics;
@@ -14,7 +14,7 @@ std::vector<gl::GUI::Text::TextStyle> gl::GUI::Text::allTextStyles;
 std::vector<gl::GUI::Text::String> gl::GUI::Text::allStrings;
 std::vector<unsigned char> gl::GUI::Text::allChars;
 std::vector<unsigned int> gl::GUI::Text::textboxStringIndices;
-std::vector<unsigned int> gl::GUI::Text::fontStringIndices;
+std::vector<gl::GUI::Text::String> gl::GUI::Text::allFontStrings;
 std::vector<gl::GUI::Text::CharQuad> gl::GUI::Text::charQuadBuffer;
 std::vector<unsigned int> gl::GUI::Text::glyphIndexBuffer;
 unsigned int gl::GUI::Text::styleStorage = 0;
@@ -108,6 +108,24 @@ void gl::GUI::Text::revalidateTextboxStringIndices()
 	}
 }
 
+void gl::GUI::Text::revalidateFontStringIndices()
+{
+	unsigned int off = 0;
+	for (Font& fon : allFonts) {
+		fon.stringOffset = off;
+		off += fon.stringCount;
+	}
+}
+
+void gl::GUI::Text::insertFontString(Font & pFont, String pString)
+{
+	if (!pFont.stringCount) {//if first textbox of this font
+		pFont.stringOffset = allFontStrings.size();//dedicate a new range of tb indices to this font
+	}
+	++pFont.stringCount;
+	allFontStrings.insert(allFontStrings.begin() + pFont.stringOffset, pString);
+}
+
 
 unsigned int gl::GUI::Text::createTextboxMetrics(unsigned int pFont, float pGlyphScaleX, float pGlyphScaleY, float pAdvanceScale, float pLineGapScale)
 {
@@ -146,98 +164,103 @@ loadChars()
 {
 	for (unsigned int t = 0; t < allTextboxes.size(); ++t) {
 		Textbox& tb = allTextboxes[t];
+		TextboxMetrics& textMetrics = allTextboxMetrics[tb.metrics];
+		Font& font = allFonts[textMetrics.font];
 		//get total char count
 		unsigned int total_char_count = 0;
 		for (unsigned int s = 0; s < tb.stringCount; ++s) {
 			total_char_count += allStrings[textboxStringIndices[tb.stringOffset + s]].charCount;
 		}
+		
 		TextboxGlyphs tbGlyphs(total_char_count);
 
-		loadTextboxGlyphs(tb, tbGlyphs);
+		loadTextboxGlyphs(tb, textMetrics, font, tbGlyphs);
 		transformTextboxGlyphs(tb, tbGlyphs);
 
 		unsigned int buffer_offset = charQuadBuffer.size();
+		insertFontString(font, String(buffer_offset, tbGlyphs.quads.size())); //insert the string of this textbox for this font
 		
 		charQuadBuffer.resize(buffer_offset + tbGlyphs.quads.size());
 		std::memcpy(&charQuadBuffer[buffer_offset], &tbGlyphs.quads[0], sizeof(CharQuad)*tbGlyphs.quads.size());
 		
 		glyphIndexBuffer.resize(buffer_offset + tbGlyphs.glyphIndices.size());
 		std::memcpy(&glyphIndexBuffer[buffer_offset], &tbGlyphs.glyphIndices[0], sizeof(unsigned int)*tbGlyphs.glyphIndices.size());
+		
 	}
+	revalidateFontStringIndices();
 }
 
 void gl::GUI::Text::
-loadTextboxGlyphs(Textbox& pTextbox, TextboxGlyphs& pGlyphs)
+loadTextboxGlyphs(Textbox& pTextbox, TextboxMetrics& pTextMetrics, Font& pFont, TextboxGlyphs& pGlyphs)
 {
-	glm::vec2 cursor = glm::vec2();
-	TextboxMetrics& textMetrics = allTextboxMetrics[pTextbox.metrics];
+	float cursor = 0.0f;
+	FontInstructions& font_inst = allFontInstructions[pFont.instructions];
 	
-	//lines
-	pGlyphs.line_sizes.reserve(pTextbox.stringCount);
-	pGlyphs.lines.reserve(pTextbox.stringCount);
-	
+	//lines can spread across multiple strings i.e. one line can contain multiple strings
 	glm::vec2 thisLineSize = glm::vec2();
 	String thisLineStr = String(0, 0);
-	unsigned int str_char_off = 0;
-	unsigned int line_char_off = 0;
+	unsigned int str_char_off = 0; //the offset of the current string (in pGlyphs.glyphIndices & pGlyphs.quads)
+	unsigned int line_char_off = 0;//the offset of the current line
+	unsigned int lineCharCount = 0;
+	float thisLineGreatestAscend = 0.0f;
+	float thisLineGreatestDescend = 0.0f;
 	for (unsigned int s = 0; s < pTextbox.stringCount; ++s) {
-		
-		unsigned int leftIndex = 0;
 		unsigned int rightIndex = 0;
-		unsigned int nonCharCount = 0;
 		const unsigned int stringIndex = textboxStringIndices[pTextbox.stringOffset + s];
 		String& str = allStrings[stringIndex];
-		Font& font = allFonts[textMetrics.font];
-		FontInstructions& font_inst = allFontInstructions[font.instructions];
-		if (!font.stringCount) {
-			font.stringOffset = fontStringIndices.size();
-		}
-		++font.stringCount;
-		fontStringIndices.insert(fontStringIndices.begin() + font.stringOffset, stringIndex);
-		
+		unsigned int str_nonCharCount = 0;
 		//iterate string chars
-		for (unsigned int c = 0; c < str.charCount; ++c) {
+		for (unsigned int c = 0; c < str.charCount;) {
 			//get glyph metrics
 			unsigned int charCode = allChars[str.charOffset + c];
 			rightIndex = std::max((unsigned int)0, std::min(charCode - font_inst.startCode, font_inst.glyphCount - 1));
-			GlyphMetrics& met = allMetrics[font.metricOffset + rightIndex];
-			//if newline
-			if (charCode != '\n' && (cursor.x + met.advanceX * textMetrics.advanceScale) < (allTextboxSizes[pTextbox.size].x - pTextbox.marging*2.0f) ) {
+			GlyphMetrics& met = allMetrics[pFont.metricOffset + rightIndex];
+			
+			if (charCode != '\n' && (cursor + met.advanceX * pTextMetrics.advanceScale) < (allTextboxSizes[pTextbox.size].x - pTextbox.marging*2.0f) ) {
+				//append char to all chars
+				CharQuad qd(cursor+ met.bearingX, met.bearingY, met.width * pTextMetrics.glyphScale.x, met.height * pTextMetrics.glyphScale.y);
+				thisLineGreatestAscend = std::max(thisLineGreatestAscend, met.bearingY);
+				thisLineGreatestDescend = std::max(thisLineGreatestDescend, met.height - met.bearingY);
+				pGlyphs.quads[str_char_off + c - str_nonCharCount] = qd;
+				pGlyphs.glyphIndices[str_char_off + c - str_nonCharCount] = rightIndex;
 
-				CharQuad qd(cursor.x + met.bearingX, cursor.y + met.bearingY, met.width * textMetrics.glyphScale.x, met.height * textMetrics.glyphScale.y);
-				thisLineSize.y = std::max(thisLineSize.y, qd.size.y);
-				pGlyphs.quads[str_char_off + c - nonCharCount] = qd;
-				pGlyphs.glyphIndices[str_char_off + c - nonCharCount] = rightIndex;
-
-				cursor.x += met.advanceX * textMetrics.advanceScale;
+				cursor += met.advanceX * pTextMetrics.advanceScale;
+				++lineCharCount;
+				++c;
 			}
 			else {
+				//end line and start new line
 				if (charCode == '\n') {
-					leftIndex = 0;
-					++nonCharCount;
+					++str_nonCharCount;
+					++c;
 				}
-				//thisLineSize.y = font.fontMetric.lineGap;
-				thisLineSize.x = cursor.x;
-				thisLineStr = String(line_char_off, (str_char_off + c - nonCharCount) - line_char_off);
-				pGlyphs.line_sizes.push_back(thisLineSize);
-				pGlyphs.lines.push_back(thisLineStr);
 				
-				cursor = glm::vec2(0.0f, 0.0f);
-				line_char_off = str_char_off + c - nonCharCount;
+				thisLineSize.y = std::max(thisLineSize.y, thisLineGreatestAscend + thisLineGreatestDescend);
+				thisLineSize.x = cursor;
+				pGlyphs.line_sizes.push_back(thisLineSize);
+
+				thisLineStr = String(line_char_off, lineCharCount);
+				pGlyphs.lines.push_back(thisLineStr);
+
+				thisLineGreatestAscend = 0.0f;
+				thisLineGreatestDescend = 0.0f;
+				cursor = 0.0f;
+				line_char_off += lineCharCount;
+				lineCharCount = 0;
 			}
-			leftIndex = rightIndex;
-		}
-		str_char_off += str.charCount;
-		if (s + 1 == pTextbox.stringCount) {
-			thisLineSize.y = font.fontMetric.lineGap;
-			thisLineSize.x = cursor.x;
-			thisLineStr = String(line_char_off, str_char_off - line_char_off - nonCharCount);
+		}//end loop over string chars
+		str_char_off += str.charCount - str_nonCharCount;
+		if (s + 1 == pTextbox.stringCount && lineCharCount) {
+			thisLineSize.y = std::max(thisLineSize.y, thisLineGreatestAscend + thisLineGreatestDescend);
+			thisLineSize.x = cursor;
+			thisLineStr = String(line_char_off, lineCharCount);
 			pGlyphs.line_sizes.push_back(thisLineSize);
 			pGlyphs.lines.push_back(thisLineStr);
-			cursor = glm::vec2(0.0f, 0.0);
+			cursor = 0.0;
 		}
-		
-	}
+	}//end loop over textbox strings
+	pGlyphs.line_sizes.shrink_to_fit();
+	pGlyphs.lines.shrink_to_fit();
 	pGlyphs.glyphIndices.resize(str_char_off);
 	pGlyphs.quads.resize(str_char_off);
 }
@@ -252,15 +275,25 @@ void gl::GUI::Text::transformTextboxGlyphs(Textbox& pTextbox, TextboxGlyphs& pGl
 	Font& font = allFonts[textMetrics.font];
 	
 	float allLineHeight = font.fontMetric.lineGap * pGlyphs.lines.size();
-	
 	glm::vec2 cursor = glm::vec2(tb_pos.x, tb_pos.y);
-	if (pTextbox.flags & TEXT_LAYOUT_CENTER_Y) {
+	if (pTextbox.flags & TEXT_LAYOUT_FREE_LINES) {
+		allLineHeight = 0.0f;
+		for (unsigned int l = 0; l < pGlyphs.lines.size(); ++l) {
+			allLineHeight += pGlyphs.line_sizes[l].y * textMetrics.lineGapScale;
+		}
+	}
+	if (pTextbox.flags & TEXT_LAYOUT_CENTER_Y && !(pTextbox.flags & TEXT_LAYOUT_FREE_LINES)) {
 		cursor.y = (cursor.y - (tb_size.y / 2.0f)) + allLineHeight/2.0f;
 	}
 	for (unsigned int l = 0; l < pGlyphs.lines.size(); ++l) {
 		String& line = pGlyphs.lines[l];
 		glm::vec2& line_size = pGlyphs.line_sizes[l];
-		cursor.y -= font.fontMetric.lineGap;
+		if (pTextbox.flags & TEXT_LAYOUT_FREE_LINES) {
+			cursor.y -= pGlyphs.line_sizes[l].y * textMetrics.lineGapScale;
+		}
+		else {
+			cursor.y -= font.fontMetric.lineGap;
+		}
 		if (pTextbox.flags & TEXT_LAYOUT_CENTER_X) {
 			cursor.x = tb_pos.x + (tb_size.x / 2.0f) - line_size.x / 2.0f;
 		}
@@ -297,11 +330,11 @@ renderGlyphs()
 			Shader::bindUniformBufferToShader(glyphShapeProgram, font.glyphStorageIndex, "GlyphBuffer");
 			
 			for (unsigned int s = 0; s < font.stringCount; ++s) {
-				String& str = allStrings[fontStringIndices[font.stringOffset + s]];
+				String& str = allFontStrings[font.stringOffset + s];
 				Shader::setUniform(glyphShapeProgram, "styleIndex", (unsigned int)str.style);
-				
-				glDrawElementsInstancedBaseInstance(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, str.charCount, str.charOffset);
 
+				glDrawElementsInstancedBaseInstance(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, str.charCount, str.charOffset);
+				
 			}
 		}
 		Debug::getGLError("renderGlyphs():");
@@ -337,5 +370,6 @@ clearCharStorage()
 	glyphIndexBuffer.clear();
 	charQuadBuffer.clear();
 	allStrings.clear();
-
+	allFontStrings.clear();
+	textboxStringIndices.clear();
 }

@@ -4,6 +4,7 @@
 #include "..\BaseGL\Shader.h"
 #include "Models.h"
 #include <App/World/EntityRegistry.h>
+#include "../Global/glDebug.h"
 unsigned int gl::Render::meshShaderProgram = 0;
 unsigned int gl::Render::meshVAO = 0;
 unsigned int gl::Render::meshVBO = 0;
@@ -61,20 +62,24 @@ void gl::Render::render()
 	Shader::use(meshShaderProgram);
 	for (unsigned int modl = 0; modl < Models::allModels.size(); ++modl) {
 		Models::Model& model = Models::allModels[modl];
-		VAO::bindStorageRange(transformIndexBuffer, model.entityOffset, model.entityCount);
-		for (unsigned int msh = 0; msh < model.meshCount; ++msh) {
-			glDrawElementsInstanced(GL_TRIANGLES, Models::allMeshes[model.meshOffset + msh].geometry.indexCount, GL_UNSIGNED_INT, 0, model.entityCount);
+		if (model.entityCount) {
+			VAO::bindStorageRange(transformIndexBuffer, model.entityOffset, model.entityCount);
+			for (unsigned int msh = 0; msh < model.meshCount; ++msh) {
+				glDrawElementsInstanced(GL_TRIANGLES, Models::allMeshes[model.meshOffset + msh].geometry.indexCount, GL_UNSIGNED_INT, 0, model.entityCount);
+			}
 		}
 	}
 	Shader::unuse();
 	glBindVertexArray(0);
+	Debug::getGLError("render(Meshes)");
 }
 
 void gl::Render::updateBuffers()
 {
-	VAO::streamStorage(entityTransformBuffer, sizeof(glm::mat4)*EntityRegistry::allMatrices.size(), &EntityRegistry::allMatrices[0]);
-	VAO::streamStorage(transformIndexBuffer, sizeof(unsigned int)*Models::allInstanceEntities.size(), &Models::allInstanceEntities[0]);
-
+	if (Models::allInstanceEntities.size()) {
+		VAO::streamStorage(entityTransformBuffer, sizeof(glm::mat4)*EntityRegistry::allMatrices.size(), &EntityRegistry::allMatrices[0]);
+		VAO::streamStorage(transformIndexBuffer, sizeof(unsigned int)*Models::allInstanceEntities.size(), &Models::allInstanceEntities[0]);
+	}
 }
 
 

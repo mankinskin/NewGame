@@ -37,7 +37,7 @@ namespace gl {
 				struct LoadAtlas {
 					unsigned int width;
 					unsigned int height;
-
+					int flags;
 					std::vector<LoadGlyphQuad> quads;
 					std::vector<unsigned char> buffer;
 				};

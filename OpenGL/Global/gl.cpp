@@ -86,7 +86,7 @@ void gl::init()
 	VCR_OSD_MONO
 	*/
 	GUI::Text::Initializer::initFreeType();
-	GUI::Text::Initializer::includeFont("Ubuntu_Regular_Mono.ttf", 15, 30, 200, FONT_LOAD_DT, 4);
+	GUI::Text::Initializer::includeFont("Ubuntu_Regular_Mono.ttf", 15, 30, 200, 0, 4);
 	GUI::Text::Initializer::loadFonts();
 	
 	
@@ -216,18 +216,16 @@ void gl::updateGeneralUniformBuffer()
 	Debug::getGLError("gl::update():");
 }
 
-void gl::frame()
+void gl::frameStart()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	
-	Debug::drawGrid();
-	Render::render();
-	GUI::renderGUI();
-	GUI::Text::renderGlyphs();
+}
 
+void gl::frameEnd()
+{
 	glfwSwapBuffers(App::mainWindow.window);
-	Debug::getGLError("Frame");
+	Debug::getGLError("FrameEnd");
 	App::Debug::printErrors();
 }
 

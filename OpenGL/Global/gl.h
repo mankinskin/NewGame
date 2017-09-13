@@ -117,7 +117,8 @@ void getOpenGLInitValues();
 void initGLEW();
 void initGeneralQuadVBO();
 void updateGeneralUniformBuffer();
-void frame();
+void frameStart();
+void frameEnd();
 void loadModels();
 
 void initGeneralUniformBuffer();

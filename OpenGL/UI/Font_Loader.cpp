@@ -118,14 +118,13 @@ loadFont(LoadFont& pFont)
 void gl::GUI::Text::Initializer::
 loadAtlas(FT_Face& pFace, FontInstructions& pFontInstructions, LoadFontMetrics& pFontMetrics, LoadAtlas& pAtlas, std::vector<LoadGlyphMetrics>& pMetrics)
 {
-	
 	const unsigned int width_glyphs = (unsigned int)ceil(sqrt((float)pFontInstructions.glyphCount));
-	unsigned int padPixels = 4;
+	unsigned int padPixels = 0;
 	padPixels += padPixels % 2;
 	unsigned int maxGlyphX = FT_MulFix(pFace->bbox.xMax - pFace->bbox.xMin, pFontMetrics.scale_x)/64;
 	unsigned int maxGlyphY = FT_MulFix(pFace->bbox.yMax - pFace->bbox.yMin, pFontMetrics.scale_y)/64;
 	
-	unsigned int spread_pixels = 4;
+	unsigned int spread_pixels = 0;
 	if (pFontInstructions.flags & FONT_LOAD_DT) {
 		maxGlyphX = (unsigned int)((float)maxGlyphX / (float)pFontInstructions.upsampling) + spread_pixels * 2;
 		maxGlyphY = (unsigned int)((float)maxGlyphY / (float)pFontInstructions.upsampling) +  spread_pixels * 2;
@@ -373,10 +372,17 @@ integrateFont(LoadFont& pFont) {
 	glGenTextures(1, &font.atlasID);
 	glBindTexture(GL_TEXTURE_2D, font.atlasID);
 
+	int mipmap_min_flag = GL_NEAREST_MIPMAP_LINEAR;
+	int mipmap_mag_flag = GL_NEAREST;
+
+	if (pFont.instructions.flags & FONT_LOAD_DT) {
+		mipmap_min_flag = GL_NEAREST_MIPMAP_LINEAR;
+		mipmap_mag_flag = GL_LINEAR;
+	}
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mipmap_min_flag);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mipmap_mag_flag);
 
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

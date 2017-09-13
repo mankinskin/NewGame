@@ -1,2 +1,17 @@
-﻿  Text.cpp
+﻿  gl.cpp
+  Generating Code...
+  Compiling...
+  Text.cpp
+  GUI.cpp
+  Font_Loader.cpp
+  Font.cpp
+  Render.cpp
+  Models.cpp
+  glDebug.cpp
+  Camera.cpp
+  VAO.cpp
+  Texture.cpp
+  Shader_Loader.cpp
+  Shader.cpp
+  Generating Code...
   OpenGL.vcxproj -> C:\Users\Linus\source\repos\NewGame\Debug\OpenGL.lib

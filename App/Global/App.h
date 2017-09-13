@@ -17,9 +17,10 @@ namespace App {
 	void frameLoop();
 	void initMainMenu();
 	void initGameGUI();
-	void mainMenu();
+	void mainMenuLoop();
 	void run();
 	void quit();
+	void mainmenu();
 	extern ContextWindow::Window mainWindow;
 
 	extern double timeFactor;

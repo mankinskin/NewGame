@@ -17,6 +17,7 @@ void App::Input::checkKeyEvents()
 			EventSlot<KeyEvent>& slot = EventSlot<KeyEvent>::get(keyEventSlotOffset + ks);//wroong
 			if (slot.evnt == kev) {
 				signalBuffer[signalOffset + signalCount++] = slot.index;
+				break;
 			}
 		}
 	}
