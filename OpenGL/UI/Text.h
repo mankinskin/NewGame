@@ -15,21 +15,22 @@ namespace gl {
 			//Textboxes
 			struct String {
 				String()
-					:charOffset(0), charCount(0), font(0), style(0){}
-				String(unsigned int pOffset, unsigned int pCount, unsigned int pFont = 0, unsigned int pStyle = 0)
-					:charOffset(pOffset), charCount(pCount), font(pFont), style(pStyle) {}
-				String(std::string pString, unsigned int pFont = 0, unsigned int pStyle = 0);
+					:charOffset(0), charCount(0), color(0), style(0){}
+				String(unsigned int pOffset, unsigned int pCount, unsigned int pColor = 0, unsigned int pStyle = 0)
+					:charOffset(pOffset), charCount(pCount), color(pColor), style(pStyle) {}
+				String(std::string pString, unsigned int pColor = 0, unsigned int pStyle = 0);
 				unsigned int charOffset;
 				unsigned int charCount;
-				unsigned int font;
 				unsigned int style;
+				unsigned int color;
 			};
 
 			struct TextboxMetrics {
-				TextboxMetrics(glm::vec2 pGlyphScale, float pAdvanceScale, float pLineGapScale)
-					:glyphScale(pGlyphScale), advanceScale(pAdvanceScale), lineGapScale(pLineGapScale) {}
-				TextboxMetrics(float pGlyphScaleX, float pGlyphScaleY, float pAdvanceScale, float pLineGapScale)
-					:glyphScale(glm::vec2(pGlyphScaleX, pGlyphScaleY)), advanceScale(pAdvanceScale), lineGapScale(pLineGapScale) {}
+				TextboxMetrics(unsigned int pFont, glm::vec2 pGlyphScale, float pAdvanceScale, float pLineGapScale)
+					:font(pFont), glyphScale(pGlyphScale), advanceScale(pAdvanceScale), lineGapScale(pLineGapScale) {}
+				TextboxMetrics(unsigned int pFont, float pGlyphScaleX, float pGlyphScaleY, float pAdvanceScale, float pLineGapScale)
+					:font(pFont), glyphScale(glm::vec2(pGlyphScaleX, pGlyphScaleY)), advanceScale(pAdvanceScale), lineGapScale(pLineGapScale) {}
+				unsigned int font;
 				glm::vec2 glyphScale;
 				float advanceScale;
 				float lineGapScale;
@@ -53,15 +54,23 @@ namespace gl {
 			//Strings
 			struct TextStyle {
 				TextStyle()
-					:thickness(1.5f), hardness(0.5f), front_color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)) {}
-				TextStyle(float pThickness, float pHardness, float pCr, float pCg, float pCb, float pCa)
-					:thickness(pThickness), hardness(pHardness), front_color(glm::vec4(pCr, pCg, pCb, pCa)) {}
-				TextStyle(float pThickness, float pHardness, glm::vec4 pFrontColor, glm::vec4 pBackColor = glm::vec4())
-					:thickness(pThickness), hardness(pHardness), front_color(pFrontColor){}
-				glm::vec4 front_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+					:thickness(1.5f), hardness(0.5f) {}
+				TextStyle(float pThickness, float pHardness)
+					:thickness(pThickness), hardness(pHardness) {}
+				
 				float thickness = 1.0f;
 				float hardness = 1.0f;
 				glm::vec2 pad;
+			};
+
+			struct TextColor {
+				TextColor()
+					:color(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)) {}
+				TextColor(float r, float g, float b, float a)
+					:color(glm::vec4(r, g, b, a)) {}
+				TextColor(glm::vec4& pColor)
+					:color(pColor) {}
+				glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 			};
 
 			struct CharQuad {
@@ -83,14 +92,14 @@ namespace gl {
 				std::vector<CharQuad> quads;
 			};
 
-			void setStringFont(unsigned int pStringIndex, unsigned int pFontIndex);
+			void setStringColor(unsigned int pStringIndex, unsigned int pColorIndex);
 			void setStringStyle(unsigned int pStringIndex, unsigned int pStyleIndex);
 			//Interface
 			void reserveTextboxSpace(unsigned int pCount);
 			unsigned int createTextbox(unsigned int pQuadIndex, unsigned int pMetrics, int pFlags, float pMarging = 0.0f);
 			unsigned int createTextbox(unsigned int pPosIndex, unsigned int pSizeIndex, unsigned int pMetrics, int pFlags, float pMarging = 0.0f);
 			unsigned int createTextbox(glm::vec2 pTopLeft, glm::vec2 pSize, unsigned int pMetrics, int pFlags, float pMarging = 0.0f);
-			unsigned int createTextboxMetrics(float pGlyphScaleX, float pGlyphScaleY, float pAdvanceScale, float pLineGapScale);
+			unsigned int createTextboxMetrics(unsigned int pFont, float pGlyphScaleX, float pGlyphScaleY, float pAdvanceScale, float pLineGapScale);
 			void appendTextboxString(unsigned int pTextbox, unsigned int pStringIndex);
 			void appendTextboxString(unsigned int pTextbox, String pString);
 			void appendTextboxString(unsigned int pTextbox, std::string pString);
@@ -104,8 +113,8 @@ namespace gl {
 			
 			
 			unsigned int createTextStyle(TextStyle& pInstructions);
-			unsigned int createTextStyle(float pThickness, float pHardness, glm::vec4 pFrontColor, glm::vec4 pBackColor = glm::vec4());
-
+			unsigned int createTextStyle(float pThickness, float pHardness);
+			unsigned int createTextColor(glm::vec4 pColor);
 			void initStyleBuffer();
 			extern unsigned int styleStorage;
 			extern std::vector<TextStyle> allTextStyles;

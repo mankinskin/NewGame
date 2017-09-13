@@ -68,7 +68,7 @@ void App::initMainMenu() {
 	gl::GUI::reserveQuadSpace(2);
 	unsigned int startButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.7f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	unsigned int quitButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.9f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-
+	unsigned int textQuad = gl::GUI::createQuad(glm::vec2(-0.2f, 0.1f), glm::vec2(0.4f, 0.4f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	Input::addButton(startButtonQuad);
 	Input::addButton(quitButtonQuad);
@@ -82,14 +82,15 @@ void App::initMainMenu() {
 	
 	String quitProgramStr("QUIT");
 	String runProgramStr("PLAY");
-
-	unsigned int tb_met = gl::GUI::Text::createTextboxMetrics(1.0f, 1.0f, 1.0f, 1.0f);
+	String textStr("This is a test text.");
+	unsigned int tb_met = gl::GUI::Text::createTextboxMetrics(0, 1.0f, 1.0f, 1.0f, 1.0f);
 
 	unsigned int tb1 = createTextbox(startButtonQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
 	unsigned int tb2 = createTextbox(quitButtonQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
+	unsigned int tb3 = createTextbox(textQuad, tb_met, TEXT_LAYOUT_CENTER_BOTH , 0.003f);
 	appendTextboxString(tb1, runProgramStr);
 	appendTextboxString(tb2, quitProgramStr);
-
+	appendTextboxString(tb3, textStr);
 	gl::GUI::Text::loadChars();
 
 }
@@ -110,8 +111,8 @@ void App::initGameGUI() {
 	gl::GUI::Text::allTextboxMetrics.reserve(1);
 
 	String quitProgramStr("QUIT");
-	unsigned int tb_met = gl::GUI::Text::createTextboxMetrics(1.0f, 1.0f, 1.0f, 1.0f);
-	unsigned int tb1 = createTextbox(quitButtonQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT, 0.003f);
+	unsigned int tb_met = gl::GUI::Text::createTextboxMetrics(0, 1.0f, 1.0f, 1.0f, 1.0f);
+	unsigned int tb1 = createTextbox(quitButtonQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
 	appendTextboxString(tb1, quitProgramStr);
 	gl::GUI::Text::loadChars();
 }
