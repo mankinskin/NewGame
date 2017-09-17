@@ -9,7 +9,6 @@ namespace App {
 		private:
 			R(*fun)(Args...);
 			std::tuple<Args...> args;
-
 			unsigned int slot_index;
 			
 		public:
@@ -52,10 +51,12 @@ namespace App {
 		template<class EventType>
 		class EventSlot {
 		public:
-			static unsigned int create(EventType pEvent) {
-				EventSlot<EventType> slt(pEvent);
-				instances.push_back(slt);
-				return slt.index;
+			EventSlot(unsigned int& pIndexRef, EventType pEvent) :index(TOTAL_SIGNAL_COUNT++), evnt(pEvent) {
+				pIndexRef = index;
+				instances.push_back(*this);
+			}
+			static void reserve_slots(unsigned int pCount) {
+				instances.reserve(pCount);
 			}
 			static unsigned int instance_count() {
 				return instances.size();
@@ -69,7 +70,6 @@ namespace App {
 			EventType evnt;
 			unsigned index;
 		private:
-			EventSlot(EventType pEvent) :index(TOTAL_SIGNAL_COUNT++), evnt(pEvent) {}
 
 			static std::vector<EventSlot<EventType>> instances;
 			

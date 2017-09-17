@@ -86,7 +86,7 @@ void gl::init()
 	VCR_OSD_MONO
 	*/
 	GUI::Text::Initializer::initFreeType();
-	GUI::Text::Initializer::includeFont("Ubuntu_Regular_Mono.ttf", 15, 30, 200, 0, 4);
+	GUI::Text::Initializer::includeFont("FreeMono.ttf", 20, 30, 200, 1, 1);
 	GUI::Text::Initializer::loadFonts();
 	
 	

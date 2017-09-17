@@ -1,17 +1,9 @@
-﻿  gl.cpp
-  Generating Code...
-  Compiling...
-  Text.cpp
-  GUI.cpp
-  Font_Loader.cpp
-  Font.cpp
-  Render.cpp
-  Models.cpp
-  glDebug.cpp
-  Camera.cpp
-  VAO.cpp
-  Texture.cpp
-  Shader_Loader.cpp
-  Shader.cpp
-  Generating Code...
+﻿  Font_Loader.cpp
+c:\users\linus\source\repos\newgame\opengl\ui\font_loader.cpp(133): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+c:\users\linus\source\repos\newgame\opengl\ui\font_loader.cpp(137): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+c:\users\linus\source\repos\newgame\opengl\ui\font_loader.cpp(138): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+c:\users\linus\source\repos\newgame\opengl\ui\font_loader.cpp(169): warning C4244: '=': conversion from 'float' to 'unsigned int', possible loss of data
+c:\users\linus\source\repos\newgame\opengl\ui\font_loader.cpp(170): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+c:\users\linus\source\repos\newgame\opengl\ui\font_loader.cpp(171): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+c:\users\linus\source\repos\newgame\opengl\ui\font_loader.cpp(248): warning C4244: 'initializing': conversion from 'float' to 'unsigned int', possible loss of data
   OpenGL.vcxproj -> C:\Users\Linus\source\repos\NewGame\Debug\OpenGL.lib

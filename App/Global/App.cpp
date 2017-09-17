@@ -57,8 +57,8 @@ void App::initMainMenu() {
 	using gl::GUI::Text::Textbox;
 	using gl::GUI::Text::String;
 	using gl::GUI::Text::createTextbox;
-	using gl::GUI::Text::appendTextboxString;
-	glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+	using gl::GUI::Text::setTextboxString;
+	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
 	gl::GUI::reserveQuadSpace(2);
 	unsigned int startButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.7f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -77,16 +77,16 @@ void App::initMainMenu() {
 	
 	String quitProgramStr("QUIT");
 	String runProgramStr("PLAY");
-	String textStr("Hello world and how are you? \nLook at dis cool text i am writing here :D (does it look good?)\n\n i am still working on the glyph positioning and text formating, so this is why I am writing this text anyway. Lets see how my program deals wih this many characters, right? xD \nshould be fine tho ^^\nAnyway, have a good day :)\n\nYour creator");
+	String textStr("Dis is Text\nThis too\nLook here, a longer line!\nNow a line that goes on so long until there is no more space and a line break has to be inserted automatically.");
 	unsigned int tb_met = gl::GUI::Text::createTextboxMetrics(0, 1.0f, 1.0f, 1.0f, 1.0f);
 
 	//unsigned int tb1 = createTextbox(startButtonQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
 	//unsigned int tb2 = createTextbox(quitButtonQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
 	unsigned int tb3 = createTextbox(textQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT , 0.003f);
-	//appendTextboxString(tb1, runProgramStr);
-	//appendTextboxString(tb2, quitProgramStr);
-	appendTextboxString(tb3, textStr);
-	gl::GUI::Text::loadChars();
+	//setTextboxString(tb1, runProgramStr);
+	//setTextboxString(tb2, quitProgramStr);
+	setTextboxString(tb3, textStr);
+	gl::GUI::Text::loadTextboxes();
 
 }
 
@@ -94,7 +94,7 @@ void App::initGameGUI() {
 	using gl::GUI::Text::Textbox;
 	using gl::GUI::Text::String;
 	using gl::GUI::Text::createTextbox;
-	using gl::GUI::Text::appendTextboxString;
+	using gl::GUI::Text::setTextboxString;
 
 	gl::GUI::reserveQuadSpace(2);
 	unsigned int menuButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.7f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -110,9 +110,9 @@ void App::initGameGUI() {
 	
 	unsigned int tb1 = createTextbox(quitButtonQuad, 0, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
 	unsigned int tb2 = createTextbox(menuButtonQuad, 0, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
-	appendTextboxString(tb1, quitProgramStr);
-	appendTextboxString(tb2, mainmenuProgramStr);
-	gl::GUI::Text::loadChars();
+	setTextboxString(tb1, quitProgramStr);
+	setTextboxString(tb2, mainmenuProgramStr);
+	gl::GUI::Text::loadTextboxes();
 
 	EntityRegistry::initEntities();
 

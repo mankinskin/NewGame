@@ -45,13 +45,21 @@ void App::Input::initMenuSignals() {
 	mouseEventSlotOffset = 0;
 	mouseEventSlotCount = 0;
 	keyEventSlotOffset = 0;
-	unsigned int rmb_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_MOUSE_BUTTON_2, 1, 0));
-	unsigned int rmb_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_MOUSE_BUTTON_2, 0, 0));
-	unsigned int esc_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_ESCAPE, 1, 0));
-	unsigned int i_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_I, 1, 0));
+	unsigned int rmb_press = 0;
+	unsigned int rmb_release = 0; 
+	unsigned int esc_press = 0;
+	unsigned int i_press = 0;
+	
+	EventSlot<KeyEvent>(rmb_press, KeyEvent(GLFW_MOUSE_BUTTON_2, 1, 0));
+	
+	EventSlot<KeyEvent>(rmb_release, KeyEvent(GLFW_MOUSE_BUTTON_2, 0, 0));
+	EventSlot<KeyEvent>(esc_press, KeyEvent(GLFW_KEY_ESCAPE, 1, 0));
+	 EventSlot<KeyEvent>(i_press, KeyEvent(GLFW_KEY_I, 1, 0));
 	keyEventSlotCount = 4;
-	unsigned int play_button_press = EventSlot<ButtonEvent>::create(ButtonEvent(0, 1, 0));
-	unsigned int quit_button_press = EventSlot<ButtonEvent>::create(ButtonEvent(1, 1, 0));
+	unsigned int play_button_press = 0;
+	unsigned int quit_button_press = 0;
+	EventSlot<ButtonEvent>(play_button_press, ButtonEvent(0, 1, 0));
+	EventSlot<ButtonEvent>(quit_button_press, ButtonEvent(1, 1, 0));
 	
 	startProgramSlot.listen({ play_button_press });
 	exitProgramSlot.listen({ esc_press, quit_button_press });//exit
@@ -88,31 +96,33 @@ void App::Input::initGameGUISignals() {
 	//-----------------------
 	//Mouse Buttons
 	mouseEventSlotOffset = EventSlot<KeyEvent>::instance_count();
-	unsigned int rmb_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_MOUSE_BUTTON_2, 1, 0));
-	unsigned int rmb_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_MOUSE_BUTTON_2, 0, 0));
+	unsigned int rmb_press = 0;
+	unsigned int rmb_release = 0;
+	EventSlot<KeyEvent>(rmb_press, KeyEvent(GLFW_MOUSE_BUTTON_2, 1, 0));
+	EventSlot<KeyEvent>(rmb_release, KeyEvent(GLFW_MOUSE_BUTTON_2, 0, 0));
 	mouseEventSlotCount = EventSlot<KeyEvent>::instance_count() - mouseEventSlotOffset;
 	//-----------------------------------------
 	//Keys
 	//Movement
 	keyEventSlotOffset = mouseEventSlotOffset + mouseEventSlotCount;
-	unsigned int c_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_C, 1, 0));
-	unsigned int c_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_C, 0, 0));
-	unsigned int w_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_W, 1, 0));
-	unsigned int w_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_W, 0, 0));
-	unsigned int s_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_S, 1, 0));
-	unsigned int s_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_S, 0, 0));
-	unsigned int a_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_A, 1, 0));
-	unsigned int a_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_A, 0, 0));
-	unsigned int d_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_D, 1, 0));
-	unsigned int d_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_D, 0, 0));
-	unsigned int space_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_SPACE, 1, 0));
-	unsigned int space_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_SPACE, 0, 0));
-	unsigned int z_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_Z, 1, 0));
-	unsigned int z_release = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_Z, 0, 0));
-	unsigned int esc_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_ESCAPE, 1, 0));
-	unsigned int i_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_I, 1, 0));
-	unsigned int h_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_H, 1, 0));
-	unsigned int g_press = EventSlot<KeyEvent>::create(KeyEvent(GLFW_KEY_G, 1, 0));
+	unsigned int c_press = 0;       EventSlot<KeyEvent>(c_press, KeyEvent(GLFW_KEY_C, 1, 0));
+	unsigned int c_release = 0;     EventSlot<KeyEvent>(c_release, KeyEvent(GLFW_KEY_C, 0, 0));
+	unsigned int w_press = 0;       EventSlot<KeyEvent>(w_press, KeyEvent(GLFW_KEY_W, 1, 0));
+	unsigned int w_release = 0;     EventSlot<KeyEvent>(w_release, KeyEvent(GLFW_KEY_W, 0, 0));
+	unsigned int s_press = 0;       EventSlot<KeyEvent>(s_press, KeyEvent(GLFW_KEY_S, 1, 0));
+	unsigned int s_release = 0;     EventSlot<KeyEvent>(s_release, KeyEvent(GLFW_KEY_S, 0, 0));
+	unsigned int a_press = 0;       EventSlot<KeyEvent>(a_press, KeyEvent(GLFW_KEY_A, 1, 0));
+	unsigned int a_release = 0;     EventSlot<KeyEvent>(a_release, KeyEvent(GLFW_KEY_A, 0, 0));
+	unsigned int g_press = 0;       EventSlot<KeyEvent>(g_press, KeyEvent(GLFW_KEY_G, 1, 0));
+	unsigned int d_press = 0;       EventSlot<KeyEvent>(d_press, KeyEvent(GLFW_KEY_D, 1, 0));
+	unsigned int d_release = 0;     EventSlot<KeyEvent>(d_release, KeyEvent(GLFW_KEY_D, 0, 0));
+	unsigned int space_press = 0;   EventSlot<KeyEvent>(space_press, KeyEvent(GLFW_KEY_SPACE, 1, 0));
+	unsigned int space_release = 0; EventSlot<KeyEvent>(space_release, KeyEvent(GLFW_KEY_SPACE, 0, 0));
+	unsigned int z_press = 0;       EventSlot<KeyEvent>(z_press, KeyEvent(GLFW_KEY_Z, 1, 0));
+	unsigned int z_release = 0;     EventSlot<KeyEvent>(z_release, KeyEvent(GLFW_KEY_Z, 0, 0));
+	unsigned int esc_press = 0;     EventSlot<KeyEvent>(esc_press, KeyEvent(GLFW_KEY_ESCAPE, 1, 0));
+	unsigned int i_press = 0;       EventSlot<KeyEvent>(i_press, KeyEvent(GLFW_KEY_I, 1, 0));
+	unsigned int h_press = 0;       EventSlot<KeyEvent>(h_press, KeyEvent(GLFW_KEY_H, 1, 0));
 	
 	keyEventSlotCount = EventSlot<KeyEvent>::instance_count() - keyEventSlotOffset;
 	
@@ -144,8 +154,8 @@ void App::Input::initGameGUISignals() {
 
 	//--------------------------------
 	//Buttons
-	unsigned int quit_button_press = EventSlot<ButtonEvent>::create(ButtonEvent(0, 1, 0));
-	unsigned int menu_button_press = EventSlot<ButtonEvent>::create(ButtonEvent(1, 1, 0));
+	unsigned int quit_button_press = 0; EventSlot<ButtonEvent>(quit_button_press, ButtonEvent(0, 1, 0));
+	unsigned int menu_button_press = 0; EventSlot<ButtonEvent>(menu_button_press, ButtonEvent(1, 1, 0));
 	//Misc
 	menuProgramSlot.listen({ menu_button_press });
 	exitProgramSlot.listen({ esc_press, quit_button_press });//exit

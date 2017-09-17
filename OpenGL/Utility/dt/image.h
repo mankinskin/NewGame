@@ -77,8 +77,8 @@ image<T>::image(const int width, const int height, const bool init) {
 
 template <class T>
 image<T>::~image() {
-  delete [] data; 
-  delete [] access;
+  delete[] data; 
+  delete[] access;
 }
 
 template <class T>

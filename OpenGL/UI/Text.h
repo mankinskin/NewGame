@@ -16,14 +16,12 @@ namespace gl {
 			//Textboxes
 			struct String {
 				String()
-					:charOffset(0), charCount(0), color(0), style(0){}
-				String(unsigned int pOffset, unsigned int pCount, unsigned int pColor = 0, unsigned int pStyle = 0)
-					:charOffset(pOffset), charCount(pCount), color(pColor), style(pStyle) {}
-				String(std::string pString, unsigned int pColor = 0, unsigned int pStyle = 0);
-				unsigned int charOffset;
-				unsigned int charCount;
-				unsigned int style;
-				unsigned int color;
+					:offset(0), count(0){}
+				String(unsigned int pOffset, unsigned int pCount)
+					:offset(pOffset), count(pCount){}
+				String(std::string pString);
+				unsigned int offset;
+				unsigned int count;
 			};
 
 			struct TextboxMetrics {
@@ -40,10 +38,9 @@ namespace gl {
 			
 			struct Textbox {
 				Textbox()
-					:stringOffset(0), stringCount(0), pos(0), size(0), marging(0.0f), flags(0) {}
+					:chars(String()), pos(0), size(0), marging(0.0f), flags(0) {}
 				
-				unsigned int stringOffset;
-				unsigned int stringCount;
+				String chars;
 				unsigned int metrics;
 				unsigned int pos;
 				unsigned int size;
@@ -94,7 +91,8 @@ namespace gl {
 				std::vector<unsigned int> glyphIndices;
 				std::vector<CharQuad> quads;
 			};
-
+			
+			
 			void setStringColor(unsigned int pStringIndex, unsigned int pColorIndex);
 			void setStringStyle(unsigned int pStringIndex, unsigned int pStyleIndex);
 			//Interface
@@ -103,17 +101,17 @@ namespace gl {
 			unsigned int createTextbox(unsigned int pPosIndex, unsigned int pSizeIndex, unsigned int pMetrics, int pFlags, float pMarging = 0.0f);
 			unsigned int createTextbox(glm::vec2 pTopLeft, glm::vec2 pSize, unsigned int pMetrics, int pFlags, float pMarging = 0.0f);
 			unsigned int createTextboxMetrics(unsigned int pFont, float pGlyphScaleX, float pGlyphScaleY, float pAdvanceScale, float pLineGapScale);
-			void appendTextboxString(unsigned int pTextbox, unsigned int pStringIndex);
-			void appendTextboxString(unsigned int pTextbox, String pString);
-			void appendTextboxString(unsigned int pTextbox, std::string pString);
+			void setTextboxString(unsigned int pTextbox, std::string pString);
+
+			void setTextboxString(unsigned int pTextbox, String pString);
 			
 			//internal
-			
+			void parseStringFormat(String pString);
 			void loadTextboxGlyphs(Textbox& pTextbox, TextboxMetrics& pTextMetrics, Font& pFont, TextboxGlyphs& pGlyphs);
 			void transformTextboxGlyphs(Textbox& pTextbox, TextboxGlyphs& pGlyphs);
-			void loadChars();
+			void loadTextboxes();
 			void renderGlyphs();
-			void revalidateTextboxStringIndices();
+			void revalidateTextboxCharIndices();
 			void revalidateFontStringIndices();
 			void insertFontString(Font & pFont, String pString);
 			
@@ -124,6 +122,8 @@ namespace gl {
 			void initStyleBuffer();
 			extern unsigned int styleStorage;
 			extern std::vector<TextStyle> allTextStyles;
+			extern std::vector<glm::vec4> allTextColors;
+			//extern std::vector<std::string> allTextColorNames;//only an idea. like white, grey, blue, pink, magenta
 			extern std::vector<Textbox> allTextboxes;
 			extern std::vector<String> allFontStrings;
 			extern std::vector<unsigned int> textboxStringIndices;
