@@ -88,9 +88,10 @@ void gl::init()
 	BetterPixels
 	UnnamedFont
 	TinyUnicode
+	Hack-Regular
 	*/
 	GUI::Text::Initializer::initFreeType();
-	GUI::Text::Initializer::includeFont("Generic.ttf", 14, 30, 200, 0, 1);
+	GUI::Text::Initializer::includeFont("Hack-Regular.ttf", 14, 30, 200, 0, 1);
 	GUI::Text::Initializer::loadFonts();
 	
 	
@@ -103,7 +104,7 @@ void gl::init()
 	loadModels();
 	Render::fillMeshVAO();
 	
-	
+	Shader::bindUniformBufferToShader(Render::screenShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
 	Shader::bindUniformBufferToShader(GUI::Text::glyphShapeProgram, generalUniformBuffer, "GeneralUniformBuffer");
 
 	Shader::bindUniformBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
@@ -204,9 +205,14 @@ void gl::initGeneralQuadVBO()
 
 void gl::initGeneralUniformBuffer()
 {
-	unsigned int generalUniformDataSize = sizeof(float) * 16 * 2;
+	//General Uniform buffer Contents
+	//projectionMatrix
+	//viewMatrix
+	//camera position
+	//
+	unsigned int generalUniformDataSize = sizeof(float) * (16 + 16 + 4);
 	
-	generalUniformBuffer = VAO::createStorage(generalUniformDataSize * 16, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+	generalUniformBuffer = VAO::createStorage(generalUniformDataSize, nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
 	VAO::createStream(generalUniformBuffer,  GL_MAP_WRITE_BIT);
 	VAO::bindStorage(GL_UNIFORM_BUFFER, generalUniformBuffer);
 	Debug::getGLError("gl::initGeneralUniformBuffer()1:");
@@ -214,12 +220,12 @@ void gl::initGeneralUniformBuffer()
 
 void gl::updateGeneralUniformBuffer()
 {
-	std::vector<float> generalUniformData(32);
+	std::vector<float> generalUniformData(36);
 	
 	std::memcpy(&generalUniformData[0], glm::value_ptr(Camera::infiniteProjectionMatrix), sizeof(float) * 16);
 	std::memcpy(&generalUniformData[16], glm::value_ptr(Camera::viewMatrix), sizeof(float) * 16);
-	
-	VAO::streamStorage(generalUniformBuffer, sizeof(float) * 32, &generalUniformData[0]);
+	std::memcpy(&generalUniformData[32], glm::value_ptr(Camera::pos), sizeof(float) * 3);
+	VAO::streamStorage(generalUniformBuffer, sizeof(float) * 36, &generalUniformData[0]);
 	
 	Debug::getGLError("gl::update():");
 }

@@ -9,7 +9,7 @@ void EntityRegistry::initEntities()
 {
 	unsigned int first_entity = 0;
 	createEntities(1, &first_entity);
-	setPos(first_entity, glm::vec3(3.0f, 5.0f, 1.0f));
+	setPos(first_entity, glm::vec3( 1.0f, 1.0f, 1.0f));
 }
 
 void EntityRegistry::createEntities(unsigned int pCount, unsigned int * pEntities)

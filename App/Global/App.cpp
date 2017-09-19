@@ -97,11 +97,11 @@ void App::initGameGUI() {
 	using gl::GUI::Text::createTextbox;
 	using gl::GUI::Text::setTextboxString;
 
-	gl::GUI::reserveQuadSpace(2);
-	unsigned int menuButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.7f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	unsigned int quitButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.85f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	Input::addButton(quitButtonQuad);
-	Input::addButton(menuButtonQuad);
+	//gl::GUI::reserveQuadSpace(2);
+	//unsigned int menuButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.7f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	//unsigned int quitButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.85f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	//Input::addButton(quitButtonQuad);
+	//Input::addButton(menuButtonQuad);
 	App::Input::loadButtons();
 	App::Input::initGameGUISignals();
 	gl::GUI::Text::reserveTextboxSpace(2);
@@ -109,10 +109,10 @@ void App::initGameGUI() {
 	String quitProgramStr("QUIT");
 	String mainmenuProgramStr("MAIN MENU");
 	
-	unsigned int tb1 = createTextbox(quitButtonQuad, 0, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
-	unsigned int tb2 = createTextbox(menuButtonQuad, 0, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
-	setTextboxString(tb1, quitProgramStr);
-	setTextboxString(tb2, mainmenuProgramStr);
+	//unsigned int tb1 = createTextbox(quitButtonQuad, 0, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
+	//unsigned int tb2 = createTextbox(menuButtonQuad, 0, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
+	//setTextboxString(tb1, quitProgramStr);
+	//setTextboxString(tb2, mainmenuProgramStr);
 	gl::GUI::Text::loadTextboxes();
 
 	EntityRegistry::initEntities();
