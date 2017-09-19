@@ -119,7 +119,7 @@ void gl::GUI::Text::Initializer::
 loadAtlas(FT_Face& pFace, FontInstructions& pFontInstructions, LoadFontMetrics& pFontMetrics, LoadAtlas& pAtlas, std::vector<LoadGlyphMetrics>& pMetrics)
 {
 	const unsigned int width_glyphs = (unsigned int)ceil(sqrt((float)pFontInstructions.glyphCount));
-	unsigned int pad_pixels = 2;
+	unsigned int pad_pixels = 0;
 	pad_pixels += pad_pixels % 2;
 	unsigned int maxGlyphWidth = FT_MulFix(pFace->bbox.xMax - pFace->bbox.xMin, pFontMetrics.scale_x)/64; //max width of the actual glyph bitmap
 	unsigned int maxGlyphHeight = FT_MulFix(pFace->bbox.yMax - pFace->bbox.yMin, pFontMetrics.scale_y)/64;//max height of the actual glyph bitmap
@@ -178,8 +178,8 @@ loadAtlas(FT_Face& pFace, FontInstructions& pFontInstructions, LoadFontMetrics& 
 		LoadGlyphQuad qud;
 		qud.minX = cursor.x + pad_pixels;
 		qud.minY = cursor.y + pad_pixels;
-		qud.maxX = cursor.x + tileSize.x;
-		qud.maxY = cursor.y + tileSize.y;
+		qud.maxX = qud.minX + tileSize.x;
+		qud.maxY = qud.minY + tileSize.y;
 		
 
 		if (pFontInstructions.flags & FONT_LOAD_DT) {
@@ -377,7 +377,7 @@ integrateFont(LoadFont& pFont) {
 	std::pair<unsigned int, unsigned int> range = convertKerning(pFont.kerningMap);
 	font.kerningOffset = range.first;
 	font.kerningCount = range.second;
-	font.fontMetric.lineGap = (float)pFont.fontMetrics.lineGap / ((float)screenPixelHeight / 2.0f);
+	font.fontMetric.lineGap = (float)pFont.fontMetrics.lineGap / ((float)screenHeight / 2.0f);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, pFont.atlas.width, pFont.atlas.height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, &pFont.atlas.buffer[0]);
 		
 	glGenerateMipmap(GL_TEXTURE_2D);
@@ -395,7 +395,7 @@ convertKerning(std::vector<int>& pKerningMap)
 	unsigned int offset = allKerning.size();
 	allKerning.resize(offset + count);
 	for (unsigned int i = 0; i < count; ++i) {
-		allKerning[offset + i] = (float)pKerningMap[i] / ((float)screenPixelWidth / 2.0f);
+		allKerning[offset + i] = (float)pKerningMap[i] / ((float)screenWidth / 2.0f);
 	}
 	return std::pair<unsigned int, unsigned int>(offset,count);
 }
@@ -413,7 +413,7 @@ storeGlyphs(Font& pFont, const LoadFont & pLoadFont)
 		const LoadGlyphQuad& qud = pLoadFont.atlas.quads[g];
 		const LoadGlyphMetrics& met = pLoadFont.metrics[g];
 		glyphs[g] = Glyph((float)qud.minX / (float)pLoadFont.atlas.width, (float)qud.minY / (float)pLoadFont.atlas.height, (float)(qud.maxX) / (float)pLoadFont.atlas.width, (float)(qud.maxY) / (float)pLoadFont.atlas.height);
-		allMetrics[pFont.metricOffset + g] = GlyphMetrics((float)(qud.maxX - qud.minX) / ((float)screenPixelWidth / 2.0f), (float)(qud.maxY - qud.minY) / ((float)screenPixelHeight / 2.0f), (float)met.advanceX / ((float)screenPixelWidth / 2.0f), (float)met.xBearing / ((float)screenPixelWidth / 2.0f), (float)met.yBearing / ((float)screenPixelHeight / 2.0f));
+		allMetrics[pFont.metricOffset + g] = GlyphMetrics((float)(qud.maxX - qud.minX) / ((float)screenWidth / 2.0f), (float)(qud.maxY - qud.minY) / ((float)screenHeight / 2.0f), (float)met.advanceX / ((float)screenWidth / 2.0f), (float)met.xBearing / ((float)screenWidth / 2.0f), (float)met.yBearing / ((float)screenHeight / 2.0f));
 		//allMetrics[pSize.metricOffset + g] = GlyphMetrics((float)met.width, (float)met.height, (float)met.advanceX, (float)met.xBearing, (float)met.yBearing);
 	}
 	pFont.glyphStorageIndex = VAO::createStorage(sizeof(Glyph)*glyCount, &glyphs[0], 0);

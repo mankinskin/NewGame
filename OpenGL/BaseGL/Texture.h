@@ -1,6 +1,5 @@
 #pragma once
 #include "..\Global\gl.h"
-#include <GL\glew.h>
 #include <unordered_map>
 namespace gl {
 	namespace Texture {

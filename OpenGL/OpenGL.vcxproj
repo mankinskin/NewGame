@@ -128,6 +128,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BaseGL\Framebuffer.h" />
     <ClInclude Include="BaseGL\Shader.h" />
     <ClInclude Include="BaseGL\VAO.h" />
     <ClInclude Include="BaseGL\Shader_Loader.h" />
@@ -151,6 +152,7 @@
     <ClInclude Include="Utility\dt\pnmfile.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BaseGL\Framebuffer.cpp" />
     <ClCompile Include="BaseGL\Shader.cpp" />
     <ClCompile Include="BaseGL\VAO.cpp" />
     <ClCompile Include="BaseGL\Shader_Loader.cpp" />

@@ -25,15 +25,13 @@ unsigned int gl::Texture::createTexture2D(unsigned int pWidth, unsigned int pHei
 	glBindTexture(GL_TEXTURE_2D, texture.ID);
 
 
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
 	glTexImage2D(GL_TEXTURE_2D, 0, texture.internalFormat, texture.width, texture.height, 0, texture.format, texture.type, pData);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	
 	all2DTextures.push_back(texture);
 	Debug::getGLError("create2DTexture():");
-	return all2DTextures.size() - 1;
+	return texture.ID;
 }
 
 void gl::Texture::setTextureWrapping(unsigned int pTextureIndex, unsigned int pWrapS, unsigned int pWrapT)

@@ -44,7 +44,7 @@ void App::Input::checkMouseEvents()
 		for (unsigned int ks = 0; ks < mouseEventSlotCount; ++ks) {
 			EventSlot<KeyEvent>& slot = EventSlot<KeyEvent>::get(mouseEventSlotOffset + ks);
 			if (slot.evnt == kev) {
-				signalBuffer[signalOffset + signalCount++] = slot.index;
+				signalBuffer[signalOffset + signalCount++] = slot.signal_index;
 			}
 		}
 

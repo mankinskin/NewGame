@@ -5,6 +5,7 @@
 #include "Models.h"
 #include <App/World/EntityRegistry.h>
 #include "../Global/glDebug.h"
+#include "../BaseGL/Framebuffer.h"
 unsigned int gl::Render::meshShaderProgram = 0;
 unsigned int gl::Render::meshVAO = 0;
 unsigned int gl::Render::meshVBO = 0;
@@ -12,8 +13,8 @@ unsigned int gl::Render::meshIBO = 0;
 unsigned int gl::Render::materialUBO = 0;
 unsigned int gl::Render::entityTransformBuffer;
 unsigned int gl::Render::transformIndexBuffer;
-
-
+unsigned int gl::Render::screenQuadVAO;
+unsigned int gl::Render::screenShaderProgram;
 
 void gl::Render::initMeshVAO()
 {
@@ -58,8 +59,17 @@ void gl::Render::storeMaterials()
 
 void gl::Render::render()
 {
+	//for depth test
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl::Texture::gBuffer);
+	glBlitFramebuffer(0, 0, screenWidth, screenHeight, 0, 0, screenWidth, screenHeight,
+		GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, Texture::gBuffer);
+	glClear(GL_COLOR_BUFFER_BIT);
 	glBindVertexArray(meshVAO);
 	Shader::use(meshShaderProgram);
+	
 	for (unsigned int modl = 0; modl < Models::allModels.size(); ++modl) {
 		Models::Model& model = Models::allModels[modl];
 		if (model.entityCount) {
@@ -71,6 +81,27 @@ void gl::Render::render()
 	}
 	Shader::unuse();
 	glBindVertexArray(0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	Debug::getGLError("render(Meshes)");
+}
+
+void gl::Render::renderToScreenQuad()
+{
+	glBindVertexArray(screenQuadVAO);
+	Shader::use(screenShaderProgram);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, Texture::gAlbedoTexture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, Texture::gPosTexture);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, Texture::gNormalTexture);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, Texture::gDepthTexture);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	
+	Shader::unuse();
+	glBindVertexArray(0);	
 	Debug::getGLError("render(Meshes)");
 }
 
@@ -80,6 +111,22 @@ void gl::Render::updateBuffers()
 		VAO::streamStorage(entityTransformBuffer, sizeof(glm::mat4)*EntityRegistry::allMatrices.size(), &EntityRegistry::allMatrices[0]);
 		VAO::streamStorage(transformIndexBuffer, sizeof(unsigned int)*Models::allInstanceEntities.size(), &Models::allInstanceEntities[0]);
 	}
+}
+
+void gl::Render::initScreenVAO()
+{
+	glCreateVertexArrays(1, &screenQuadVAO);
+	glVertexArrayVertexBuffer(screenQuadVAO, 0, quadVBO, 0, sizeof(float) * 2);
+	glVertexArrayElementBuffer(screenQuadVAO, quadEBO);
+	VAO::setVertexAttrib(screenQuadVAO, 0, 0, 2, GL_FLOAT, 0);
+}
+
+void gl::Render::initScreenShader()
+{
+	screenShaderProgram = Shader::newProgram("screenShaderProgram", Shader::newModule("screenShaderProgram.vert"), Shader::newModule("screenShaderProgram.frag")).ID;
+	Shader::addVertexAttribute(screenShaderProgram, "corner_pos", 0);
+
+	
 }
 
 

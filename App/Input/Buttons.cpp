@@ -66,7 +66,7 @@ void App::Input::checkButtonEvents()
 		for (unsigned int ks = 0; ks < EventSlot<ButtonEvent>::instance_count(); ++ks) {
 			EventSlot<ButtonEvent>& slot = EventSlot<ButtonEvent>::get(ks);
 			if (slot.evnt == kev) {
-				signalBuffer[signalOffset + signalCount++] = slot.index;
+				signalBuffer[signalOffset + signalCount++] = slot.signal_index;
 			}
 		}
 

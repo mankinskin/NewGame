@@ -20,7 +20,7 @@ glm::vec2 gl::Camera::lookRotation = {};
 glm::mat4 gl::Camera::translationMatrix = {};
 glm::vec3 vel = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 mov = glm::vec3(0.0f, 0.0f, 0.0f);
-float gl::Camera::cam_speed = 0.5f;
+float gl::Camera::cam_speed = 0.02f;
 float gl::Camera::FOV = 70.0f;
 float gl::Camera::sensitivity = 0.5f;
 float gl::Camera::yRestrictionAngle = 3.0f;
@@ -47,8 +47,8 @@ void gl::Camera::init()
 	viewMatrix = glm::lookAt(pos, lookAt, normal);
 	projectionMatrix = glm::perspective(FOV, (float)(App::mainWindow.width*resolution) / (float)(App::mainWindow.height*resolution), nearPlane, farPlane);
 	infiniteProjectionMatrix = projectionMatrix;
-	infiniteProjectionMatrix[2][2] = eulerian - 1.0f;
-	infiniteProjectionMatrix[3][2] = nearPlane*(eulerian - 2.0f);
+	//infiniteProjectionMatrix[2][2] = eulerian - 1.0f;
+	//infiniteProjectionMatrix[3][2] = nearPlane*(eulerian - 2.0f);
 
 	Debug::getGLError("Camera::init()");
 }
@@ -81,8 +81,8 @@ void gl::Camera::look(glm::vec2 pDir)
 		pDir = pDir * sensitivity;
 
 		
-		//lookAt = glm::rotate(lookAt, pDir.y, cross_right);
-		normal = glm::rotate(normal, pDir.x, lookAt);
+		lookAt = glm::rotate(lookAt, pDir.y, cross_right);
+		lookAt = glm::rotate(lookAt, pDir.x, -normal);
 		//lookAt.y = std::max(std::min(lookAt.y, 0.9f), -0.9f);
 		//lookAt = glm::normalize(lookAt);
 	}

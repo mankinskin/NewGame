@@ -4,6 +4,54 @@
 #include <initializer_list>
 namespace App {
 	namespace Input {
+
+		struct Signal {
+			Signal(int pOn, int pStay)
+				:on(pOn), stay(pStay) {}
+			Signal()
+				:on(0), stay(0) {}
+			
+			void set(int set = 1) {
+				on = set;
+			}
+			void set_stay(int set = 1) {
+				stay = set;
+			}
+			void reset() {
+				on = stay;
+			}
+			int on;
+			int stay;//the value to assign to 'on' when resetting it
+		};
+		extern std::vector<Signal> allSignalSlots; // 1 = signaled
+		extern std::vector<int> allSignalLocks; // 1 = locked 
+
+		
+		extern unsigned TOTAL_SIGNAL_COUNT;
+
+		//this might be kinda slow. it should store an array of indices for each "LockSignal" which is a signal which either lock or unlock the array of other signals
+		extern std::unordered_map<unsigned int, std::vector<unsigned int>> signalLockBindings;
+		extern std::unordered_map<unsigned int, std::vector<unsigned int>> signalUnlockBindings;
+
+		// set pLockSignal to set the locks of pTargetSignals to pLock
+		static void signal_unlock(unsigned int pLockSignal, std::initializer_list<unsigned int> pTargetSignals) {
+			auto it = signalUnlockBindings.find(pLockSignal);
+			if (it == signalUnlockBindings.end()) {
+				signalUnlockBindings.insert(std::pair<unsigned int, std::vector<unsigned int>>(pLockSignal, std::vector<unsigned int>(pTargetSignals)));
+				return;
+			}
+			it->second.insert(it->second.end(), pTargetSignals.begin(), pTargetSignals.end());
+		}
+		static void signal_lock(unsigned int pLockSignal, std::initializer_list<unsigned int> pTargetSignals) {
+			auto it = signalLockBindings.find(pLockSignal);
+			if (it == signalLockBindings.end()) {
+				signalLockBindings.insert(std::pair<unsigned int, std::vector<unsigned int>>(pLockSignal, std::vector<unsigned int>(pTargetSignals)));
+				return;
+			}
+			it->second.insert(it->second.end(), pTargetSignals.begin(), pTargetSignals.end());
+		}
+
+
 		template<typename R, typename... Args>
 		class FuncSlot {
 		private:
@@ -51,8 +99,8 @@ namespace App {
 		template<class EventType>
 		class EventSlot {
 		public:
-			EventSlot(unsigned int& pIndexRef, EventType pEvent) :index(TOTAL_SIGNAL_COUNT++), evnt(pEvent) {
-				pIndexRef = index;
+			EventSlot(unsigned int& pIndexRef, EventType pEvent) :signal_index(TOTAL_SIGNAL_COUNT++), evnt(pEvent) {
+				pIndexRef = signal_index;
 				instances.push_back(*this);
 			}
 			static void reserve_slots(unsigned int pCount) {
@@ -68,7 +116,7 @@ namespace App {
 				return instances[index];
 			}
 			EventType evnt;
-			unsigned index;
+			unsigned signal_index;
 		private:
 
 			static std::vector<EventSlot<EventType>> instances;

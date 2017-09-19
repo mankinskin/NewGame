@@ -15,6 +15,7 @@
 #include "../Render/Render.h"
 #include "../Render/Models.h"
 #include "../UI/Text.h"
+#include "../BaseGL/Framebuffer.h"
 int gl::MAX_WORK_GROUP_COUNT = 0;
 glm::ivec3 gl::MAX_WORK_GROUP_SIZE = {};
 unsigned int gl::MAX_LIGHT_COUNT = 100;
@@ -25,8 +26,8 @@ std::string gl::GLSL_VERSION = "";
 std::string gl::SYSTEM_RENDERER = "";
 float gl::resolution = 1.0f;
 int gl::MAX_TEXTURE_UNIT_COUNT;
-unsigned int gl::screenPixelWidth = 0;
-unsigned int gl::screenPixelHeight = 0;
+unsigned int gl::screenWidth = 0;
+unsigned int gl::screenHeight = 0;
 unsigned int gl::mergeComputeShader = 0;
 unsigned int gl::finalMergeShader;
 unsigned int gl::mainFrame = 0;
@@ -51,15 +52,12 @@ void gl::init()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	
-	
-	
-	
 	gl::Debug::getGLError("gl::init():");
 	App::Debug::printErrors();
 	//init framebuffers
 	//include shaders
 	Render::initMeshShader();
+	Render::initScreenShader();
 	GUI::initGUIShaders();
 	GUI::Text::initFontShader();
 	Debug::initDebugShader();
@@ -68,11 +66,12 @@ void gl::init()
 	//generals
 	initGeneralUniformBuffer();
 	initGeneralQuadVBO();
+	Texture::initGBuffer();
+	Render::initScreenVAO();
 	Debug::getGLError("gl::init()3");
 	App::Debug::printErrors();
 	
 	/*FONTS
-	C64_Pro_Mono,
 	times,
 	FreeSans,
 	Input_Regular_Mono,
@@ -84,9 +83,14 @@ void gl::init()
 	SourceCodePro_Regular,
 	SourceCodePro_Medium,
 	VCR_OSD_MONO
+	Generic
+	justabit
+	BetterPixels
+	UnnamedFont
+	TinyUnicode
 	*/
 	GUI::Text::Initializer::initFreeType();
-	GUI::Text::Initializer::includeFont("FreeMono.ttf", 20, 30, 200, 1, 1);
+	GUI::Text::Initializer::includeFont("Generic.ttf", 14, 30, 200, 0, 1);
 	GUI::Text::Initializer::loadFonts();
 	
 	
@@ -98,7 +102,8 @@ void gl::init()
 	
 	loadModels();
 	Render::fillMeshVAO();
-
+	
+	
 	Shader::bindUniformBufferToShader(GUI::Text::glyphShapeProgram, generalUniformBuffer, "GeneralUniformBuffer");
 
 	Shader::bindUniformBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
@@ -121,13 +126,16 @@ void gl::init()
 void gl::configure()
 {
 	setViewport(App::mainWindow);
+	glBindFramebuffer(GL_FRAMEBUFFER, Texture::gBuffer);
+	setViewport(App::mainWindow);
 	
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void gl::setViewport(App::ContextWindow::Window& pViewport) {
-	screenPixelWidth = pViewport.width;
-	screenPixelHeight = pViewport.height;
-	glViewport(0, 0, screenPixelWidth, screenPixelHeight);
+	screenWidth = pViewport.width;
+	screenHeight = pViewport.height;
+	glViewport(0, 0, screenWidth, screenHeight);
 }
 
 void gl::getOpenGLInitValues()
@@ -153,8 +161,8 @@ void gl::getOpenGLInitValues()
 	glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &VAO::MAX_UNIFORM_BUFFER_BINDINGS);
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &MAX_TEXTURE_UNIT_COUNT);
 	glGetIntegerv(GL_MIN_MAP_BUFFER_ALIGNMENT, &VAO::MIN_MAP_BUFFER_ALIGNMENT);
-	screenPixelWidth = App::mainWindow.width;
-	screenPixelHeight = App::mainWindow.height;
+	screenWidth = App::mainWindow.width;
+	screenHeight = App::mainWindow.height;
 
 	//glBindImageTexture(0, mainFrame, 1, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 	Debug::getGLError("gl::initOpenGL()");
@@ -175,20 +183,20 @@ void gl::initGeneralQuadVBO()
 {
 
 	/*
-	0---2
+	3---2
 	|  /|
 	| / |
 	|/  |
-	1---3
+	0---1
 	*/
 	float varr[4 * 2] = {
 		0.0f, 0.0f, 
-		0.0f, 1.0f,
-		1.0f, 0.0f, 
-		1.0f, 1.0f
+		1.0f, 0.0f,
+		1.0f, 1.0f, 
+		0.0f, 1.0f
 	};
 	unsigned int iarr[6] = {
-		0, 1, 2, 2, 1, 3
+		0, 1, 2, 0, 2, 3
 	};
 	quadVBO = VAO::createStorage(sizeof(float) * 4 * 2, &varr[0], 0) + 1;
 	quadEBO = VAO::createStorage(sizeof(unsigned int) * 6, &iarr[0], 0) + 1;
@@ -224,6 +232,7 @@ void gl::frameStart()
 
 void gl::frameEnd()
 {
+	
 	glfwSwapBuffers(App::mainWindow.window);
 	Debug::getGLError("FrameEnd");
 	App::Debug::printErrors();
@@ -231,24 +240,58 @@ void gl::frameEnd()
 
 void gl::loadModels()
 {
-	//hardcoded cube
+	/*hardcoded cube
+	     6------------6
+		/|           /|
+	   / |	        / |
+	  /  |	       /  |
+	 /	 |	      /   |
+ 5'11'12-8----5'10'13-2
+	|   /		 |   /
+	|  /		 |  /
+	| /			 | /
+	|/           |/   
+  4'0'8--------1'9
+	*/
 	std::vector<Vertex> verts = {
-		Vertex(-1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(-1.0f, 1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(1.0f,  1.0f, 1.0f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(1.0f,  1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(-1.0f, 1.0f,  -1.0,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+		//downside
+		Vertex(-1.0f, -1.0f,  1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f),
+		Vertex( 1.0f, -1.0f,  1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f),
+		Vertex( 1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f),
+		Vertex(-1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f),
+		//left side
+		Vertex(-1.0f, -1.0f,   1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+		Vertex(-1.0f,  1.0f,   1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+		Vertex(-1.0f,  1.0f,  -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+		Vertex(-1.0f, -1.0f,  -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+		//front
+		Vertex(-1.0f, -1.0f,  1.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f),
+		Vertex(	1.0f, -1.0f,  1.0f,	 0.0f, 0.0f, 1.0f, 0.0f, 0.0f),
+		Vertex( 1.0f,  1.0f,  1.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f),
+		Vertex(-1.0f,  1.0f,  1.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f),
+		//upside
+		Vertex(-1.0f,  1.0f,  1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
+		Vertex( 1.0f,  1.0f,  1.0f,	 0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
+		Vertex( 1.0f,  1.0f, -1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
+		Vertex(-1.0f,  1.0f, -1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
+		//back
+		Vertex(-1.0f,  -1.0f,  -1.0f,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
+		Vertex(-1.0f,   1.0f,  -1.0f,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
+		Vertex( 1.0f,   1.0f,  -1.0f,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
+		Vertex( 1.0f,  -1.0f,  -1.0f,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
+		//right
+		Vertex(1.0f,  -1.0f, -1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+		Vertex(1.0f,   1.0f, -1.0f,	 1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+		Vertex(1.0f,   1.0f,  1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
+		Vertex(1.0f,  -1.0f,  1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f)
 	};
 	std::vector<unsigned> inds = {
 		0, 3, 1, 1, 3, 2, //downside
-		0, 4, 3, 3, 4, 7, //left side
-		0, 5, 4, 0, 1, 5, //front
-		4, 5, 6, 4, 6, 7, //upside
-		7, 6, 3, 3, 6, 2, //back
-		2, 6, 1, 1, 6, 5  //right
+		4, 5, 6, 6, 7, 4, //left side
+		8, 9, 10, 10, 11, 8, //front
+		12, 13, 14, 14, 15, 12, //upside
+		16, 17, 18, 18, 19, 16, //back
+		20, 21, 22, 22, 23, 20  //right
 	};
 
 	Models::createModel(Models::createMesh(Models::newGeometry(verts, inds), 0, 0), 1);

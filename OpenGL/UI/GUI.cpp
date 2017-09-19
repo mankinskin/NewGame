@@ -122,10 +122,10 @@ void gl::GUI::updateGUI() {
 	}
 
 
-	VAO::streamStorage(guiQuadBuffer, sizeof(glm::ivec4)*(it - indexQuads.begin()), &indexQuads[0]);
-	VAO::streamStorage(guiPositionBuffer, sizeof(glm::vec2)*(it - indexQuads.begin()), &allPositions[0]);
-	VAO::streamStorage(guiSizeBuffer, sizeof(glm::vec2)*(it - indexQuads.begin()), &allSizes[0]);
-	VAO::streamStorage(guiColorBuffer, sizeof(glm::vec4)*(it - indexQuads.begin()), &allColors[0]);
+	VAO::streamStorage(guiQuadBuffer, sizeof(glm::ivec4)*quad_count, &indexQuads[0]);
+	VAO::streamStorage(guiPositionBuffer, sizeof(glm::vec2)*quad_count, &allPositions[0]);
+	VAO::streamStorage(guiSizeBuffer, sizeof(glm::vec2)*quad_count, &allSizes[0]);
+	VAO::streamStorage(guiColorBuffer, sizeof(glm::vec4)*quad_count, &allColors[0]);
 	//VAO::streamTargetStorage(guiUVBuffer, sizeof(glm::vec4)*allUVRanges.size(), &allUVRanges[0]);
 }
 

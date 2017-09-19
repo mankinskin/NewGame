@@ -13,11 +13,6 @@
 std::vector<void(*)()> App::Input::callbackBuffer;
 std::vector<unsigned int> App::Input::signalBuffer;
 std::vector<unsigned int> App::Input::rejectedSignals;
-std::unordered_map<unsigned int, std::vector<unsigned int>> App::Input::signalLockBindings;
-std::unordered_map<unsigned int, std::vector<unsigned int>> App::Input::signalUnlockBindings;
-std::vector<int> App::Input::allSignalLocks;
-std::vector<unsigned int> App::Input::allSignalSlots;
-unsigned App::Input::TOTAL_SIGNAL_COUNT;
 
 /*
 button-pipeline
@@ -213,7 +208,7 @@ void App::Input::checkEvents() {
 	unsigned int passed = 0;
 	for (unsigned int& sig : rejectedSignals) {
  		if (!allSignalLocks[sig]) {
-			allSignalSlots[sig] = 1;
+			allSignalSlots[sig].set(1);
 			signalBuffer[passed++] = sig;
 		}
 		else {
@@ -239,7 +234,6 @@ void App::Input::end()
 
 void App::Input::callFunctions()
 {
-	printf("callFunctions(): signalBuffer.size() = %i\n", signalBuffer.size());
 	for (unsigned int& sig : signalBuffer) {
 		for (FuncSlot<void>& inst : FuncSlot<void>::instances) {
 			for (unsigned s : inst.signal_bindings) {
@@ -266,7 +260,11 @@ void App::Input::callFunctions()
 			}
 	}
 	signalBuffer.clear();
-	std::fill(allSignalSlots.begin(), allSignalSlots.end(), 0);
+	//reset signals
+	//some signals will be set off, others (rules) will stay on untill they are explicitly turned off
+	for (unsigned int s = 0; s < allSignalSlots.size(); ++s) {
+		allSignalSlots[s].reset();
+	}
 }
 
 void App::Input::fetchGLFWEvents()

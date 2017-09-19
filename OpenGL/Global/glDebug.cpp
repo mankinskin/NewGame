@@ -147,9 +147,8 @@ void gl::Debug::init()
 void gl::Debug::drawGrid()
 {
 	glBindVertexArray(VAO);
-
-	Shader::use(lineShaderID);
 	glDepthFunc(GL_ALWAYS);
+	Shader::use(lineShaderID);
 	for (unsigned int m = 0; m < debugMeshes.size(); ++m) {
 		if (meshFlags[m]) {
 			unsigned int offset = debugMeshes[m].offset;
@@ -158,7 +157,6 @@ void gl::Debug::drawGrid()
 		}
 	}
 	glDepthFunc(GL_LESS);
-
 	Shader::unuse();
 	glBindVertexArray(0);
 	getGLError("drawGrid():");

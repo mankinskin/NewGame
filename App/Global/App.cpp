@@ -58,15 +58,16 @@ void App::initMainMenu() {
 	using gl::GUI::Text::String;
 	using gl::GUI::Text::createTextbox;
 	using gl::GUI::Text::setTextboxString;
-	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+	glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
 
-	gl::GUI::reserveQuadSpace(2);
+	gl::GUI::reserveQuadSpace(4);
 	unsigned int startButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.7f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	unsigned int quitButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.9f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	unsigned int textQuad = gl::GUI::createQuad(glm::vec2(-0.9f, 0.9f), glm::vec2(1.2f, 1.2f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-
+	unsigned int windowQuad = gl::GUI::createQuad(glm::vec2(-0.9f, 0.9f), glm::vec2(1.2f, 1.2f), glm::vec4(0.9f, 0.9f, 0.9f, 1.0f));
+	unsigned int tabQuad = gl::GUI::createQuad(glm::vec2(-0.87f, 0.89f), glm::vec2(1.14f, 0.18f), glm::vec4(0.9f, 0.4f, 0.4f, 1.0f));
 	Input::addButton(startButtonQuad);
 	Input::addButton(quitButtonQuad);
+	Input::addButton(tabQuad);
 	App::Input::loadButtons();
 	Input::initMenuSignals();
 
@@ -77,14 +78,14 @@ void App::initMainMenu() {
 	
 	String quitProgramStr("QUIT");
 	String runProgramStr("PLAY");
-	String textStr("Dis is Text\nThis too\nLook here, a longer line!\nNow a line that goes on so long until there is no more space and a line break has to be inserted automatically.");
+	String textStr("Dis is Text\nThis too\nLook here, a longer line!\nNow a line that goes on so long until there is no more space and line breaks have to be inserted automatically.");
 	unsigned int tb_met = gl::GUI::Text::createTextboxMetrics(0, 1.0f, 1.0f, 1.0f, 1.0f);
 
-	//unsigned int tb1 = createTextbox(startButtonQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
-	//unsigned int tb2 = createTextbox(quitButtonQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
-	unsigned int tb3 = createTextbox(textQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT , 0.003f);
-	//setTextboxString(tb1, runProgramStr);
-	//setTextboxString(tb2, quitProgramStr);
+	unsigned int tb1 = createTextbox(startButtonQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
+	unsigned int tb2 = createTextbox(quitButtonQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
+	unsigned int tb3 = createTextbox(glm::vec2(-0.9f, 0.8f), glm::vec2(1.2f, 1.0f), tb_met, TEXT_LAYOUT_BOUND_LEFT , 0.003f);
+	setTextboxString(tb1, runProgramStr);
+	setTextboxString(tb2, quitProgramStr);
 	setTextboxString(tb3, textStr);
 	gl::GUI::Text::loadTextboxes();
 
@@ -169,7 +170,7 @@ void App::mainmenu()
 
 void App::frameLoop()
 {
-	glClearColor(0.01f, 0.01f, 0.01f, 1.0f);
+	glClearColor(0.1f, 0.1f, 0.3f, 0.0f);
 	initGameGUI();
 
 	Debug::printErrors();
@@ -185,17 +186,22 @@ void App::frameLoop()
 		gl::Camera::look(Input::cursorFrameDelta);
 		gl::Camera::update();
 		Debug::printErrors();
-		EntityRegistry::setPos(0, glm::vec3(gl::Camera::pos.x, 0.0f, gl::Camera::pos.z));
+		//EntityRegistry::setPos(0, glm::vec3(gl::Camera::pos.x, 0.0f, gl::Camera::pos.z));
  		gl::updateGeneralUniformBuffer();
 		gl::Render::updateBuffers();
 		Debug::printErrors();
 
 		gl::frameStart();
 
+  		
 		gl::Debug::drawGrid();
-		gl::Render::render();
 		gl::GUI::renderGUI();
 		gl::GUI::Text::renderGlyphs();
+		gl::Render::render();
+		gl::Render::renderToScreenQuad();
+		
+		
+		
 		gl::frameEnd();
 		updateTime();
 		updateTimeFactor();
