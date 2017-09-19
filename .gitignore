@@ -1,8 +1,5 @@
 assets/
 deps/
-Debug/
-NewGame.VC.db
-x64
 .vs/
 *.obj
 *.log
@@ -14,6 +11,5 @@ x64
 *.pdb
 *.lib
 *.dll
-*.exe
 *.ilk
 *.exp
