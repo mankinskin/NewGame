@@ -15,7 +15,8 @@
 #include <OpenGL\UI\GUI.h>
 #include "../World/EntityRegistry.h"
 #include <OpenGL\Render\Models.h>
-#include <OpenGL/Render/Render.h>
+#include <OpenGL\Render\Render.h>
+#include <OpenGL\Lighting\Lights.h>
 App::State App::state = App::State::Init;
 App::ContextWindow::Window App::mainWindow = App::ContextWindow::Window();
 double App::timeFactor = 1.0;
@@ -24,7 +25,8 @@ double App::lastFrameLimitedMS = 0;
 double App::totalMS = 0;
 double App::targetFrameMS = 16.0;
 
-
+glm::vec3 App::light_pos = glm::vec3(4.0f, 3.0f, 4.0f);
+glm::vec3 App::light_mov = glm::vec3();
 void App::init()
 {
 	state = MainMenu;
@@ -172,6 +174,10 @@ void App::frameLoop()
 {
 	glClearColor(0.1f, 0.1f, 0.3f, 0.0f);
 	initGameGUI();
+	
+	gl::Lighting::createLight(glm::vec4(light_pos, 1.0f), glm::vec4(1.0f, 0.0f, 0.0, 10.0f));
+	gl::Lighting::updateLightIndexRangeBuffer();
+
 
 	Debug::printErrors();
 	while (state == App::State::Running) {
@@ -186,8 +192,12 @@ void App::frameLoop()
 		gl::Camera::look(Input::cursorFrameDelta);
 		gl::Camera::update();
 		Debug::printErrors();
+		light_pos += light_mov * 0.2f;
+		gl::Lighting::setLightPos(0, light_pos);
 		//EntityRegistry::setPos(0, glm::vec3(gl::Camera::pos.x, 0.0f, gl::Camera::pos.z));
  		gl::updateGeneralUniformBuffer();
+		gl::Lighting::updateLightDataBuffer();
+		
 		gl::Render::updateBuffers();
 		Debug::printErrors();
 
@@ -198,7 +208,7 @@ void App::frameLoop()
 		gl::GUI::renderGUI();
 		gl::GUI::Text::renderGlyphs();
 		gl::Render::render();
-		gl::Render::renderToScreenQuad();
+		gl::Lighting::renderLights();
 		
 		
 		

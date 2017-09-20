@@ -17,6 +17,7 @@
     <ClCompile Include="UI\Font.cpp" />
     <ClCompile Include="Render\Models.cpp" />
     <ClCompile Include="BaseGL\Framebuffer.cpp" />
+    <ClCompile Include="Lighting\Lights.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -41,6 +42,7 @@
     <ClInclude Include="UI\Font.h" />
     <ClInclude Include="Render\Models.h" />
     <ClInclude Include="BaseGL\Framebuffer.h" />
+    <ClInclude Include="Lighting\Lights.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Text">

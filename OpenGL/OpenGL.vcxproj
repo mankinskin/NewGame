@@ -137,6 +137,7 @@
     <ClInclude Include="Global\gl.h" />
     <ClInclude Include="Global\glDebug.h" />
     <ClInclude Include="Global\stdafx.h" />
+    <ClInclude Include="Lighting\Lights.h" />
     <ClInclude Include="Render\Models.h" />
     <ClInclude Include="Render\Model_Loader.h" />
     <ClInclude Include="Render\Render.h" />
@@ -160,6 +161,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Global\gl.cpp" />
     <ClCompile Include="Global\glDebug.cpp" />
+    <ClCompile Include="Lighting\Lights.cpp" />
     <ClCompile Include="Render\Models.cpp" />
     <ClCompile Include="Render\Model_Loader.cpp" />
     <ClCompile Include="Render\Render.cpp" />

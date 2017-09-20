@@ -32,4 +32,7 @@ namespace App {
 	void updateTime();
 	void updateTimeFactor();
 	void limitFPS();
+
+	extern glm::vec3 light_pos;
+	extern glm::vec3 light_mov;
 }

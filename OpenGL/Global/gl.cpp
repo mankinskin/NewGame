@@ -16,6 +16,7 @@
 #include "../Render/Models.h"
 #include "../UI/Text.h"
 #include "../BaseGL/Framebuffer.h"
+#include "../Lighting/Lights.h"
 int gl::MAX_WORK_GROUP_COUNT = 0;
 glm::ivec3 gl::MAX_WORK_GROUP_SIZE = {};
 unsigned int gl::MAX_LIGHT_COUNT = 100;
@@ -57,7 +58,9 @@ void gl::init()
 	//init framebuffers
 	//include shaders
 	Render::initMeshShader();
-	Render::initScreenShader();
+	Lighting::initLightShader();
+	//Render::initScreenShader();
+
 	GUI::initGUIShaders();
 	GUI::Text::initFontShader();
 	Debug::initDebugShader();
@@ -68,6 +71,8 @@ void gl::init()
 	initGeneralQuadVBO();
 	Texture::initGBuffer();
 	Render::initScreenVAO();
+	Lighting::initLightVAO();
+	Lighting::initLightDataBuffer();
 	Debug::getGLError("gl::init()3");
 	App::Debug::printErrors();
 	
@@ -104,7 +109,9 @@ void gl::init()
 	loadModels();
 	Render::fillMeshVAO();
 	
-	Shader::bindUniformBufferToShader(Render::screenShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
+	Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, Lighting::lightDataUBO, "LightDataBuffer");
+	Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
+
 	Shader::bindUniformBufferToShader(GUI::Text::glyphShapeProgram, generalUniformBuffer, "GeneralUniformBuffer");
 
 	Shader::bindUniformBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");

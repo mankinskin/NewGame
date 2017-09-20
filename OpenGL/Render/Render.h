@@ -9,7 +9,6 @@ namespace gl {
 		void fillMeshVAO();
 		void storeMaterials();
 		void render();
-		void renderToScreenQuad();
 		void updateBuffers();
 		void initScreenVAO();
 		void initScreenShader();

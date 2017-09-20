@@ -79,6 +79,16 @@ void App::Input::initGameGUISignals() {
 	FuncSlot<void> stopXSlot(gl::Camera::stop_x);
 	FuncSlot<void> stopYSlot(gl::Camera::stop_y);
 
+	FuncSlot<void> moveLightForwardSlot([]() {App::light_mov += glm::vec3(0.0f, 0.0f, -1.0f); });
+	FuncSlot<void> moveLightBackwardSlot([]() {App::light_mov += glm::vec3(0.0f, 0.0f, 1.0f); });
+	FuncSlot<void> moveLightLeftSlot([]() {App::light_mov += glm::vec3(-1.0f, 0.0f, 0.0f); });
+	FuncSlot<void> moveLightRightSlot([]() {App::light_mov += glm::vec3(1.0f, 0.0f, 0.0f); });
+	FuncSlot<void> moveLightUpSlot([]() {App::light_mov += glm::vec3(0.0f, 1.0f, 0.0f); });
+	FuncSlot<void> moveLightDownSlot([]() {App::light_mov += glm::vec3(0.0f, -1.0f, 0.0f); });
+	FuncSlot<void> stopLightZSlot([]() {App::light_mov.z = 0.0f; });
+	FuncSlot<void> stopLightXSlot([]() {App::light_mov.x = 0.0f; });
+	FuncSlot<void> stopLightYSlot([]() {App::light_mov.y = 0.0f; });
+
 	FuncSlot<void> exitProgramSlot(App::quit);
 	FuncSlot<void> menuProgramSlot(App::mainmenu);
 	FuncSlot<void> setCameraModeSlot(toggleTrackMouse);
@@ -102,19 +112,35 @@ void App::Input::initGameGUISignals() {
 	keyEventSlotOffset = mouseEventSlotOffset + mouseEventSlotCount;
 	unsigned int c_press = 0;       EventSlot<KeyEvent>(c_press, KeyEvent(GLFW_KEY_C, 1, 0));
 	unsigned int c_release = 0;     EventSlot<KeyEvent>(c_release, KeyEvent(GLFW_KEY_C, 0, 0));
+
 	unsigned int w_press = 0;       EventSlot<KeyEvent>(w_press, KeyEvent(GLFW_KEY_W, 1, 0));
 	unsigned int w_release = 0;     EventSlot<KeyEvent>(w_release, KeyEvent(GLFW_KEY_W, 0, 0));
 	unsigned int s_press = 0;       EventSlot<KeyEvent>(s_press, KeyEvent(GLFW_KEY_S, 1, 0));
 	unsigned int s_release = 0;     EventSlot<KeyEvent>(s_release, KeyEvent(GLFW_KEY_S, 0, 0));
 	unsigned int a_press = 0;       EventSlot<KeyEvent>(a_press, KeyEvent(GLFW_KEY_A, 1, 0));
 	unsigned int a_release = 0;     EventSlot<KeyEvent>(a_release, KeyEvent(GLFW_KEY_A, 0, 0));
-	unsigned int g_press = 0;       EventSlot<KeyEvent>(g_press, KeyEvent(GLFW_KEY_G, 1, 0));
 	unsigned int d_press = 0;       EventSlot<KeyEvent>(d_press, KeyEvent(GLFW_KEY_D, 1, 0));
 	unsigned int d_release = 0;     EventSlot<KeyEvent>(d_release, KeyEvent(GLFW_KEY_D, 0, 0));
 	unsigned int space_press = 0;   EventSlot<KeyEvent>(space_press, KeyEvent(GLFW_KEY_SPACE, 1, 0));
 	unsigned int space_release = 0; EventSlot<KeyEvent>(space_release, KeyEvent(GLFW_KEY_SPACE, 0, 0));
 	unsigned int z_press = 0;       EventSlot<KeyEvent>(z_press, KeyEvent(GLFW_KEY_Z, 1, 0));
 	unsigned int z_release = 0;     EventSlot<KeyEvent>(z_release, KeyEvent(GLFW_KEY_Z, 0, 0));
+
+
+	unsigned int up_press = 0;       EventSlot<KeyEvent>(up_press, KeyEvent(GLFW_KEY_UP, 1, 0));
+	unsigned int up_release = 0;     EventSlot<KeyEvent>(up_release, KeyEvent(GLFW_KEY_UP, 0, 0));
+	unsigned int down_press = 0;       EventSlot<KeyEvent>(down_press, KeyEvent(GLFW_KEY_DOWN, 1, 0));
+	unsigned int down_release = 0;     EventSlot<KeyEvent>(down_release, KeyEvent(GLFW_KEY_DOWN, 0, 0));
+	unsigned int left_press = 0;       EventSlot<KeyEvent>(left_press, KeyEvent(GLFW_KEY_LEFT, 1, 0));
+	unsigned int left_release = 0;     EventSlot<KeyEvent>(left_release, KeyEvent(GLFW_KEY_LEFT, 0, 0));
+	unsigned int right_press = 0;       EventSlot<KeyEvent>(right_press, KeyEvent(GLFW_KEY_RIGHT, 1, 0));
+	unsigned int right_release = 0;     EventSlot<KeyEvent>(right_release, KeyEvent(GLFW_KEY_RIGHT, 0, 0));
+	unsigned int o_press = 0;   EventSlot<KeyEvent>(o_press, KeyEvent(GLFW_KEY_O, 1, 0));
+	unsigned int o_release = 0; EventSlot<KeyEvent>(o_release, KeyEvent(GLFW_KEY_O, 0, 0));
+	unsigned int l_press = 0;       EventSlot<KeyEvent>(l_press, KeyEvent(GLFW_KEY_L, 1, 0));
+	unsigned int l_release = 0;     EventSlot<KeyEvent>(l_release, KeyEvent(GLFW_KEY_L, 0, 0));
+	
+	unsigned int g_press = 0;       EventSlot<KeyEvent>(g_press, KeyEvent(GLFW_KEY_G, 1, 0));
 	unsigned int esc_press = 0;     EventSlot<KeyEvent>(esc_press, KeyEvent(GLFW_KEY_ESCAPE, 1, 0));
 	unsigned int i_press = 0;       EventSlot<KeyEvent>(i_press, KeyEvent(GLFW_KEY_I, 1, 0));
 	unsigned int h_press = 0;       EventSlot<KeyEvent>(h_press, KeyEvent(GLFW_KEY_H, 1, 0));
@@ -122,9 +148,10 @@ void App::Input::initGameGUISignals() {
 	keyEventSlotCount = EventSlot<KeyEvent>::instance_count() - keyEventSlotOffset;
 	
 	setCameraModeSlot.listen({ rmb_press , rmb_release, c_press });//setCameraMode
+	
 	moveForwardSlot.listen({ w_press });//forward
-	stopZSlot.listen({ w_release, s_release });//stop_z
 	moveBackwardSlot.listen({ s_press });//back
+	stopZSlot.listen({ w_release, s_release });//stop_z
 	signal_lock(w_press, { s_press, s_release });
 	signal_unlock(w_release, { s_press, s_release });
 	signal_lock(s_press, { w_press, w_release });
@@ -145,6 +172,30 @@ void App::Input::initGameGUISignals() {
 	signal_unlock(space_release, { z_press, z_release });
 	signal_lock(z_press, { space_press, space_release });
 	signal_unlock(z_release, { space_press, space_release });
+
+	moveLightForwardSlot.listen({ up_press });//forward
+	moveLightBackwardSlot.listen({ down_press });//back
+	stopLightZSlot.listen({ up_release, down_release });//stop_z
+	signal_lock(up_press, { down_press, down_release });
+	signal_unlock(up_release, { down_press, down_release });
+	signal_lock(down_press, { up_press, up_release });
+	signal_unlock(down_release, { up_press, up_release });
+
+	moveLightLeftSlot.listen({ left_press });//left
+	moveLightRightSlot.listen({ right_press });//right
+	stopLightXSlot.listen({ left_release, right_release });//stop_x
+	signal_lock(left_press, { right_press, right_release });
+	signal_unlock(left_release, { right_press, right_release });
+	signal_lock(right_press, { left_press, left_release });
+	signal_unlock(right_release, { left_press, left_release });
+
+	moveLightUpSlot.listen({ o_press });//up
+	moveLightDownSlot.listen({ l_press });//down
+	stopLightYSlot.listen({ o_release, l_release });//stop_y
+	signal_lock(o_press, { l_press, l_release });
+	signal_unlock(o_release, { l_press, l_release });
+	signal_lock(l_press, { o_press, o_release });
+	signal_unlock(l_release, { o_press, o_release });
 
 
 	//--------------------------------

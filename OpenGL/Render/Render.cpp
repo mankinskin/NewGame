@@ -85,25 +85,6 @@ void gl::Render::render()
 	Debug::getGLError("render(Meshes)");
 }
 
-void gl::Render::renderToScreenQuad()
-{
-	glBindVertexArray(screenQuadVAO);
-	Shader::use(screenShaderProgram);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, Texture::gAlbedoTexture);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, Texture::gPosTexture);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, Texture::gNormalTexture);
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, Texture::gDepthTexture);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	
-	Shader::unuse();
-	glBindVertexArray(0);	
-	Debug::getGLError("render(Meshes)");
-}
 
 void gl::Render::updateBuffers()
 {
