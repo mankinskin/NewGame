@@ -1,7 +1,6 @@
-assets/
-deps/
-.vs/
+deps/include/boost/
 *.obj
+.vs/
 *.log
 *.vcxproj
 *.tlog
@@ -9,7 +8,5 @@ deps/
 *.vcxproj.filters
 *.idb
 *.pdb
-*.lib
-*.dll
 *.ilk
 *.exp

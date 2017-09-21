@@ -1,0 +1,48 @@
+#version 450
+layout(location = 0) in vec2 cornerPos;
+
+layout(location = 1) in unsigned int posIndex;
+layout(location = 2) in unsigned int sizeIndex;
+layout(location = 3) in unsigned int colorIndex;
+layout(location = 4) in unsigned int uvIndex;
+
+
+const unsigned int MAX_QUADS = 100000;
+
+layout(std140) uniform PositionBuffer{
+	vec4 posBuffer[unsigned int(round(MAX_QUADS/2))];
+};
+
+layout(std140) uniform SizeBuffer{
+	vec4 sizeBuffer[unsigned int(round(MAX_QUADS/2))];
+};
+
+layout(std140) uniform UVBuffer{
+	vec4 uvBuffer[MAX_QUADS];
+};
+
+layout(std140) uniform ColorBuffer{
+	vec4 colorBuffer[MAX_QUADS];
+};
+
+out Vertex{
+	vec2 uv;
+	vec4 color;
+}outv;
+
+void main(){
+
+	vec4 posd = vec4(posBuffer[unsigned int(floor(posIndex/2))]);
+	vec2 pos = vec2(posd[(posIndex%2)*2], posd[((posIndex%2)*2)+1]);
+	
+	vec4 sized = vec4(sizeBuffer[unsigned int(floor(sizeIndex/2))]);
+	vec2 size = vec2(sized[(sizeIndex%2)*2], sized[((sizeIndex%2)*2)+1]);
+	
+	vec4 color = colorBuffer[colorIndex];
+	
+	vec4 uv = uvBuffer[uvIndex];
+		
+	gl_Position = vec4(pos.x + cornerPos.x*size.x, pos.y - size.y + cornerPos.y * size.y, 0.0, 1.0);
+	outv.color = color;
+	outv.uv = vec2((1.0 - cornerPos.x)*uv.x + cornerPos.x * uv.z, (1.0 - cornerPos.y)*uv.y + cornerPos.y * uv.w);
+}

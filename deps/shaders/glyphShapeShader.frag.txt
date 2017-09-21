@@ -1,0 +1,25 @@
+#version 450
+
+out vec4 ocolor;
+
+struct Style{
+	float thickness;
+	float hardness;
+	vec2 pad;
+};
+
+in Vertex{
+	vec2 uv;
+	Style style;
+}inVer;
+
+uniform sampler2D atlas;
+
+
+void main(){
+	//float dist = smoothstep(0.1, 0.6, texture(atlas, inVer.uv).w);
+	//float dist = smoothstep(0.5 - (inVer.style.thickness - 1.0f)/2.0f, 1.0 - ((inVer.style.thickness - 1.0f)/2.0f)*inVer.style.hardness, texture(atlas, inVer.uv).w);
+	float dist = texture(atlas, inVer.uv).w;
+    vec3 color = vec3(0.0, 0.0, 0.0);
+	ocolor = vec4(color, dist + 0.0);
+}

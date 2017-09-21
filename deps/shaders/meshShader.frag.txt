@@ -1,0 +1,30 @@
+#version 450
+
+layout(location = 0)out vec4 albedoBuffer;
+layout(location = 1)out vec3 posBuffer;
+layout(location = 2)out vec3 normalBuffer;
+
+struct Material{
+        vec3 ambient_albedo;
+        vec3 diffuse_albedo;
+        vec3 specular_albedo;
+        float shininess;
+        vec2 pad;
+};
+
+layout(std140)uniform MaterialBuffer{
+        Material materialBuffer[10];
+};
+
+in Vertex{
+	vec3 pos;
+	vec3 normal;
+	vec4 color;
+}inVertex;
+
+void main(){
+	albedoBuffer = abs(inVertex.color);
+	posBuffer = inVertex.pos;
+	normalBuffer = inVertex.normal;
+	
+}

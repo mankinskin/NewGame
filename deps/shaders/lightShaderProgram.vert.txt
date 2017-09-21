@@ -1,0 +1,12 @@
+#version 450
+layout(location = 0) in vec2 corner_pos;
+layout(location = 1) in uvec2 index_range;
+
+out vec2 uv;
+out uvec2 i_rng;
+
+void main(){
+	uv = corner_pos;
+	i_rng = index_range;
+	gl_Position = vec4(-1.0 + corner_pos.x*2, -1.0 + corner_pos.y*2, 0.0, 1.0);
+}
