@@ -131,6 +131,7 @@ void App::mainMenuLoop()
 	while (state == App::MainMenu) {
 		gl::GUI::updateGUI();
 		gl::GUI::Text::updateCharStorage();//why does this only work if i update it each frame?!
+
 		App::Input::fetchGLFWEvents();
 		Input::fetchButtonEvents();
 		App::Input::checkEvents();
@@ -172,16 +173,13 @@ void App::mainmenu()
 
 void App::frameLoop()
 {
-	glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	initGameGUI();
 	
         gl::Lighting::reservePointLightSpace(4);
-        gl::Lighting::createLight(glm::vec4(light_pos.x, light_pos.y, -light_pos.z, 1.0f), glm::vec4(1.0f, 1.0f, 1.0, 10.0f));
+        
         gl::Lighting::createLight(glm::vec4(light_pos, 1.0f), glm::vec4(1.0f, 0.0f, 0.0, 10.0f));
-	gl::Lighting::createLight(glm::vec4(-light_pos.x, light_pos.y, -light_pos.z, 1.0f), glm::vec4(0.0f, 1.0f, 0.0, 10.0f));
-        gl::Lighting::createLight(glm::vec4(-light_pos.x, light_pos.y, light_pos.z, 1.0f), glm::vec4(0.0f, 0.0f, 1.0, 10.0f));
-      
-
+        gl::Lighting::createLight(glm::vec4(light_pos.x, light_pos.y, light_pos.z, 0.0f), glm::vec4(1.0f, 1.0f, 1.0, 10.0f));
 
 	Debug::printErrors();
 	while (state == App::State::Running) {
@@ -197,7 +195,7 @@ void App::frameLoop()
 		gl::Camera::update();
 		Debug::printErrors();
 		light_pos += light_mov * 0.2f;
-		gl::Lighting::setLightPos(0, light_pos);
+		gl::Lighting::setLightPos(1, light_pos);
 		//EntityRegistry::setPos(0, glm::vec3(gl::Camera::pos.x, 0.0f, gl::Camera::pos.z));
  		gl::updateGeneralUniformBuffer();
 		gl::Lighting::updateLightDataBuffer();
