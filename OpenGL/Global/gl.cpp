@@ -17,6 +17,7 @@
 #include "../UI/Text.h"
 #include "../BaseGL/Framebuffer.h"
 #include "../Lighting/Lights.h"
+
 int gl::MAX_WORK_GROUP_COUNT = 0;
 glm::ivec3 gl::MAX_WORK_GROUP_SIZE = {};
 unsigned int gl::MAX_LIGHT_COUNT = 100;
@@ -59,7 +60,7 @@ void gl::init()
 	//include shaders
 	Render::initMeshShader();
 	Lighting::initLightShader();
-	//Render::initScreenShader();
+	Render::initScreenShader();
 
 	GUI::initGUIShaders();
 	GUI::Text::initFontShader();
@@ -70,6 +71,7 @@ void gl::init()
 	initGeneralUniformBuffer();
 	initGeneralQuadVBO();
 	Texture::initGBuffer();
+	Texture::initLightFBO();
 	Render::initScreenVAO();
 	Lighting::initLightVAO();
 	Lighting::initLightDataBuffer();

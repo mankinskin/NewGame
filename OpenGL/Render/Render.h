@@ -12,6 +12,7 @@ namespace gl {
 		void updateBuffers();
 		void initScreenVAO();
 		void initScreenShader();
+		void renderScreenQuad();
 		extern unsigned int meshShaderProgram;
 		extern unsigned int screenShaderProgram;
 		extern unsigned int screenQuadVAO;

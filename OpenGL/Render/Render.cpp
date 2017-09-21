@@ -86,6 +86,17 @@ void gl::Render::render()
 }
 
 
+void gl::Render::renderScreenQuad(){
+	glBindVertexArray(screenQuadVAO);
+	Shader::use(screenShaderProgram);
+	
+	glActiveTexture(GL_TEXTURE0); 
+	glBindTexture(GL_TEXTURE_2D, Texture::lightColorTexture);
+		
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);	
+	glBindVertexArray(0);
+	Shader::unuse();
+}
 void gl::Render::updateBuffers()
 {
 	if (Models::allInstanceEntities.size()) {

@@ -6,6 +6,7 @@
 #include "../BaseGL/Framebuffer.h"
 #include "../Global/glDebug.h"
 #include "../Render/Render.h"
+#include "../BaseGL/Texture.h"
 std::vector<glm::vec4> gl::Lighting::allLightData;
 std::vector<gl::Lighting::LightIndexRange> gl::Lighting::allLightIndexRanges;
 unsigned int gl::Lighting::lightVAO = 0;
@@ -79,6 +80,7 @@ void gl::Lighting::reservePointLightSpace(unsigned int pCount){
 
 void gl::Lighting::renderLights()
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, Texture::lightFBO);
 	glBindVertexArray(Render::screenQuadVAO);
 	Shader::use(lightShaderProgram);
 	Debug::getGLError("renderLights()1");
@@ -96,6 +98,7 @@ void gl::Lighting::renderLights()
 	Shader::unuse();
 	glBindVertexArray(0);	
 	Debug::getGLError("renderLights()4");
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 void gl::Lighting::setLightPos(unsigned int pLightIndex, glm::vec3& pPos){
 	std::memcpy(&allLightData[allLightIndexRanges[pLightIndex].offset], &pPos, sizeof(float)*3);

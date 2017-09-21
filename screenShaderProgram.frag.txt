@@ -1,0 +1,11 @@
+#version 450
+
+layout(location = 0) uniform sampler2D lightColorTexture;
+
+out vec4 out_color;
+
+in vec2 uv;
+
+void main(){
+	out_color = texture(lightColorTexture, uv);
+}

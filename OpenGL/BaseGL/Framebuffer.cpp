@@ -13,11 +13,15 @@ unsigned int gl::Texture::gAmbientTexture;
 unsigned int gl::Texture::gDiffuseTexture;
 unsigned int gl::Texture::gSpecularTexture;
 
+unsigned int gl::Texture::lightFBO;
+unsigned int gl::Texture::lightColorTexture;
+unsigned int gl::Texture::lightDepthTexture;
+
 void gl::Texture::initGBuffer()
 {
-	glGenFramebuffers(1, &gBuffer);
+	glCreateFramebuffers(1, &gBuffer);
 	
-	gAlbedoTexture = createTexture2D(screenWidth, screenHeight, GL_RGBA16F, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	gAlbedoTexture = createTexture2D(screenWidth, screenHeight, GL_RGBA16F, GL_RGBA, GL_FLOAT, 0);
 	gPosTexture = createTexture2D(screenWidth, screenHeight, GL_RGB32F, GL_RGB, GL_FLOAT, 0);
 	gDepthTexture = createTexture2D(screenWidth, screenHeight, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 	gNormalTexture = createTexture2D(screenWidth, screenHeight, GL_RGB32F, GL_RGB, GL_FLOAT, 0);
@@ -38,4 +42,22 @@ void gl::Texture::initGBuffer()
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
+}
+void gl::Texture::initLightFBO(){
+	glCreateFramebuffers(1, &lightFBO);
+	lightColorTexture = createTexture2D(screenWidth, screenHeight, GL_RGBA16F, GL_RGBA, GL_FLOAT, 0);
+	lightDepthTexture = createTexture2D(screenWidth, screenHeight, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, lightFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, lightColorTexture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, lightDepthTexture, 0);
+	
+	std::vector<unsigned int> attachments = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(attachments.size(), &attachments[0]);
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+	if (status != GL_FRAMEBUFFER_COMPLETE) {
+		App::Debug::pushError("Framebuffer incomplete");
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

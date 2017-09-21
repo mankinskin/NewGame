@@ -176,6 +176,7 @@ void App::frameLoop()
 	initGameGUI();
 	
 	gl::Lighting::createLight(glm::vec4(light_pos, 1.0f), glm::vec4(1.0f, 0.0f, 0.0, 10.0f));
+	gl::Lighting::createLight(glm::vec4(-light_pos.x, light_pos.y, -light_pos.z, 1.0f), glm::vec4(0.0f, 1.0f, 0.0, 10.0f));
 	gl::Lighting::updateLightIndexRangeBuffer();
 
 
@@ -209,7 +210,7 @@ void App::frameLoop()
 		gl::GUI::Text::renderGlyphs();
 		gl::Render::render();
 		gl::Lighting::renderLights();
-		
+		gl::Render::renderScreenQuad();	
 		
 		
 		gl::frameEnd();

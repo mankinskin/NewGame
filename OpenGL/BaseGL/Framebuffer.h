@@ -11,5 +11,10 @@ namespace gl {
 		extern unsigned int gAmbientTexture;
 		extern unsigned int gDiffuseTexture;
 		extern unsigned int gSpecularTexture;
+
+		void initLightFBO();
+		extern unsigned int lightFBO;
+		extern unsigned int lightColorTexture;
+		extern unsigned int lightDepthTexture;
 	}
 }
