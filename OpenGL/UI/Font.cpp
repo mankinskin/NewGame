@@ -39,8 +39,8 @@ initFontVAO() {
 	glVertexArrayBindingDivisor(fontVAO, 1, 1);
 	glVertexArrayBindingDivisor(fontVAO, 2, 1);
 	
-	glVertexArrayElementBuffer(fontVAO, quadEBO);
-	glVertexArrayVertexBuffer(fontVAO, 0, quadVBO, 0, sizeof(float) * 2);
+	glVertexArrayElementBuffer(fontVAO, quadEBO+1);
+	glVertexArrayVertexBuffer(fontVAO, 0, quadVBO+1, 0, sizeof(float) * 2);
 
 	VAO::setVertexArrayVertexStorage(fontVAO, 1, quadStorage, sizeof(CharQuad));
 	VAO::setVertexArrayVertexStorage(fontVAO, 2, charStorage, sizeof(unsigned int));

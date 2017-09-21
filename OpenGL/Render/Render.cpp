@@ -89,11 +89,14 @@ void gl::Render::render()
 void gl::Render::renderScreenQuad(){
 	glBindVertexArray(screenQuadVAO);
 	Shader::use(screenShaderProgram);
-	
+	glDepthFunc(GL_ALWAYS);
 	glActiveTexture(GL_TEXTURE0); 
 	glBindTexture(GL_TEXTURE_2D, Texture::lightColorTexture);
+	glActiveTexture(GL_TEXTURE1); 
+	glBindTexture(GL_TEXTURE_2D, Texture::gAlbedoTexture);
 		
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);	
+	glDepthFunc(GL_LESS);
 	glBindVertexArray(0);
 	Shader::unuse();
 }
@@ -108,8 +111,8 @@ void gl::Render::updateBuffers()
 void gl::Render::initScreenVAO()
 {
 	glCreateVertexArrays(1, &screenQuadVAO);
-	glVertexArrayVertexBuffer(screenQuadVAO, 0, quadVBO, 0, sizeof(float) * 2);
-	glVertexArrayElementBuffer(screenQuadVAO, quadEBO);
+	glVertexArrayVertexBuffer(screenQuadVAO, 0, quadVBO + 1, 0, sizeof(float) * 2);
+	glVertexArrayElementBuffer(screenQuadVAO, quadEBO + 1);
 	VAO::setVertexAttrib(screenQuadVAO, 0, 0, 2, GL_FLOAT, 0);
 }
 

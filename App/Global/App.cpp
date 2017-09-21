@@ -172,12 +172,15 @@ void App::mainmenu()
 
 void App::frameLoop()
 {
-	glClearColor(0.1f, 0.1f, 0.3f, 0.0f);
+	glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
 	initGameGUI();
 	
-	gl::Lighting::createLight(glm::vec4(light_pos, 1.0f), glm::vec4(1.0f, 0.0f, 0.0, 10.0f));
+        gl::Lighting::reservePointLightSpace(4);
+        gl::Lighting::createLight(glm::vec4(light_pos.x, light_pos.y, -light_pos.z, 1.0f), glm::vec4(1.0f, 1.0f, 1.0, 10.0f));
+        gl::Lighting::createLight(glm::vec4(light_pos, 1.0f), glm::vec4(1.0f, 0.0f, 0.0, 10.0f));
 	gl::Lighting::createLight(glm::vec4(-light_pos.x, light_pos.y, -light_pos.z, 1.0f), glm::vec4(0.0f, 1.0f, 0.0, 10.0f));
-	gl::Lighting::updateLightIndexRangeBuffer();
+        gl::Lighting::createLight(glm::vec4(-light_pos.x, light_pos.y, light_pos.z, 1.0f), glm::vec4(0.0f, 0.0f, 1.0, 10.0f));
+      
 
 
 	Debug::printErrors();
@@ -198,7 +201,7 @@ void App::frameLoop()
 		//EntityRegistry::setPos(0, glm::vec3(gl::Camera::pos.x, 0.0f, gl::Camera::pos.z));
  		gl::updateGeneralUniformBuffer();
 		gl::Lighting::updateLightDataBuffer();
-		
+		gl::Lighting::updateLightIndexRangeBuffer();
 		gl::Render::updateBuffers();
 		Debug::printErrors();
 

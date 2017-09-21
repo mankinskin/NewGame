@@ -86,8 +86,8 @@ void gl::GUI::initGUIVAO()
 	VAO::bindStorage(GL_UNIFORM_BUFFER, guiPositionBuffer);
 	VAO::bindStorage(GL_UNIFORM_BUFFER, guiSizeBuffer);
 
-	glVertexArrayElementBuffer(guiVAO, quadEBO);
-	glVertexArrayVertexBuffer(guiVAO, 0, quadVBO, 0, sizeof(glm::vec2));
+	glVertexArrayElementBuffer(guiVAO, quadEBO+1);
+	glVertexArrayVertexBuffer(guiVAO, 0, quadVBO+1, 0, sizeof(glm::vec2));
 	VAO::setVertexArrayVertexStorage(guiVAO, 1, guiQuadBuffer, sizeof(glm::ivec4));
 	
 

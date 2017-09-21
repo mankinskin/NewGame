@@ -208,8 +208,8 @@ void gl::initGeneralQuadVBO()
 	unsigned int iarr[6] = {
 		0, 1, 2, 0, 2, 3
 	};
-	quadVBO = VAO::createStorage(sizeof(float) * 4 * 2, &varr[0], 0) + 1;
-	quadEBO = VAO::createStorage(sizeof(unsigned int) * 6, &iarr[0], 0) + 1;
+	quadVBO = VAO::createStorage(sizeof(float) * 4 * 2, &varr[0], 0);
+	quadEBO = VAO::createStorage(sizeof(unsigned int) * 6, &iarr[0], 0);
 }
 
 void gl::initGeneralUniformBuffer()

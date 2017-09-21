@@ -19,21 +19,22 @@ void gl::Lighting::initLightVAO(){
         
         lightIndexVBO = VAO::createStorage(MAX_LIGHT_COUNT*sizeof(LightIndexRange), 0, VAO::STREAM_FLAGS | GL_MAP_WRITE_BIT);
         VAO::createStream(lightIndexVBO, GL_MAP_WRITE_BIT);
-
+       
         glCreateVertexArrays(1, &lightVAO);
-	    glVertexArrayElementBuffer(lightVAO, gl::quadEBO);
-	    glVertexArrayVertexBuffer(lightVAO, 0, gl::quadVBO, 0, sizeof(glm::vec2));
-        VAO::setVertexArrayVertexStorage(lightVAO, 1, lightIndexVBO, sizeof(LightIndexRange));
-		VAO::setVertexAttrib(lightVAO, 0, 0, 2, GL_FLOAT, 0);
-		VAO::setVertexAttrib(lightVAO, 1, 1, 2, GL_UNSIGNED_INT, 0);
-	    glVertexArrayBindingDivisor(lightVAO, 1, 1);
+	glVertexArrayVertexBuffer(lightVAO, 0, gl::quadVBO + 1, 0, sizeof(float)*2);
+        glVertexArrayElementBuffer(lightVAO, gl::quadEBO + 1);
+        VAO::setVertexArrayVertexStorage(lightVAO, 1, lightIndexVBO, sizeof(unsigned int)*2);
+        glVertexArrayBindingDivisor(lightVAO, 1, 1);
+	VAO::setVertexAttrib(lightVAO, 0, 0, 2, GL_FLOAT, 0);
+	VAO::setVertexAttrib(lightVAO, 1, 1, 2, GL_UNSIGNED_INT, 0);
+	
 }
 
 void gl::Lighting::initLightDataBuffer(){
 
         lightDataUBO = VAO::createStorage(MAX_LIGHT_COUNT*sizeof(glm::vec4)*3, 0, VAO::STREAM_FLAGS | GL_MAP_WRITE_BIT); 
         VAO::createStream(lightDataUBO, GL_MAP_WRITE_BIT);
-		VAO::bindStorage(GL_UNIFORM_BUFFER, lightDataUBO);
+	VAO::bindStorage(GL_UNIFORM_BUFFER, lightDataUBO);
 }
 
 void gl::Lighting::updateLightDataBuffer(){
@@ -67,23 +68,22 @@ unsigned int gl::Lighting::createLight(glm::vec4& pPos, glm::vec4& pColor, glm::
         allLightData.push_back(pFrustum);
         return allLightIndexRanges.size()-1;
 }
-
 void gl::Lighting::reserveLightSpace(unsigned int pCount){
 	allLightIndexRanges.reserve(allLightIndexRanges.capacity() + pCount);
 	allLightData.reserve(allLightData.capacity() + pCount*3);
 }
-
 void gl::Lighting::reservePointLightSpace(unsigned int pCount){
 	allLightIndexRanges.reserve(allLightIndexRanges.capacity() + pCount);
 	allLightData.reserve(allLightData.capacity() + pCount*2);	
 }
-
 void gl::Lighting::renderLights()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, Texture::lightFBO);
-	glBindVertexArray(Render::screenQuadVAO);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glBindVertexArray(lightVAO);
 	Shader::use(lightShaderProgram);
-	Debug::getGLError("renderLights()1");
+        glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR);
+        glDepthFunc(GL_ALWAYS);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, Texture::gAlbedoTexture);
 	glActiveTexture(GL_TEXTURE1);
@@ -93,8 +93,9 @@ void gl::Lighting::renderLights()
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, Texture::gDepthTexture);
 	Debug::getGLError("renderLights()3");
-	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, allLightIndexRanges.size());
-	
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, allLightIndexRanges.size());
+        glDepthFunc(GL_LESS);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	Shader::unuse();
 	glBindVertexArray(0);	
 	Debug::getGLError("renderLights()4");
