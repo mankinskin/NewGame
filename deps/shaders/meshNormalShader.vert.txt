@@ -1,0 +1,28 @@
+#version 450
+layout(location = 0) in vec3 pos;
+layout(location = 1) in vec3 normal;
+layout(location = 3) in unsigned int transform;
+const unsigned int MAX_ENTITIES = 10000;
+
+uniform GeneralUniformBuffer{
+	vec4 generalUniformBuffer[9];
+};
+
+uniform EntityTransformBuffer{
+	vec4 entityTransformBuffer[MAX_ENTITIES*4];
+};
+
+uniform TransformIndexBuffer{
+	ivec4 transformIndexBuffer[MAX_ENTITIES];
+};
+
+out vec3 out_normal;
+
+void main(){
+	mat4 matrix = mat4(generalUniformBuffer[0], generalUniformBuffer[1], generalUniformBuffer[2], generalUniformBuffer[3]);
+	matrix = matrix * mat4(generalUniformBuffer[4], generalUniformBuffer[5], generalUniformBuffer[6], generalUniformBuffer[7]);
+	mat4 transform_mat = mat4(entityTransformBuffer[transform*4], entityTransformBuffer[transform*4 + 1], entityTransformBuffer[transform*4 + 2], entityTransformBuffer[transform*4 + 3]);
+	
+	out_normal = normal;
+	gl_Position = matrix *  transform_mat * vec4(pos, 1.0);
+}

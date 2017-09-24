@@ -138,9 +138,9 @@
     <ClInclude Include="Global\glDebug.h" />
     <ClInclude Include="Global\stdafx.h" />
     <ClInclude Include="Lighting\Lights.h" />
-    <ClInclude Include="Render\Models.h" />
-    <ClInclude Include="Render\Model_Loader.h" />
-    <ClInclude Include="Render\Render.h" />
+    <ClInclude Include="Models\Models.h" />
+    <ClInclude Include="Models\Model_Loader.h" />
+    <ClInclude Include="Models\Render.h" />
     <ClInclude Include="UI\Font.h" />
     <ClInclude Include="UI\Font_Loader.h" />
     <ClInclude Include="UI\GUI.h" />
@@ -162,9 +162,9 @@
     <ClCompile Include="Global\gl.cpp" />
     <ClCompile Include="Global\glDebug.cpp" />
     <ClCompile Include="Lighting\Lights.cpp" />
-    <ClCompile Include="Render\Models.cpp" />
-    <ClCompile Include="Render\Model_Loader.cpp" />
-    <ClCompile Include="Render\Render.cpp" />
+    <ClCompile Include="Models\Models.cpp" />
+    <ClCompile Include="Models\Model_Loader.cpp" />
+    <ClCompile Include="Models\Render.cpp" />
     <ClCompile Include="UI\Font.cpp" />
     <ClCompile Include="UI\Font_Loader.cpp" />
     <ClCompile Include="UI\GUI.cpp" />

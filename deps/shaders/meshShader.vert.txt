@@ -21,7 +21,7 @@ uniform TransformIndexBuffer{
 out Vertex{
 	vec3 pos;
 	vec3 normal;
-	vec4 color;
+	vec2 uv;
 }outVertex;
 
 void main(){
@@ -29,10 +29,9 @@ void main(){
 	matrix = matrix * mat4(generalUniformBuffer[4], generalUniformBuffer[5], generalUniformBuffer[6], generalUniformBuffer[7]);
 	mat4 transform_mat = mat4(entityTransformBuffer[transform*4], entityTransformBuffer[transform*4 + 1], entityTransformBuffer[transform*4 + 2], entityTransformBuffer[transform*4 + 3]);
 	
-	
+	outVertex.uv = uv; 
 	outVertex.normal = normal;
 	outVertex.pos = vec4(transform_mat*vec4(pos, 1.0)).xyz;
-	outVertex.color = vec4(pos, 1.0);
 	gl_Position = matrix * transform_mat * vec4(pos, 1.0);
 	
 }

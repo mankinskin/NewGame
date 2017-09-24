@@ -67,6 +67,8 @@ struct Vertex {
 	Vertex() {}
 	Vertex(float pPosX, float pPosY, float pPosZ, float pNormX, float pNormY, float pNormZ, float pUVCoordS, float pUVCoordT)
 		:pos(glm::vec3(pPosX, pPosY, pPosZ)), normal(glm::vec3(pNormX, pNormY, pNormZ)), uv(glm::vec2(pUVCoordS, pUVCoordT)) {}
+        Vertex(glm::vec3 pPos, glm::vec3 pNormal, glm::vec2 pUV)
+                :pos(pPos), normal(pNormal), uv(pUV) {}
 	glm::vec3 pos;
 	glm::vec3 normal;
 	glm::vec2 uv;

@@ -14,8 +14,8 @@
 #include <OpenGL\UI\Font_Loader.h>
 #include <OpenGL\UI\GUI.h>
 #include "../World/EntityRegistry.h"
-#include <OpenGL\Render\Models.h>
-#include <OpenGL\Render\Render.h>
+#include <OpenGL\Models\Models.h>
+#include <OpenGL\Models\Render.h>
 #include <OpenGL\Lighting\Lights.h>
 App::State App::state = App::State::Init;
 App::ContextWindow::Window App::mainWindow = App::ContextWindow::Window();
@@ -119,7 +119,7 @@ void App::initGameGUI() {
 
 	EntityRegistry::initEntities();
 
-	gl::Models::allModels[0].addInstances({ 0 });
+	gl::Models::allModels[0].addInstances({ 0, 1});
 
 	gl::Models::Model::revalidateEntityOffsets();
 }
@@ -178,9 +178,9 @@ void App::frameLoop()
 	
         gl::Lighting::reservePointLightSpace(4);
         
-        gl::Lighting::createLight(glm::vec4(light_pos, 1.0f), glm::vec4(1.0f, 0.0f, 0.0, 10.0f));
         gl::Lighting::createLight(glm::vec4(light_pos.x, light_pos.y, light_pos.z, 0.0f), glm::vec4(1.0f, 1.0f, 1.0, 10.0f));
-
+        gl::Lighting::createLight(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 0.0f, 1.0, 40.0f));
+       
 	Debug::printErrors();
 	while (state == App::State::Running) {
 		gl::GUI::updateGUI();
@@ -200,7 +200,7 @@ void App::frameLoop()
  		gl::updateGeneralUniformBuffer();
 		gl::Lighting::updateLightDataBuffer();
 		gl::Lighting::updateLightIndexRangeBuffer();
-		gl::Render::updateBuffers();
+		gl::Models::updateBuffers();
 		Debug::printErrors();
 
 		gl::frameStart();
@@ -209,9 +209,10 @@ void App::frameLoop()
 		gl::Debug::drawGrid();
 		gl::GUI::renderGUI();
 		gl::GUI::Text::renderGlyphs();
-		gl::Render::render();
+		gl::Models::render();
+                //gl::Models::renderNormals();
 		gl::Lighting::renderLights();
-		gl::Render::renderScreenQuad();	
+		gl::Models::renderScreenQuad();
 		
 		
 		gl::frameEnd();

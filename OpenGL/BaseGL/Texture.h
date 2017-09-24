@@ -14,13 +14,25 @@ struct Texture2D {
 	GLenum type;
 };
 
+struct TextureBuffer {
+        TextureBuffer() {}
+        unsigned char* data;
+        int width;
+        int height;
+        int channels;
+};
+
 struct TexData2D{
 	std::vector<unsigned char> data;
 	unsigned int width;
 	unsigned int height;
 };
 extern vector<Texture2D> all2DTextures;
+
+void loadTextureBuffer(TextureBuffer& pBuffer, std::string pFilename, int pForceChannels = 0);
 unsigned int createTexture2D(unsigned int pWidth, unsigned int pHeight, GLenum pInternalFormat, GLenum pFormat, GLenum pType, const void* pData);
+unsigned int createTexture2D(std::string pFilename);
+unsigned int createTexture2D(TextureBuffer pBuffer);
 void setTextureWrapping(unsigned int pTextureIndex, unsigned int pWrapS, unsigned int pWrapT);
 void setTextureFilter(unsigned int pTextureIndex, unsigned int pMagFilter, unsigned int pMinFilter);
 

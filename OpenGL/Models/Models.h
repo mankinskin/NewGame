@@ -5,13 +5,7 @@
 
 namespace gl {
 	namespace Models {
-		struct Geometry {
-			Geometry() {}
-			Geometry(unsigned int pOffset, unsigned int pCount)
-				:indexOffset(pOffset), indexCount(pCount) {}
-			unsigned indexOffset;
-			unsigned indexCount;
-		};
+		
 		struct Material {
 			float amb_ref = 1.0f;
 			float diff_ref = 0.5f;
@@ -19,9 +13,12 @@ namespace gl {
 			float shine = 1.0f;
 		};
 		struct Mesh {
-			Mesh(Geometry pGeometry, unsigned pTextureID = 0, unsigned pMaterialIndex = 0)
-				:geometry(pGeometry), texture(pTextureID), materialIndex(pMaterialIndex) {}
-			Geometry geometry;
+			Mesh(unsigned pVertexOffset, unsigned pVertexCount, unsigned pIndexOffset, unsigned pIndexCount, unsigned pTextureID = 0, unsigned pMaterialIndex = 0)
+				:vertexOffset(pVertexOffset), vertexCount(pVertexCount),indexOffset(pIndexOffset), indexCount(pIndexCount), texture(pTextureID), materialIndex(pMaterialIndex) {}
+                        unsigned vertexOffset;
+                        unsigned vertexCount;
+                        unsigned indexOffset;
+                        unsigned indexCount;
 			unsigned materialIndex;
 			unsigned texture;
 		};
@@ -44,10 +41,8 @@ namespace gl {
 
 		void addModel(std::string pFilename);
 		const unsigned int MAX_MODELS = 100;
-		Geometry newGeometry(std::vector<Vertex> pVerts, std::vector<unsigned int> pIndices);
-		
+
 		unsigned createMesh(unsigned int pIndexOffset, unsigned int pIndexCount, unsigned int pTextureID, unsigned int pMaterialIndex);
-		unsigned createMesh(Geometry pGeometry, unsigned int pTextureID, unsigned int pMaterialIndex);
 		unsigned createModel(unsigned pMeshOffset, unsigned pMeshCount);
 		
 		

@@ -12,8 +12,9 @@
 #include "..\BaseGL\Texture.h"
 #include "..\UI\Font_Loader.h"
 #include "..\UI\GUI.h"
-#include "../Render/Render.h"
-#include "../Render/Models.h"
+#include "../Models/Render.h"
+#include "../Models/Models.h"
+#include "../Models/Model_Loader.h"
 #include "../UI/Text.h"
 #include "../BaseGL/Framebuffer.h"
 #include "../Lighting/Lights.h"
@@ -58,9 +59,10 @@ void gl::init()
 	App::Debug::printErrors();
 	//init framebuffers
 	//include shaders
-	Render::initMeshShader();
+        Models::initNormalShader();
+        Models::initMeshShader();
 	Lighting::initLightShader();
-	Render::initScreenShader();
+        Models::initScreenShader();
 
 	GUI::initGUIShaders();
 	GUI::Text::initFontShader();
@@ -72,7 +74,7 @@ void gl::init()
 	initGeneralQuadVBO();
 	Texture::initGBuffer();
 	Texture::initLightFBO();
-	Render::initScreenVAO();
+        Models::initScreenVAO();
 	Lighting::initLightVAO();
 	Lighting::initLightDataBuffer();
 	Debug::getGLError("gl::init()3");
@@ -106,10 +108,10 @@ void gl::init()
 	
 	gl::GUI::Text::initFontVAO();
 	GUI::initGUIVAO();
-	Render::initMeshVAO();
+        Models::initMeshVAO();
 	
 	loadModels();
-	Render::fillMeshVAO();
+        Models::fillMeshVAO();
 	
 	Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, Lighting::lightDataUBO, "LightDataBuffer");
 	Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
@@ -118,9 +120,9 @@ void gl::init()
 
 	Shader::bindUniformBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
 
-	Shader::bindUniformBufferToShader(Render::meshShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
-	Shader::bindUniformBufferToShader(Render::meshShaderProgram, Render::entityTransformBuffer, "EntityTransformBuffer");
-	Shader::bindUniformBufferToShader(Render::meshShaderProgram, Render::transformIndexBuffer, "TransformIndexBuffer");
+	Shader::bindUniformBufferToShader(Models::meshShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
+	Shader::bindUniformBufferToShader(Models::meshShaderProgram, Models::entityTransformBuffer, "EntityTransformBuffer");
+	Shader::bindUniformBufferToShader(Models::meshShaderProgram, Models::transformIndexBuffer, "TransformIndexBuffer");
 
 
 	Shader::bindUniformBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiPositionBuffer, "PositionBuffer");
@@ -255,62 +257,9 @@ void gl::frameEnd()
 
 void gl::loadModels()
 {
-	/*hardcoded cube
-	     6------------6
-		/|           /|
-	   / |	        / |
-	  /  |	       /  |
-	 /	 |	      /   |
- 5'11'12-8----5'10'13-2
-	|   /		 |   /
-	|  /		 |  /
-	| /			 | /
-	|/           |/   
-  4'0'8--------1'9
-	*/
-	std::vector<Vertex> verts = {
-		//downside
-		Vertex(-1.0f, -1.0f,  1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f),
-		Vertex( 1.0f, -1.0f,  1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f),
-		Vertex( 1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(-1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f),
-		//left side
-		Vertex(-1.0f, -1.0f,   1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(-1.0f,  1.0f,   1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(-1.0f,  1.0f,  -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(-1.0f, -1.0f,  -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		//front
-		Vertex(-1.0f, -1.0f,  1.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f),
-		Vertex(	1.0f, -1.0f,  1.0f,	 0.0f, 0.0f, 1.0f, 0.0f, 0.0f),
-		Vertex( 1.0f,  1.0f,  1.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f),
-		Vertex(-1.0f,  1.0f,  1.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f),
-		//upside
-		Vertex(-1.0f,  1.0f,  1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-		Vertex( 1.0f,  1.0f,  1.0f,	 0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-		Vertex( 1.0f,  1.0f, -1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(-1.0f,  1.0f, -1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-		//back
-		Vertex(-1.0f,  -1.0f,  -1.0f,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
-		Vertex(-1.0f,   1.0f,  -1.0f,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
-		Vertex( 1.0f,   1.0f,  -1.0f,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
-		Vertex( 1.0f,  -1.0f,  -1.0f,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
-		//right
-		Vertex(1.0f,  -1.0f, -1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(1.0f,   1.0f, -1.0f,	 1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(1.0f,   1.0f,  1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f),
-		Vertex(1.0f,  -1.0f,  1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f)
-	};
-	std::vector<unsigned> inds = {
-		0, 3, 1, 1, 3, 2, //downside
-		4, 5, 6, 6, 7, 4, //left side
-		8, 9, 10, 10, 11, 8, //front
-		12, 13, 14, 14, 15, 12, //upside
-		16, 17, 18, 18, 19, 16, //back
-		20, 21, 22, 22, 23, 20  //right
-	};
+        Models::Loader::includeModel("sphere.3ds");
+        Models::Loader::loadModelFiles();
 
-	Models::createModel(Models::createMesh(Models::newGeometry(verts, inds), 0, 0), 1);
-	
 }
 
 

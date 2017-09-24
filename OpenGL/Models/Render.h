@@ -3,17 +3,20 @@
 #include <vector>
 
 namespace gl {
-	namespace Render {		
+	namespace Models {		
 		void initMeshVAO();
 		void initMeshShader();
 		void fillMeshVAO();
 		void storeMaterials();
 		void render();
+                void initNormalShader();
+                void renderNormals();
 		void updateBuffers();
 		void initScreenVAO();
 		void initScreenShader();
 		void renderScreenQuad();
 		extern unsigned int meshShaderProgram;
+                extern unsigned int normalShaderProgram;
 		extern unsigned int screenShaderProgram;
 		extern unsigned int screenQuadVAO;
 		extern unsigned int meshVAO;

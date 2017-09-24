@@ -5,7 +5,7 @@
 #include "../Global/gl.h"
 #include "../BaseGL/Framebuffer.h"
 #include "../Global/glDebug.h"
-#include "../Render/Render.h"
+#include "../Models/Render.h"
 #include "../BaseGL/Texture.h"
 std::vector<glm::vec4> gl::Lighting::allLightData;
 std::vector<gl::Lighting::LightIndexRange> gl::Lighting::allLightIndexRanges;
@@ -82,15 +82,19 @@ void gl::Lighting::renderLights()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBindVertexArray(lightVAO);
 	Shader::use(lightShaderProgram);
-        glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR);
+        glBlendFunc(GL_ONE, GL_ONE);
         glDepthFunc(GL_ALWAYS);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, Texture::gAlbedoTexture);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, Texture::gPosTexture);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, Texture::gNormalTexture);
+	glBindTexture(GL_TEXTURE_2D, Texture::gAmbientTexture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, Texture::gDiffuseTexture);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, Texture::gSpecularTexture);
 	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, Texture::gPosTexture);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, Texture::gNormalTexture);
+	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, Texture::gDepthTexture);
 	Debug::getGLError("renderLights()3");
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, allLightIndexRanges.size());

@@ -7,7 +7,6 @@ namespace gl {
 		extern unsigned int gPosTexture;
 		extern unsigned int gDepthTexture;
 		extern unsigned int gNormalTexture;
-		extern unsigned int gAlbedoTexture;
 		extern unsigned int gAmbientTexture;
 		extern unsigned int gDiffuseTexture;
 		extern unsigned int gSpecularTexture;

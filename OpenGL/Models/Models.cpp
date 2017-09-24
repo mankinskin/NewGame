@@ -26,15 +26,10 @@ void gl::Models::addModel(std::string pFilename)
 
 unsigned gl::Models::createMesh(unsigned int pIndexOffset, unsigned int pIndexCount, unsigned int pTextureID, unsigned int pMaterialIndex)
 {
-	allMeshes.push_back(Mesh(Geometry(pIndexOffset, pIndexCount), pTextureID, pMaterialIndex));
+	allMeshes.push_back(Mesh(pIndexOffset, pIndexCount, pTextureID, pMaterialIndex));
 	return allMeshes.size() - 1;
 }
 
-unsigned gl::Models::createMesh(Geometry pGeometry, unsigned int pTextureID, unsigned int pMaterialIndex)
-{
-	allMeshes.push_back(Mesh(pGeometry, pTextureID, pMaterialIndex));
-	return allMeshes.size() - 1;
-}
 
 unsigned gl::Models::createModel(unsigned pMeshOffset, unsigned pMeshCount)
 {
@@ -58,14 +53,6 @@ void gl::Models::Model::revalidateMeshOffsets()
 		allModels[mod].meshOffset = offs;
 		offs += allModels[mod].meshCount;
 	}
-}
-
-gl::Models::Geometry gl::Models::newGeometry(std::vector<Vertex> pVerts, std::vector<unsigned int> pIndices)
-{
-	Geometry geom(allIndices.size(), pIndices.size());
-	allIndices.insert(allIndices.end(), pIndices.begin(), pIndices.end());
-	allVertices.insert(allVertices.end(), pVerts.begin(), pVerts.end());
-	return geom;
 }
 
 void gl::Models::Model::addInstances(std::vector<unsigned int> pEntityIDs) {

@@ -4,12 +4,19 @@
 
 //an entity is a world object. 
 namespace EntityRegistry {
+
 	void initEntities();
+        void updateMatrices();
 	void createEntities(unsigned int pCount, unsigned int* pEntities);
+        void newEntityID(unsigned int & pEntity);
+        
+        void setScale(unsigned int pEntityID, glm::vec3 pScale);
 	void setPos(unsigned int pEntityID, glm::vec3 pPos);
 	void translate(unsigned int pEntityID, glm::vec3 pPos);
-	const unsigned int MAX_ENTITIES = 10000;
+	
+        const unsigned int MAX_ENTITIES = 10000;
 	extern unsigned int num_entities;
 	extern std::vector<glm::vec3> allPositions;
+        extern std::vector<glm::vec3> allScales;
 	extern std::vector<glm::mat4> allMatrices;
 }
