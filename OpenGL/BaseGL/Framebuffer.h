@@ -15,5 +15,10 @@ namespace gl {
 		extern unsigned int lightFBO;
 		extern unsigned int lightColorTexture;
 		extern unsigned int lightDepthTexture;
+
+                void initButtonFBO();
+                extern unsigned int buttonFBO;
+                extern unsigned int buttonIndexTexture;
+                extern unsigned int buttonDepthTexture;
 	}
 }

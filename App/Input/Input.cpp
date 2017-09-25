@@ -13,7 +13,6 @@
 std::vector<void(*)()> App::Input::callbackBuffer;
 std::vector<unsigned int> App::Input::signalBuffer;
 std::vector<unsigned int> App::Input::rejectedSignals;
-
 /*
 button-pipeline
 to set up
@@ -245,7 +244,6 @@ void App::Input::clearSignals() {
 
 
 void App::Input::checkEvents() {
-	//TODO find a way to manage ranges of different element types
 	
 	checkKeyEvents();
 	checkMouseEvents();

@@ -1,0 +1,10 @@
+#version 450
+
+
+layout(location = 0)out unsigned int id;
+
+flat in unsigned int button_id;
+
+void main(){
+	id = button_id;
+}

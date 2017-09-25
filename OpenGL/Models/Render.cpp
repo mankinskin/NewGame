@@ -14,8 +14,6 @@ unsigned int gl::Models::meshIBO = 0;
 unsigned int gl::Models::materialUBO = 0;
 unsigned int gl::Models::entityTransformBuffer;
 unsigned int gl::Models::transformIndexBuffer;
-unsigned int gl::Models::screenQuadVAO;
-unsigned int gl::Models::screenShaderProgram;
 
 void gl::Models::initMeshVAO()
 {
@@ -128,18 +126,6 @@ void gl::Models::initNormalShader()
         Shader::addVertexAttribute(normalShaderProgram, "normal", 1);
 }
 
-void gl::Models::renderScreenQuad(){
-	glBindVertexArray(screenQuadVAO);
-	Shader::use(screenShaderProgram);
-	glDepthFunc(GL_ALWAYS);
-	glActiveTexture(GL_TEXTURE0); 
-	glBindTexture(GL_TEXTURE_2D, Texture::lightColorTexture);
-		
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);	
-	glDepthFunc(GL_LESS);
-	glBindVertexArray(0);
-	Shader::unuse();
-}
 void gl::Models::updateBuffers()
 {
 	if (Models::allInstanceEntities.size()) {
@@ -148,21 +134,6 @@ void gl::Models::updateBuffers()
 	}
 }
 
-void gl::Models::initScreenVAO()
-{
-	glCreateVertexArrays(1, &screenQuadVAO);
-	glVertexArrayVertexBuffer(screenQuadVAO, 0, quadVBO + 1, 0, sizeof(float) * 2);
-	glVertexArrayElementBuffer(screenQuadVAO, quadEBO + 1);
-	VAO::setVertexAttrib(screenQuadVAO, 0, 0, 2, GL_FLOAT, 0);
-}
-
-void gl::Models::initScreenShader()
-{
-	screenShaderProgram = Shader::newProgram("screenShaderProgram", Shader::newModule("screenShaderProgram.vert"), Shader::newModule("screenShaderProgram.frag")).ID;
-	Shader::addVertexAttribute(screenShaderProgram, "corner_pos", 0);
-
-	
-}
 
 
 

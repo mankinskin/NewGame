@@ -16,6 +16,10 @@ unsigned int gl::Texture::lightFBO;
 unsigned int gl::Texture::lightColorTexture;
 unsigned int gl::Texture::lightDepthTexture;
 
+unsigned int gl::Texture::buttonFBO;
+unsigned int gl::Texture::buttonIndexTexture;
+unsigned int gl::Texture::buttonDepthTexture;
+
 void gl::Texture::initGBuffer()
 {
 	glCreateFramebuffers(1, &gBuffer);
@@ -54,6 +58,24 @@ void gl::Texture::initLightFBO(){
 	glBindFramebuffer(GL_FRAMEBUFFER, lightFBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, lightColorTexture, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, lightDepthTexture, 0);
+	
+        unsigned int attachments[1] = { GL_COLOR_ATTACHMENT0};
+        glDrawBuffers(1, &attachments[0]);
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+	if (status != GL_FRAMEBUFFER_COMPLETE) {
+		App::Debug::pushError("Framebuffer incomplete");
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+void gl::Texture::initButtonFBO(){
+        glCreateFramebuffers(1, & buttonFBO);
+	buttonIndexTexture = createTexture2D(screenWidth, screenHeight, GL_R8UI, GL_RED_INTEGER, GL_UNSIGNED_INT, 0);
+	buttonDepthTexture = createTexture2D(screenWidth, screenHeight, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, buttonFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, buttonIndexTexture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, buttonDepthTexture, 0);
 	
         unsigned int attachments[1] = { GL_COLOR_ATTACHMENT0};
         glDrawBuffers(1, &attachments[0]);

@@ -8,15 +8,16 @@
 #include <thread>
 #include <chrono>
 #include <OpenGL\Global\gl.h>
-#include <OpenGL\UI\Text.h>
+#include <OpenGL\GUI\Text.h>
 #include <OpenGL\Camera.h>
 #include <OpenGL\Global\glDebug.h>
-#include <OpenGL\UI\Font_Loader.h>
-#include <OpenGL\UI\GUI.h>
+#include <OpenGL\GUI\Font_Loader.h>
+#include <OpenGL\GUI\GUI.h>
 #include "../World/EntityRegistry.h"
 #include <OpenGL\Models\Models.h>
 #include <OpenGL\Models\Render.h>
 #include <OpenGL\Lighting\Lights.h>
+#include <OpenGL/GUI/Buttons.h>
 App::State App::state = App::State::Init;
 App::ContextWindow::Window App::mainWindow = App::ContextWindow::Window();
 double App::timeFactor = 1.0;
@@ -62,33 +63,31 @@ void App::initMainMenu() {
 	using gl::GUI::Text::setTextboxString;
 	glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
 
-	gl::GUI::reserveQuadSpace(4);
-	unsigned int startButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.7f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	unsigned int quitButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.9f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	unsigned int windowQuad = gl::GUI::createQuad(glm::vec2(-0.9f, 0.9f), glm::vec2(1.2f, 1.2f), glm::vec4(0.9f, 0.9f, 0.9f, 1.0f));
-	unsigned int tabQuad = gl::GUI::createQuad(glm::vec2(-0.87f, 0.89f), glm::vec2(1.14f, 0.18f), glm::vec4(0.9f, 0.4f, 0.4f, 1.0f));
-	Input::addButton(startButtonQuad);
+	gl::GUI::reserveQuadSpace(2);
+	unsigned int startButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.7f), glm::vec2(0.2f, 0.1f));
+	unsigned int quitButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.9f), glm::vec2(0.2f, 0.1f));
+	
+        Input::addButton(startButtonQuad);
 	Input::addButton(quitButtonQuad);
-	Input::addButton(tabQuad);
-	App::Input::loadButtons();
+	gl::GUI::initButtonBuffer();
 	Input::initMenuSignals();
 
 	gl::GUI::Text::reserveTextboxSpace(2); 
-	gl::GUI::Text::allTextboxMetrics.reserve(2);
-
+	gl::GUI::Text::allTextboxMetrics.reserve(1);
+        unsigned int tb_met = gl::GUI::Text::createTextboxMetrics(0, 1.0f, 1.0f, 1.0f, 1.0f);
 
 	
 	String quitProgramStr("QUIT");
 	String runProgramStr("PLAY");
-	String textStr("Dis is Text\nThis too\nLook here, a longer line!\nNow a line that goes on so long until there is no more space and line breaks have to be inserted automatically.");
-	unsigned int tb_met = gl::GUI::Text::createTextboxMetrics(0, 1.0f, 1.0f, 1.0f, 1.0f);
+        
+        
 
 	unsigned int tb1 = createTextbox(startButtonQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
 	unsigned int tb2 = createTextbox(quitButtonQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
-	unsigned int tb3 = createTextbox(glm::vec2(-0.9f, 0.8f), glm::vec2(1.2f, 1.0f), tb_met, TEXT_LAYOUT_BOUND_LEFT , 0.003f);
+	
 	setTextboxString(tb1, runProgramStr);
 	setTextboxString(tb2, quitProgramStr);
-	setTextboxString(tb3, textStr);
+
 	gl::GUI::Text::loadTextboxes();
 
 }
@@ -104,7 +103,7 @@ void App::initGameGUI() {
 	//unsigned int quitButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.85f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	//Input::addButton(quitButtonQuad);
 	//Input::addButton(menuButtonQuad);
-	App::Input::loadButtons();
+	gl::GUI::initButtonBuffer();
 	App::Input::initGameGUISignals();
 	gl::GUI::Text::reserveTextboxSpace(2);
 
@@ -129,18 +128,18 @@ void App::mainMenuLoop()
 {
 	initMainMenu();
 	while (state == App::MainMenu) {
-		gl::GUI::updateGUI();
+		gl::GUI::updateQuadBuffer();
 		gl::GUI::Text::updateCharStorage();//why does this only work if i update it each frame?!
-
-		App::Input::fetchGLFWEvents();
+                gl::GUI::updateButtonBuffer();
+		Input::fetchGLFWEvents();
+                gl::GUI::rasterButtons();
 		Input::fetchButtonEvents();
-		App::Input::checkEvents();
-		App::Input::callFunctions();
+		Input::checkEvents();
+		Input::callFunctions();
 		Input::end();
 
 		gl::frameStart();
 
-		gl::GUI::renderGUI();
 		gl::GUI::Text::renderGlyphs();
 
 		gl::frameEnd();
@@ -183,7 +182,7 @@ void App::frameLoop()
        
 	Debug::printErrors();
 	while (state == App::State::Running) {
-		gl::GUI::updateGUI();
+		gl::GUI::updateQuadBuffer();
 		gl::GUI::Text::updateCharStorage();
 		Input::fetchGLFWEvents();
 		Input::fetchButtonEvents();
@@ -207,12 +206,11 @@ void App::frameLoop()
 
   		
 		gl::Debug::drawGrid();
-		gl::GUI::renderGUI();
 		gl::GUI::Text::renderGlyphs();
 		gl::Models::render();
                 //gl::Models::renderNormals();
 		gl::Lighting::renderLights();
-		gl::Models::renderScreenQuad();
+		gl::renderScreenQuad();
 		
 		
 		gl::frameEnd();

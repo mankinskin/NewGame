@@ -10,15 +10,16 @@
 #include <glm\gtc\type_ptr.hpp>
 #include "..\BaseGL\Shader.h"
 #include "..\BaseGL\Texture.h"
-#include "..\UI\Font_Loader.h"
-#include "..\UI\GUI.h"
+#include "..\GUI\Font_Loader.h"
+#include "..\GUI\GUI.h"
 #include "../Models/Render.h"
 #include "../Models/Models.h"
 #include "../Models/Model_Loader.h"
-#include "../UI/Text.h"
+#include "../GUI/Text.h"
 #include "../BaseGL/Framebuffer.h"
 #include "../Lighting/Lights.h"
-
+#include "../GUI/Colored_Quads.h"
+#include "../GUI/Buttons.h"
 int gl::MAX_WORK_GROUP_COUNT = 0;
 glm::ivec3 gl::MAX_WORK_GROUP_SIZE = {};
 unsigned int gl::MAX_LIGHT_COUNT = 100;
@@ -38,6 +39,8 @@ unsigned int gl::mainFBO  = 0;
 unsigned int gl::quadVBO = 0;
 unsigned int gl::quadEBO = 0; 
 unsigned int gl::generalUniformBuffer = 0;
+unsigned int gl::screenQuadVAO;
+unsigned int gl::screenShaderProgram;
 
 
 void gl::init()
@@ -59,14 +62,15 @@ void gl::init()
 	App::Debug::printErrors();
 	//init framebuffers
 	//include shaders
+        Debug::initDebugShader();
+        initScreenShader();
         Models::initNormalShader();
         Models::initMeshShader();
 	Lighting::initLightShader();
-        Models::initScreenShader();
-
-	GUI::initGUIShaders();
+        GUI::initButtonIndexShader();
+	GUI::initColoredQuadShader();
 	GUI::Text::initFontShader();
-	Debug::initDebugShader();
+	
 	Shader::Loader::buildShaderPrograms();
 	
 	//generals
@@ -74,7 +78,8 @@ void gl::init()
 	initGeneralQuadVBO();
 	Texture::initGBuffer();
 	Texture::initLightFBO();
-        Models::initScreenVAO();
+        Texture::initButtonFBO();
+        initScreenVAO();
 	Lighting::initLightVAO();
 	Lighting::initLightDataBuffer();
 	Debug::getGLError("gl::init()3");
@@ -107,28 +112,30 @@ void gl::init()
 	//bind uniform buffers to shaders
 	
 	gl::GUI::Text::initFontVAO();
-	GUI::initGUIVAO();
+	GUI::initColoredQuadVAO();
         Models::initMeshVAO();
 	
 	loadModels();
         Models::fillMeshVAO();
-	
+        
 	Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, Lighting::lightDataUBO, "LightDataBuffer");
-	Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
-
+        
+        Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
+        App::Debug::printErrors();
 	Shader::bindUniformBufferToShader(GUI::Text::glyphShapeProgram, generalUniformBuffer, "GeneralUniformBuffer");
-
+        
 	Shader::bindUniformBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
-
+        
 	Shader::bindUniformBufferToShader(Models::meshShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
 	Shader::bindUniformBufferToShader(Models::meshShaderProgram, Models::entityTransformBuffer, "EntityTransformBuffer");
 	Shader::bindUniformBufferToShader(Models::meshShaderProgram, Models::transformIndexBuffer, "TransformIndexBuffer");
+        App::Debug::printErrors();
 
+        Shader::bindUniformBufferToShader(gl::GUI::buttonIndexShader, gl::GUI::quadBuffer, "QuadBuffer");
 
-	Shader::bindUniformBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiPositionBuffer, "PositionBuffer");
-	Shader::bindUniformBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiSizeBuffer, "SizeBuffer");
-	Shader::bindUniformBufferToShader(gl::GUI::guiQuadShader, gl::GUI::guiColorBuffer, "ColorBuffer");
-	
+	Shader::bindUniformBufferToShader(gl::GUI::coloredQuadShader, gl::GUI::quadColorBuffer, "ColorBuffer");
+	Shader::bindUniformBufferToShader(gl::GUI::coloredQuadShader, gl::GUI::quadBuffer, "QuadBuffer");
+        App::Debug::printErrors();
 	
 	
 	Debug::getGLError("gl::init()4");
@@ -263,3 +270,30 @@ void gl::loadModels()
 }
 
 
+void gl::renderScreenQuad(){
+	glBindVertexArray(screenQuadVAO);
+	Shader::use(screenShaderProgram);
+	glDepthFunc(GL_ALWAYS);
+	glActiveTexture(GL_TEXTURE0); 
+	glBindTexture(GL_TEXTURE_2D, Texture::lightColorTexture);
+		
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);	
+	glDepthFunc(GL_LESS);
+	glBindVertexArray(0);
+	Shader::unuse();
+}
+void gl::initScreenVAO()
+{
+	glCreateVertexArrays(1, &screenQuadVAO);
+	glVertexArrayVertexBuffer(screenQuadVAO, 0, quadVBO + 1, 0, sizeof(float) * 2);
+	glVertexArrayElementBuffer(screenQuadVAO, quadEBO + 1);
+	VAO::setVertexAttrib(screenQuadVAO, 0, 0, 2, GL_FLOAT, 0);
+}
+
+void gl::initScreenShader()
+{
+	screenShaderProgram = Shader::newProgram("screenShaderProgram", Shader::newModule("screenShaderProgram.vert"), Shader::newModule("screenShaderProgram.frag")).ID;
+	Shader::addVertexAttribute(screenShaderProgram, "corner_pos", 0);
+
+	
+}

@@ -2,7 +2,6 @@
 #include <GLFW\glfw3.h>
 #include <glm\glm.hpp>
 #include <unordered_map>
-#include <OpenGL\UI\GUI.h>
 #include <functional>
 #include <tuple>
 #include <utility>
@@ -11,7 +10,6 @@
 namespace App {
 	namespace Input {
 		
-
 		void init();
 		void end();
 		void callFunctions();
@@ -27,7 +25,7 @@ namespace App {
 		void initMenuSignals();
 		void initGameGUISignals();
 		void fetchGLFWEvents();
-
+                
 		static void key_Callback(GLFWwindow* window, int pKey, int pScancode, int pAction, int pMods);
 		static void char_Callback(GLFWwindow* window, unsigned int pCodepoint);
 		static void cursorPosition_Callback(GLFWwindow* window, double pX, double pY);
