@@ -199,8 +199,8 @@ void App::Input::initGameGUISignals() {
 
 	//--------------------------------
 	//Buttons
-	unsigned int quit_button_press = 0; EventSlot<ButtonEvent>(quit_button_press, ButtonEvent(0, 1, 0));
-	unsigned int menu_button_press = 0; EventSlot<ButtonEvent>(menu_button_press, ButtonEvent(1, 1, 0));
+	unsigned int menu_button_press = 0; EventSlot<ButtonEvent>(menu_button_press, ButtonEvent(0, 1, 0));
+	unsigned int quit_button_press = 0; EventSlot<ButtonEvent>(quit_button_press, ButtonEvent(1, 1, 0));
 	//Misc
 	menuProgramSlot.listen({ menu_button_press });
 	exitProgramSlot.listen({ esc_press, quit_button_press });//exit
@@ -215,7 +215,7 @@ void App::Input::initGameGUISignals() {
 
 void App::Input::init()
 {
-
+        puts("Initilizing GLFW Input...\n");
 	//initializes GLFW input and defines the keys to track
 	glfwSetInputMode(App::mainWindow.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	glfwSetKeyCallback(App::mainWindow.window, key_Callback);
@@ -224,8 +224,6 @@ void App::Input::init()
 	glfwSetCursorEnterCallback(App::mainWindow.window, cursorEnter_Callback);
 	glfwSetMouseButtonCallback(App::mainWindow.window, mouseButton_Callback);
 	glfwSetScrollCallback(App::mainWindow.window, scroll_Callback);
-	
-	
 }
 
 
@@ -316,11 +314,12 @@ void App::Input::callFunctions()
 	}
 }
 
-void App::Input::fetchGLFWEvents()
+void App::Input::fetchEvents()
 {
 	//updates the states of the mouse buttons, mouse wheel and all tracked keys
 	cursorFrameDelta = glm::vec2();
 	glfwPollEvents();
+        fetchButtonEvents();
 }
 
 

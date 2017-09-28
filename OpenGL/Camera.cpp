@@ -35,6 +35,7 @@ int gl::Camera::expect_z_stop = 0;
 
 void gl::Camera::init()
 {
+
 	FOV = 70.0f;
 	pos = glm::vec3(0.0, 2.0, 0.0);
 	UP = glm::vec3(0.0, 1.0, 0.0);

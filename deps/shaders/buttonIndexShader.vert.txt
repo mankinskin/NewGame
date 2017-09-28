@@ -11,6 +11,6 @@ flat out unsigned int button_id;
 void main(){
 	vec4 quad = quadBuffer[quad_index];
 	button_id = gl_InstanceID + 1;
-	gl_Position = vec4(corner_pos.x, corner_pos.y, 0.0, 1.0);
-	//gl_Position = vec4(quad.x + quad.y*corner_pos.x, quad.z + quad.w * (1.0 - corner_pos.y), 0.0, 1.0);
+
+	gl_Position = vec4(quad.x + quad.z*corner_pos.x, quad.y - quad.w * (1.0 - corner_pos.y), 0.0, 1.0);
 }

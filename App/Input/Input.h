@@ -11,21 +11,19 @@ namespace App {
 	namespace Input {
 		
 		void init();
-		void end();
-		void callFunctions();
-		
+                void initMenuSignals();
+		void initGameGUISignals();
+		void fetchEvents();
 		void checkEvents();
+                void callFunctions();
+		void clearSignals();
+                void end();
 		
-		extern std::vector<void(*)()> callbackBuffer;
-		
-		extern std::vector<unsigned int> rejectedSignals;
+
+		extern std::vector<void(*)()> callbackBuffer;//calls to be made
+		extern std::vector<unsigned int> rejectedSignals;//stored signals from previous frames
 		extern std::vector<unsigned int> signalBuffer; //signal indices to trigger if not locked
 		
-		void clearSignals();
-		void initMenuSignals();
-		void initGameGUISignals();
-		void fetchGLFWEvents();
-                
 		static void key_Callback(GLFWwindow* window, int pKey, int pScancode, int pAction, int pMods);
 		static void char_Callback(GLFWwindow* window, unsigned int pCodepoint);
 		static void cursorPosition_Callback(GLFWwindow* window, double pX, double pY);

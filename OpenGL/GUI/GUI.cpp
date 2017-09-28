@@ -11,7 +11,6 @@ unsigned int gl::GUI::MAX_QUAD_COUNT = 10000;
 unsigned int gl::GUI::quadBuffer;
 
 
-
 void gl::GUI::clearBuffers()
 {
 	allQuads.clear();
@@ -45,8 +44,9 @@ void gl::GUI::reserveQuadSpace(unsigned int pCount)
 
 void gl::GUI::initQuadBuffer()
 {
-        quadBuffer = VAO::createStorage(MAX_QUAD_COUNT * sizeof(glm::vec4), nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
-	VAO::createStream(quadBuffer, GL_MAP_WRITE_BIT);
+        quadBuffer = VAO::createStorage(MAX_QUAD_COUNT * sizeof(glm::vec4), 0, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+        VAO::createStream(quadBuffer, GL_MAP_WRITE_BIT);
+        VAO::bindStorage(GL_UNIFORM_BUFFER, quadBuffer);
 
 }
 

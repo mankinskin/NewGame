@@ -16,8 +16,9 @@
 #include "../World/EntityRegistry.h"
 #include <OpenGL\Models\Models.h>
 #include <OpenGL\Models\Render.h>
-#include <OpenGL\Lighting\Lights.h>
+#include <OpenGL/Lighting\Lights.h>
 #include <OpenGL/GUI/Buttons.h>
+#include <OpenGL/GUI/Colored_Quads.h>
 App::State App::state = App::State::Init;
 App::ContextWindow::Window App::mainWindow = App::ContextWindow::Window();
 double App::timeFactor = 1.0;
@@ -40,14 +41,14 @@ void App::init()
 	//Input listeners
 	Input::init();
 	gl::init();
-	gl::configure();
-	gl::GUI::Text::initStyleBuffer();
+	//gl::GUI::Text::initStyleBuffer();
 	
 	Debug::printErrors();
 }
 
 void App::initGLFW()
 {
+        std::puts("Initializing GLFW...\n");
 	unsigned int glfw = glfwInit();
 	if (glfw != GLFW_TRUE) {
 		Debug::pushError(("\nApp::init() - Unable to initialize GLFW (glfwInit() return code: %i)\n" + glfw), Debug::Error::Severity::Fatal);
@@ -56,92 +57,45 @@ void App::initGLFW()
 	}
 }
 
-void App::initMainMenu() {
-	using gl::GUI::Text::Textbox;
-	using gl::GUI::Text::String;
-	using gl::GUI::Text::createTextbox;
-	using gl::GUI::Text::setTextboxString;
-	glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
-
-	gl::GUI::reserveQuadSpace(2);
-	unsigned int startButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.7f), glm::vec2(0.2f, 0.1f));
-	unsigned int quitButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.9f), glm::vec2(0.2f, 0.1f));
-	
-        Input::addButton(startButtonQuad);
-	Input::addButton(quitButtonQuad);
-	gl::GUI::initButtonBuffer();
-	Input::initMenuSignals();
-
-	gl::GUI::Text::reserveTextboxSpace(2); 
-	gl::GUI::Text::allTextboxMetrics.reserve(1);
-        unsigned int tb_met = gl::GUI::Text::createTextboxMetrics(0, 1.0f, 1.0f, 1.0f, 1.0f);
-
-	
-	String quitProgramStr("QUIT");
-	String runProgramStr("PLAY");
-        
-        
-
-	unsigned int tb1 = createTextbox(startButtonQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
-	unsigned int tb2 = createTextbox(quitButtonQuad, tb_met, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
-	
-	setTextboxString(tb1, runProgramStr);
-	setTextboxString(tb2, quitProgramStr);
-
-	gl::GUI::Text::loadTextboxes();
-
-}
-
-void App::initGameGUI() {
-	using gl::GUI::Text::Textbox;
-	using gl::GUI::Text::String;
-	using gl::GUI::Text::createTextbox;
-	using gl::GUI::Text::setTextboxString;
-
-	//gl::GUI::reserveQuadSpace(2);
-	//unsigned int menuButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.7f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	//unsigned int quitButtonQuad = gl::GUI::createQuad(glm::vec2(-1.0f, -0.85f), glm::vec2(0.2f, 0.1f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	//Input::addButton(quitButtonQuad);
-	//Input::addButton(menuButtonQuad);
-	gl::GUI::initButtonBuffer();
-	App::Input::initGameGUISignals();
-	gl::GUI::Text::reserveTextboxSpace(2);
-
-	String quitProgramStr("QUIT");
-	String mainmenuProgramStr("MAIN MENU");
-	
-	//unsigned int tb1 = createTextbox(quitButtonQuad, 0, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
-	//unsigned int tb2 = createTextbox(menuButtonQuad, 0, TEXT_LAYOUT_BOUND_LEFT | TEXT_LAYOUT_CENTER_Y, 0.003f);
-	//setTextboxString(tb1, quitProgramStr);
-	//setTextboxString(tb2, mainmenuProgramStr);
-	gl::GUI::Text::loadTextboxes();
-
-	EntityRegistry::initEntities();
-
-	gl::Models::allModels[0].addInstances({ 0, 1});
-
-	gl::Models::Model::revalidateEntityOffsets();
-}
-
 
 void App::mainMenuLoop()
 {
-	initMainMenu();
+
+        unsigned int quitButtonQuad = gl::GUI::createQuad(-1.0f, -0.8f, 0.2f, 0.1f);
+        gl::GUI::colorQuad(quitButtonQuad, 0);
+        gl::GUI::Text::createTextboxMetrics(0, 1.0, 1.0, 1.0, 1.0);
+        unsigned int tb = gl::GUI::Text::createTextbox(quitButtonQuad, 0, 0);
+        gl::GUI::Text::setTextboxString(tb, gl::GUI::Text::String("QUIT"));
+        gl::GUI::Text::loadTextboxes();
+        //-----------
+        unsigned int sphere = 0;
+        EntityRegistry::createEntities(1, &sphere);
+
+        EntityRegistry::setPos(sphere, glm::vec3(1.0f, 0.0f, -4.0f));
+        EntityRegistry::updateMatrices();
+        gl::Models::allModels[0].addInstances({sphere});
+        gl::Models::Model::revalidateMeshOffsets();
+        gl::Models::Model::revalidateEntityOffsets();
+        //----------
+        Input::toggleTrackMouse();
 	while (state == App::MainMenu) {
-		gl::GUI::updateQuadBuffer();
-		gl::GUI::Text::updateCharStorage();//why does this only work if i update it each frame?!
-                gl::GUI::updateButtonBuffer();
-		Input::fetchGLFWEvents();
-                gl::GUI::rasterButtons();
-		Input::fetchButtonEvents();
-		Input::checkEvents();
-		Input::callFunctions();
-		Input::end();
 
-		gl::frameStart();
-
-		gl::GUI::Text::renderGlyphs();
-
+                fetchInput();
+                gl::Camera::look(Input::cursorFrameDelta);
+                gl::Camera::update();
+                gl::updateGeneralUniformBuffer();
+                gl::GUI::updateQuadBuffer();
+                gl::GUI::updateColoredQuads();
+                gl::GUI::Text::updateCharStorage();
+                gl::Models::updateBuffers();
+                gl::frameStart();
+                
+                gl::Debug::drawGrid();
+                gl::GUI::renderColoredQuads();
+                gl::Models::render();
+                gl::GUI::Text::renderGlyphs();
+                gl::Lighting::renderLights();
+                gl::renderScreenQuad();
 		gl::frameEnd();
 
 		Debug::printErrors();
@@ -151,67 +105,32 @@ void App::mainMenuLoop()
 
 		Debug::printInfo();
 	}
-	gl::GUI::Text::clearCharStorage();
-	gl::GUI::clearBuffers();
-	Input::clearButtons();
 	
 }
 
-void App::run() {
-	state = App::State::Running;
-}
-
-void App::quit() {
-	state = App::State::Exit;
-}
-
-void App::mainmenu()
+void App::fetchInput()
 {
-	state = App::State::MainMenu;
+        Input::fetchEvents();
+        Input::checkEvents();
+        Input::callFunctions();
+        Input::end();
 }
+
 
 void App::frameLoop()
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	initGameGUI();
-	
-        gl::Lighting::reservePointLightSpace(4);
-        
-        gl::Lighting::createLight(glm::vec4(light_pos.x, light_pos.y, light_pos.z, 0.0f), glm::vec4(1.0f, 1.0f, 1.0, 10.0f));
-        gl::Lighting::createLight(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 0.0f, 1.0, 40.0f));
-       
-	Debug::printErrors();
 	while (state == App::State::Running) {
-		gl::GUI::updateQuadBuffer();
-		gl::GUI::Text::updateCharStorage();
-		Input::fetchGLFWEvents();
-		Input::fetchButtonEvents();
-		App::Input::checkEvents();
-		App::Input::callFunctions();
-		Input::end();
+                fetchInput();
 		
+                //camera
 		gl::Camera::look(Input::cursorFrameDelta);
 		gl::Camera::update();
-		Debug::printErrors();
-		light_pos += light_mov * 0.2f;
-		gl::Lighting::setLightPos(1, light_pos);
-		//EntityRegistry::setPos(0, glm::vec3(gl::Camera::pos.x, 0.0f, gl::Camera::pos.z));
+
  		gl::updateGeneralUniformBuffer();
-		gl::Lighting::updateLightDataBuffer();
-		gl::Lighting::updateLightIndexRangeBuffer();
-		gl::Models::updateBuffers();
-		Debug::printErrors();
 
 		gl::frameStart();
 
-  		
 		gl::Debug::drawGrid();
-		gl::GUI::Text::renderGlyphs();
-		gl::Models::render();
-                //gl::Models::renderNormals();
-		gl::Lighting::renderLights();
-		gl::renderScreenQuad();
-		
 		
 		gl::frameEnd();
 		updateTime();
@@ -220,9 +139,6 @@ void App::frameLoop()
 		
 		Debug::printInfo();
 	}
-	gl::GUI::Text::clearCharStorage();
-	gl::GUI::clearBuffers();
-	Input::clearButtons();
 }
 
 
@@ -251,4 +167,17 @@ void App::updateTimeFactor() {
 void App::setTargetFPS(unsigned int pTargetFPS)
 {
 	targetFrameMS = (unsigned int)(1000.0f / (float)pTargetFPS);
+}
+
+void App::run() {
+        state = App::State::Running;
+}
+
+void App::quit() {
+        state = App::State::Exit;
+}
+
+void App::mainmenu()
+{
+        state = App::State::MainMenu;
 }

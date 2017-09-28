@@ -40,7 +40,7 @@ namespace gl {
 		void streamStorage(Storage& pStorage, unsigned int pUploadSize, void * pData);
 		void * mapStorage(unsigned int pStorageIndex, unsigned int pFlags);
 		void * mapStorage(Storage& pStorage, unsigned int pFlags);
-		void bindStorage(unsigned int pStorageIndex, unsigned int pTarget);
+		void bindStorage(unsigned int pTarget, unsigned int pStorageIndex);
 		void bindStorage(unsigned int pTarget, Storage& pStorage);
 		void bindStorageRange(Storage& pStorage, unsigned int pOffset, unsigned int pSize);
 		void bindStorageRange(unsigned int pStorageIndex, unsigned int pOffset, unsigned int pSize);

@@ -26,8 +26,8 @@ initFontShader()
 
 void gl::GUI::Text::
 initFontVAO() {
-	charStorage = VAO::createStorage(MAX_CHARS * sizeof(unsigned int), nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
 	quadStorage = VAO::createStorage(MAX_CHARS * sizeof(CharQuad), nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+        charStorage = VAO::createStorage(MAX_CHARS * sizeof(unsigned int), nullptr, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
 	VAO::createStream(quadStorage, GL_MAP_WRITE_BIT);
 	VAO::createStream(charStorage, GL_MAP_WRITE_BIT);
 	glCreateVertexArrays(1, &fontVAO);

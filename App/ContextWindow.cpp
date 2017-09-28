@@ -53,7 +53,7 @@ void App::ContextWindow::Window::init()
 		glfwDestroyWindow(window);
 	}
 #ifdef _DEBUG
-	puts("\nCreating a GLFW Window...");
+	printf("\nGLFW Window Size:\nX: %i Y: %i\n", width, height);
 #endif
 
 

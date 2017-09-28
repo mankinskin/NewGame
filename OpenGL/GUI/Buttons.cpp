@@ -13,15 +13,18 @@ unsigned int gl::GUI::buttonIndexShader;
 void gl::GUI::rasterButtons() {
         Debug::getGLError("rasterButtons()1");
         if (App::Input::allButtonQuads.size()) {
+                glDepthFunc(GL_ALWAYS);
                 glBindFramebuffer(GL_FRAMEBUFFER, gl::Texture::buttonFBO);
+                
                 glBindVertexArray(buttonVAO);
                 gl::Shader::use(buttonIndexShader);
-
+                //
                 glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, App::Input::allButtonQuads.size());
-                
+                //
                 gl::Shader::unuse();
                 glBindVertexArray(0);
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                glDepthFunc(GL_LESS);
                 Debug::getGLError("rasterButtons()");
         }
 }
@@ -33,16 +36,16 @@ void gl::GUI::initButtonIndexShader() {
 
 void gl::GUI::initButtonBuffer()
 {
-        buttonBuffer = gl::VAO::createStorage(sizeof(unsigned int) * 100, 0, GL_MAP_WRITE_BIT | gl::VAO::STREAM_FLAGS);
+        buttonBuffer = gl::VAO::createStorage(sizeof(unsigned int) * 10000, 0, GL_MAP_WRITE_BIT | gl::VAO::STREAM_FLAGS);
         gl::VAO::createStream(buttonBuffer, GL_MAP_WRITE_BIT);
 
         glCreateVertexArrays(1, &buttonVAO);
-        glVertexArrayElementBuffer(buttonVAO, gl::quadEBO);
-        glVertexArrayVertexBuffer(buttonVAO, 0, gl::quadVBO, 0, sizeof(glm::vec2));
+        glVertexArrayElementBuffer(buttonVAO, gl::quadEBO+1);
+        glVertexArrayVertexBuffer(buttonVAO, 0, gl::quadVBO+1, 0, sizeof(glm::vec2));
         gl::VAO::setVertexAttrib(buttonVAO, 0, 0, 2, GL_FLOAT, 0);
 
         gl::VAO::setVertexArrayVertexStorage(buttonVAO, 1, buttonBuffer, sizeof(unsigned int));
-        gl::VAO::setVertexAttrib(buttonVAO, 1, 1, 1, GL_UNSIGNED_INT, sizeof(unsigned int));
+        gl::VAO::setVertexAttrib(buttonVAO, 1, 1, 1, GL_UNSIGNED_INT, 0);
         glVertexArrayBindingDivisor(buttonVAO, 1, 1);
 }
 

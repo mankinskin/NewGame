@@ -54,7 +54,7 @@ namespace App {
                 void fetchButtonEvents();
                 void checkButtonEvents();
 
-
+                extern unsigned int hovered_button;
                 extern std::vector<ButtonEvent> buttonEventBuffer;
                 extern std::vector<unsigned int> allButtonQuads;
                 extern std::vector<int> allButtonFlags;

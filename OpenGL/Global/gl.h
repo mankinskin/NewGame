@@ -115,7 +115,13 @@ namespace gl {
         extern unsigned int screenQuadVAO;
 
         void init();
-        void configure();
+        void initFramebuffers();
+        void initShaders();
+        void initGeneralBuffers();
+        void initGUI();
+        void initModels();
+        void initLighting();
+        void bindUniformBufferLocations();
         void setViewport(App::ContextWindow::Window& pViewport);
         void getOpenGLInitValues();
         void initGLEW();

@@ -137,6 +137,10 @@ void gl::Debug::initDebugVAOs()
 
 void gl::Debug::init()
 {	
+        Debug::generateDebugGrid("grid1.0", 1.0f, 1000, 1.0f, 1.0f, 1.0f, 0.9f);
+        Debug::generateDebugGrid("grid0.5", 0.5f, 2000, 1.0f, 1.0f, 1.0f, 0.3f);
+        Debug::initCoordinateSystem("coord");
+
 	vertexBuffer = VAO::createStorage(vertices.size() * sizeof(LineVertex), &vertices[0], 0);
 	indexBuffer = VAO::createStorage(indices.size() * sizeof(unsigned int), &indices[0], 0);
 	initDebugVAOs();

@@ -24,7 +24,7 @@ unsigned int gl::GUI::createColor(glm::vec4 pColor, std::string pColorName){
 void gl::GUI::storeGUIColors()
 {
         quadColorBuffer = VAO::createStorage(sizeof(glm::vec4)*allColors.size(), &allColors[0], 0);
-        VAO::bindStorage(quadColorBuffer, GL_UNIFORM_BUFFER);
+        VAO::bindStorage(GL_UNIFORM_BUFFER, quadColorBuffer);
 }
 void gl::GUI::colorQuad(unsigned int pQuad, unsigned int pColor){
         allColoredQuads.push_back(Colored_Quad(pQuad, pColor));
@@ -32,7 +32,7 @@ void gl::GUI::colorQuad(unsigned int pQuad, unsigned int pColor){
 
 void gl::GUI::renderColoredQuads(){
     glBindVertexArray(coloredQuadVAO);    
-    Shader::use(quadColorBuffer);
+    Shader::use(coloredQuadShader);
     
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, allColoredQuads.size());
 
@@ -45,16 +45,14 @@ void gl::GUI::initColoredQuadVAO(){
         VAO::createStream(coloredQuadBuffer, GL_MAP_WRITE_BIT);
 
         glCreateVertexArrays(1, &coloredQuadVAO);
-        glVertexArrayElementBuffer(coloredQuadVAO, quadEBO);
-        glVertexArrayVertexBuffer(coloredQuadVAO, 0, quadVBO, 0, sizeof(glm::vec2));
+        glVertexArrayElementBuffer(coloredQuadVAO, quadEBO+1);
+        glVertexArrayVertexBuffer(coloredQuadVAO, 0, quadVBO+1, 0, sizeof(glm::vec2));
         VAO::setVertexAttrib(coloredQuadVAO, 0, 0, 2, GL_FLOAT, 0);
 
-        VAO::setVertexArrayVertexStorage(coloredQuadVAO, 1, coloredQuadBuffer, sizeof(Colored_Quad));
-        VAO::setVertexAttrib(coloredQuadVAO, 1, 1, 2, GL_UNSIGNED_INT, sizeof(Colored_Quad));
+        VAO::setVertexArrayVertexStorage(coloredQuadVAO, 1, coloredQuadBuffer, sizeof(glm::uvec2));
+        VAO::setVertexAttrib(coloredQuadVAO, 1, 1, 2, GL_UNSIGNED_INT, 0);
         glVertexArrayBindingDivisor(coloredQuadVAO, 1, 1);
 }
-
-
 
 void gl::GUI::initColoredQuadShader(){
         coloredQuadShader = Shader::newProgram("coloredQuadShader", Shader::newModule("coloredQuadShader.vert"), Shader::newModule("coloredQuadShader.frag")).ID; 
@@ -68,5 +66,3 @@ void gl::GUI::updateColoredQuads()
                 VAO::streamStorage(coloredQuadBuffer, sizeof(Colored_Quad)*allColoredQuads.size(), &allColoredQuads[0]);
         }
 }
-
-

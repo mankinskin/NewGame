@@ -47,109 +47,126 @@ void gl::init()
 {
 	initGLEW();
 	getOpenGLInitValues();
-	Debug::generateDebugGrid("grid1.0", 1.0f, 1000, 1.0f, 1.0f, 1.0f, 0.9f);
-	Debug::generateDebugGrid("grid0.5", 0.5f, 2000, 1.0f, 1.0f, 1.0f, 0.3f);
-	Debug::initCoordinateSystem("coord");
+
 	Debug::init();
 	Camera::init();
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
-	gl::Debug::getGLError("gl::init():");
-	App::Debug::printErrors();
-	//init framebuffers
-	//include shaders
-        Debug::initDebugShader();
-        initScreenShader();
-        Models::initNormalShader();
-        Models::initMeshShader();
-	Lighting::initLightShader();
-        GUI::initButtonIndexShader();
-	GUI::initColoredQuadShader();
-	GUI::Text::initFontShader();
-	
-	Shader::Loader::buildShaderPrograms();
-	
-	//generals
-	initGeneralUniformBuffer();
-	initGeneralQuadVBO();
-	Texture::initGBuffer();
-	Texture::initLightFBO();
-        Texture::initButtonFBO();
-        initScreenVAO();
-	Lighting::initLightVAO();
-	Lighting::initLightDataBuffer();
-	Debug::getGLError("gl::init()3");
-	App::Debug::printErrors();
-	
-	/*FONTS
-	times,
-	FreeSans,
-	Input_Regular_Mono,
-	Input_Light_Mono,
-	FreeMono,
-	C64_Pro_Mono
-	C64_Pro_Regular,
-	Ubuntu_Regular_Mono,
-	SourceCodePro_Regular,
-	SourceCodePro_Medium,
-	VCR_OSD_MONO
-	Generic
-	justabit
-	BetterPixels
-	UnnamedFont
-	TinyUnicode
-	Hack-Regular
-	*/
-	GUI::Text::Initializer::initFreeType();
-	GUI::Text::Initializer::includeFont("Hack-Regular.ttf", 14, 30, 200, 0, 1);
-	GUI::Text::Initializer::loadFonts();
-	
-	
-	//bind uniform buffers to shaders
-	
-	gl::GUI::Text::initFontVAO();
-	GUI::initColoredQuadVAO();
-        Models::initMeshVAO();
-	
-	loadModels();
-        Models::fillMeshVAO();
-        
-	Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, Lighting::lightDataUBO, "LightDataBuffer");
-        
-        Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
-        App::Debug::printErrors();
-	Shader::bindUniformBufferToShader(GUI::Text::glyphShapeProgram, generalUniformBuffer, "GeneralUniformBuffer");
-        
-	Shader::bindUniformBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
-        
-	Shader::bindUniformBufferToShader(Models::meshShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
-	Shader::bindUniformBufferToShader(Models::meshShaderProgram, Models::entityTransformBuffer, "EntityTransformBuffer");
-	Shader::bindUniformBufferToShader(Models::meshShaderProgram, Models::transformIndexBuffer, "TransformIndexBuffer");
-        App::Debug::printErrors();
+        initFramebuffers();
+        initShaders();
+        initGeneralBuffers();
 
-        Shader::bindUniformBufferToShader(gl::GUI::buttonIndexShader, gl::GUI::quadBuffer, "QuadBuffer");
+        initGUI();
+        initModels();
+        initLighting();
+        bindUniformBufferLocations();
 
-	Shader::bindUniformBufferToShader(gl::GUI::coloredQuadShader, gl::GUI::quadColorBuffer, "ColorBuffer");
-	Shader::bindUniformBufferToShader(gl::GUI::coloredQuadShader, gl::GUI::quadBuffer, "QuadBuffer");
-        App::Debug::printErrors();
-	
-	
 	Debug::getGLError("gl::init()4");
 	App::Debug::printErrors();
 }
 
-void gl::configure()
+void gl::initFramebuffers()
 {
-	setViewport(App::mainWindow);
-	glBindFramebuffer(GL_FRAMEBUFFER, Texture::gBuffer);
-	setViewport(App::mainWindow);
-	
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        Texture::initGBuffer();
+        Texture::initLightFBO();
+        Texture::initButtonFBO();
 }
+
+void gl::initShaders()
+{
+        //include shaders
+        Debug::initDebugShader();
+        initScreenShader();
+        Models::initNormalShader();
+        Models::initMeshShader();
+        Lighting::initLightShader();
+        GUI::initButtonIndexShader();
+        GUI::initColoredQuadShader();
+        GUI::Text::initFontShader();
+
+        Shader::Loader::buildShaderPrograms();
+}
+
+void gl::initGeneralBuffers()
+{
+        initGeneralUniformBuffer();
+        initGeneralQuadVBO();
+        initScreenVAO();
+}
+
+void gl::initGUI()
+{
+        
+        gl::GUI::createColor(glm::vec4(1.0, 1.0, 1.0, 1.0), "white");
+        gl::GUI::createColor(glm::vec4(0.0, 0.0, 0.0, 1.0), "black");
+        gl::GUI::createColor(glm::vec4(1.0, 0.0, 0.0, 1.0), "red");
+        gl::GUI::createColor(glm::vec4(0.0, 1.0, 0.0, 1.0), "green");
+        gl::GUI::createColor(glm::vec4(0.0, 0.0, 1.0, 1.0), "blue");
+        gl::GUI::createColor(glm::vec4(0.0, 0.0, 0.0, 0.0), "none");
+        GUI::storeGUIColors();
+        GUI::initQuadBuffer();
+        GUI::initColoredQuadVAO();
+        GUI::initButtonBuffer();
+        /*FONTS
+        times,
+        FreeSans,
+        Input_Regular_Mono,
+        Input_Light_Mono,
+        FreeMono,
+        C64_Pro_Mono
+        C64_Pro_Regular,
+        Ubuntu_Regular_Mono,
+        SourceCodePro_Regular,
+        SourceCodePro_Medium,
+        VCR_OSD_MONO
+        Generic
+        justabit
+        BetterPixels
+        UnnamedFont
+        TinyUnicode
+        Hack-Regular
+        DroidSansMonoSlashed
+        */
+        GUI::Text::Initializer::initFreeType();
+        GUI::Text::initFontVAO();
+        GUI::Text::Initializer::includeFont("Hack-Regular.ttf", 14, 30, 200, 0, 1);
+        GUI::Text::Initializer::loadFonts();
+}
+
+void gl::initModels()
+{
+        Models::initMeshVAO();
+        loadModels();
+        Models::fillMeshVAO();
+}
+
+void gl::initLighting()
+{
+        Lighting::initLightVAO();
+        Lighting::initLightDataBuffer();
+}
+
+void gl::bindUniformBufferLocations()
+{
+        //bind uniform buffers to shaders
+
+        Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, Lighting::lightDataUBO, "LightDataBuffer");
+
+        Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
+        App::Debug::printErrors();
+        Shader::bindUniformBufferToShader(GUI::Text::glyphShapeProgram, generalUniformBuffer, "GeneralUniformBuffer");
+
+        Shader::bindUniformBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
+
+        Shader::bindUniformBufferToShader(Models::meshShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
+        Shader::bindUniformBufferToShader(Models::meshShaderProgram, Models::entityTransformBuffer, "EntityTransformBuffer");
+        Shader::bindUniformBufferToShader(Models::meshShaderProgram, Models::transformIndexBuffer, "TransformIndexBuffer");
+        App::Debug::printErrors();
+
+        Shader::bindUniformBufferToShader(gl::GUI::buttonIndexShader, gl::GUI::quadBuffer, "QuadBuffer");
+
+        Shader::bindUniformBufferToShader(gl::GUI::coloredQuadShader, gl::GUI::quadColorBuffer, "ColorBuffer");
+        Shader::bindUniformBufferToShader(gl::GUI::coloredQuadShader, gl::GUI::quadBuffer, "QuadBuffer");
+}
+
 
 void gl::setViewport(App::ContextWindow::Window& pViewport) {
 	screenWidth = pViewport.width;
@@ -180,14 +197,20 @@ void gl::getOpenGLInitValues()
 	glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &VAO::MAX_UNIFORM_BUFFER_BINDINGS);
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &MAX_TEXTURE_UNIT_COUNT);
 	glGetIntegerv(GL_MIN_MAP_BUFFER_ALIGNMENT, &VAO::MIN_MAP_BUFFER_ALIGNMENT);
-	screenWidth = App::mainWindow.width;
+	
+        screenWidth = App::mainWindow.width;
 	screenHeight = App::mainWindow.height;
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//glBindImageTexture(0, mainFrame, 1, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 	Debug::getGLError("gl::initOpenGL()");
 }
 
 void gl::initGLEW() {
+        puts("Initializing OpenGL(GLEW)...\n");
 	unsigned int glew = glewInit();
 	if (glew != GLEW_OK) {
 
@@ -201,12 +224,12 @@ void gl::initGLEW() {
 void gl::initGeneralQuadVBO()
 {
 
-	/*
-	3---2
-	|  /|
-	| / |
-	|/  |
-	0---1
+	/*        Colored-Quad
+	3---2     0,0------1,0
+	|  /|      |        |
+	| / |      |        |
+	|/  |      |        |
+	0---1     0,1------1,1
 	*/
 	float varr[4 * 2] = {
 		0.0f, 0.0f, 

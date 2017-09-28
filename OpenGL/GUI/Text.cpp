@@ -247,9 +247,6 @@ loadTextboxGlyphs(Textbox& pTextbox, TextboxMetrics& pTextMetrics, Font& pFont, 
 	pGlyphs.glyphIndices.resize(str_char_off);
 	pGlyphs.quads.resize(str_char_off);
 }
-
-
-
 void gl::GUI::Text::transformTextboxGlyphs(Textbox& pTextbox, TextboxGlyphs& pGlyphs)
 {
 	glm::vec2 tb_pos = allTextboxPositions[pTextbox.pos];
@@ -301,12 +298,13 @@ renderGlyphs()
 	if (allTextboxes.size()) {
 		glDisable(GL_DEPTH_TEST);
 		glBindVertexArray(fontVAO);
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		Shader::use(glyphShapeProgram);
-		glActiveTexture(GL_TEXTURE0);
+		
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		Shader::setUniform(GUI::Text::glyphShapeProgram, "atlas", (int)0);
 		//VAO::setUniform(glyphShapeProgram, "ortho", ortho);
-		
+		glActiveTexture(GL_TEXTURE0);
 		for (unsigned int fo = 0; fo < allFonts.size(); ++fo) {
 			Font& font = allFonts[fo];
 			glBindTexture(GL_TEXTURE_2D, font.atlasID);

@@ -74,6 +74,7 @@ void gl::Texture::initButtonFBO(){
 	buttonDepthTexture = createTexture2D(screenWidth, screenHeight, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, buttonFBO);
+        
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, buttonIndexTexture, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, buttonDepthTexture, 0);
 	
@@ -84,5 +85,7 @@ void gl::Texture::initButtonFBO(){
 	if (status != GL_FRAMEBUFFER_COMPLETE) {
 		App::Debug::pushError("Framebuffer incomplete");
 	}
+        
+        glClearColor(0, 0, 0, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
