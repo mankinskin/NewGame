@@ -1,5 +1,4 @@
 #pragma once
-
 namespace gl {
 	namespace Texture {
 		void initGBuffer();
@@ -10,7 +9,7 @@ namespace gl {
 		extern unsigned int gAmbientTexture;
 		extern unsigned int gDiffuseTexture;
 		extern unsigned int gSpecularTexture;
-
+                
 		void initLightFBO();
 		extern unsigned int lightFBO;
 		extern unsigned int lightColorTexture;
@@ -20,5 +19,10 @@ namespace gl {
                 extern unsigned int buttonFBO;
                 extern unsigned int buttonIndexTexture;
                 extern unsigned int buttonDepthTexture;
+
+                void initFontFBO();
+                extern unsigned int fontFBO;
+                extern unsigned int fontColorTexture;
+                extern unsigned int fontDepthTexture;
 	}
 }

@@ -1,8 +1,7 @@
 #include "Keys.h"
 
 std::vector<App::Input::KeyEvent> App::Input::keyEventBuffer;
-unsigned int App::Input::keyEventSlotOffset = 0;
-unsigned int App::Input::keyEventSlotCount = 0;
+
 void App::Input::checkKeyEvents()
 {
 	size_t keyEventCount = keyEventBuffer.size();
@@ -13,8 +12,8 @@ void App::Input::checkKeyEvents()
 
 	for (unsigned int e = 0; e < keyEventCount; ++e) {
 		KeyEvent& kev = keyEventBuffer[e];
-		for (unsigned int ks = 0; ks < keyEventSlotCount; ++ks) {
-			EventSlot<KeyEvent>& slot = EventSlot<KeyEvent>::get(keyEventSlotOffset + ks);//wroong
+		for (unsigned int ks = 0; ks < EventSlot<KeyEvent>::instance_count(); ++ks) {
+			EventSlot<KeyEvent>& slot = EventSlot<KeyEvent>::get_instance(ks);//wroong
 			if (slot.evnt == kev) {
 				signalBuffer[signalOffset + signalCount++] = slot.signal_index;
 				break;
@@ -24,3 +23,4 @@ void App::Input::checkKeyEvents()
 	keyEventBuffer.clear();
 	signalBuffer.resize(signalOffset + signalCount);
 }
+

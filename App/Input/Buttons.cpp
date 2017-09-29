@@ -3,8 +3,9 @@
 #include "Mouse.h"
 #include <OpenGL\GUI\GUI.h>
 #include <OpenGL\BaseGL\Framebuffer.h>
+#include <algorithm>
 std::vector<App::Input::ButtonCondition> App::Input::allButtonStates;
-std::vector<App::Input::KeyEvent> App::Input::mouseButtonEventBuffer;
+
 std::vector<App::Input::ButtonEvent> App::Input::buttonEventBuffer;
 std::vector<int> App::Input::allButtonFlags;
 std::vector<unsigned int> App::Input::allButtonQuads;
@@ -38,7 +39,7 @@ void App::Input::fetchButtonEvents()
                 
                 glGetTextureImage(gl::Texture::buttonIndexTexture, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, gl::screenWidth * gl::screenHeight, &buttonIndexFrame[0]);
                 
-                unsigned int cursor_pos = gl::screenWidth * (gl::screenHeight - (absoluteCursorPosition.y + 1)) + absoluteCursorPosition.x;
+                unsigned int cursor_pos = std::min(gl::screenWidth * (absoluteCursorPosition.y - 1) + (absoluteCursorPosition.x - 1), (gl::screenWidth * gl::screenHeight)-1);
                 unsigned int now_hovered_button = buttonIndexFrame[cursor_pos];
 
                 if (now_hovered_button != hovered_button) {//'in' change 
@@ -49,7 +50,6 @@ void App::Input::fetchButtonEvents()
                         if (now_hovered_button) {
                                 evnts[evnt_count++] = ButtonEvent(now_hovered_button - 1, ButtonCondition(mouseButtons[0].action, 1));
                         }
-
                 }
                 else {
                         if (hovered_button) {
@@ -62,7 +62,7 @@ void App::Input::fetchButtonEvents()
                         }
                 }
 
-                hovered_button = now_hovered_button ? now_hovered_button : 0; //map to valid button id range
+                hovered_button = now_hovered_button; //map to valid button id range
 
                 if (!evnt_count)
                         return;
@@ -79,7 +79,7 @@ void App::Input::checkButtonEvents()
         for (unsigned int e = 0; e < buttonEventCount; ++e) {
                 ButtonEvent& kev = buttonEventBuffer[e];
                 for (unsigned int ks = 0; ks < EventSlot<ButtonEvent>::instance_count(); ++ks) {
-                        EventSlot<ButtonEvent>& slot = EventSlot<ButtonEvent>::get(ks);
+                        EventSlot<ButtonEvent>& slot = EventSlot<ButtonEvent>::get_instance(ks);
                         if (slot.evnt == kev) {
                                 signalBuffer[signalOffset + signalCount++] = slot.signal_index;
                         }

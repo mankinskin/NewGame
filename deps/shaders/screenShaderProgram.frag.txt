@@ -2,10 +2,12 @@
 
 
 layout(binding = 0)uniform sampler2D lightColorTexture;
+layout(binding = 1)uniform sampler2D fontColorTexture;
 out vec4 color;
 
 in vec2 uv;
 void main(){
 	vec4 light_color = texture(lightColorTexture, uv);
-	color = vec4(light_color );
+	vec4 font_color = texture(fontColorTexture, uv);
+	color = vec4(light_color);
 }

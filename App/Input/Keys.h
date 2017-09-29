@@ -1,5 +1,6 @@
 #pragma once
 #include "Input.h"
+#include "Event.h"
 namespace App {
 	namespace Input {
 		using Key = int;
@@ -34,12 +35,12 @@ namespace App {
 			Key key;
 			KeyCondition change;
 		};
-		inline bool operator==(KeyEvent const & l, KeyEvent const& r) {
-			return l.key == r.key && l.change == r.change;
-		}
+                inline bool operator==(KeyEvent const & l, KeyEvent const& r) {
+                        return l.key == r.key && l.change == r.change;
+                }
 		extern std::vector<KeyEvent> keyEventBuffer;
-		extern unsigned int keyEventSlotOffset;
-		extern unsigned int keyEventSlotCount;
+		
 		void checkKeyEvents();
+
 	}
 }

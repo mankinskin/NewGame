@@ -6,7 +6,7 @@
 #include "..\Camera.h"
 #include <App\Global\Debug.h>
 #include <glm\gtc\matrix_transform.hpp>
-
+#include "../BaseGL/Framebuffer.h"
 
 std::vector<gl::GUI::Text::Textbox> gl::GUI::Text::allTextboxes;
 std::vector<gl::GUI::Text::TextboxMetrics> gl::GUI::Text::allTextboxMetrics;
@@ -296,9 +296,10 @@ void gl::GUI::Text::
 renderGlyphs()
 {
 	if (allTextboxes.size()) {
-		glDisable(GL_DEPTH_TEST);
+		glBindFramebuffer(GL_FRAMEBUFFER, Texture::fontFBO);
+                glDepthFunc(GL_ALWAYS);
 		glBindVertexArray(fontVAO);
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                
 		Shader::use(glyphShapeProgram);
 		
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -318,11 +319,12 @@ renderGlyphs()
 				
 			}
 		}
+                glDepthFunc(GL_LESS);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		Debug::getGLError("renderGlyphs():");
 		Shader::unuse();
 		glBindVertexArray(0);
-		glEnable(GL_DEPTH_TEST);
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 }
 

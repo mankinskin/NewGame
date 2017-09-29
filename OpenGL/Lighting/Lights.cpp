@@ -80,10 +80,10 @@ void gl::Lighting::renderLights()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, Texture::lightFBO);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDepthFunc(GL_ALWAYS);
 	glBindVertexArray(lightVAO);
 	Shader::use(lightShaderProgram);
-        glBlendFunc(GL_ONE, GL_ONE);
-        glDepthFunc(GL_ALWAYS);
+        //glBlendFunc(GL_ONE, GL_ONE);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, Texture::gAmbientTexture);
         glActiveTexture(GL_TEXTURE1);
@@ -98,6 +98,7 @@ void gl::Lighting::renderLights()
 	glBindTexture(GL_TEXTURE_2D, Texture::gDepthTexture);
 	Debug::getGLError("renderLights()3");
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, allLightIndexRanges.size());
+        
         glDepthFunc(GL_LESS);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	Shader::unuse();

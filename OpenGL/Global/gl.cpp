@@ -20,6 +20,7 @@
 #include "../Lighting/Lights.h"
 #include "../GUI/Colored_Quads.h"
 #include "../GUI/Buttons.h"
+#include <App/World/EntityRegistry.h>
 int gl::MAX_WORK_GROUP_COUNT = 0;
 glm::ivec3 gl::MAX_WORK_GROUP_SIZE = {};
 unsigned int gl::MAX_LIGHT_COUNT = 100;
@@ -47,7 +48,7 @@ void gl::init()
 {
 	initGLEW();
 	getOpenGLInitValues();
-
+        setViewport(App::mainWindow);
 	Debug::init();
 	Camera::init();
         initFramebuffers();
@@ -59,6 +60,19 @@ void gl::init()
         initLighting();
         bindUniformBufferLocations();
 
+        
+        //-----------
+        unsigned int sphere = 0;
+        EntityRegistry::createEntities(1, &sphere);
+
+        EntityRegistry::setPos(sphere, glm::vec3(1.0f, 0.0f, -10.0f));
+        EntityRegistry::setScale(sphere, glm::vec3(0.2f, 0.2f, 0.2f));
+        EntityRegistry::updateMatrices();
+        gl::Models::allModels[0].addInstances({ sphere });
+        gl::Models::Model::revalidateMeshOffsets();
+        gl::Models::Model::revalidateEntityOffsets();
+        //----------
+
 	Debug::getGLError("gl::init()4");
 	App::Debug::printErrors();
 }
@@ -68,6 +82,7 @@ void gl::initFramebuffers()
         Texture::initGBuffer();
         Texture::initLightFBO();
         Texture::initButtonFBO();
+        Texture::initFontFBO();
 }
 
 void gl::initShaders()
@@ -200,7 +215,7 @@ void gl::getOpenGLInitValues()
 	
         screenWidth = App::mainWindow.width;
 	screenHeight = App::mainWindow.height;
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
@@ -225,20 +240,20 @@ void gl::initGeneralQuadVBO()
 {
 
 	/*        Colored-Quad
-	3---2     0,0------1,0
-	|  /|      |        |
-	| / |      |        |
-	|/  |      |        |
+	2---3     0,0------1,0
+	|   |      |        |
+	|   |      |        |
+	|   |      |        |
 	0---1     0,1------1,1
 	*/
 	float varr[4 * 2] = {
 		0.0f, 0.0f, 
 		1.0f, 0.0f,
-		1.0f, 1.0f, 
-		0.0f, 1.0f
+		0.0f, 1.0f, 
+		1.0f, 1.0f
 	};
 	unsigned int iarr[6] = {
-		0, 1, 2, 0, 2, 3
+		0, 1, 2, 2, 1, 3
 	};
 	quadVBO = VAO::createStorage(sizeof(float) * 4 * 2, &varr[0], 0);
 	quadEBO = VAO::createStorage(sizeof(unsigned int) * 6, &iarr[0], 0);
@@ -271,19 +286,6 @@ void gl::updateGeneralUniformBuffer()
 	Debug::getGLError("gl::update():");
 }
 
-void gl::frameStart()
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-}
-
-void gl::frameEnd()
-{
-	
-	glfwSwapBuffers(App::mainWindow.window);
-	Debug::getGLError("FrameEnd");
-	App::Debug::printErrors();
-}
 
 void gl::loadModels()
 {
@@ -293,17 +295,23 @@ void gl::loadModels()
 }
 
 
-void gl::renderScreenQuad(){
+void gl::renderFrame(){
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        Debug::drawGrid();
 	glBindVertexArray(screenQuadVAO);
 	Shader::use(screenShaderProgram);
-	glDepthFunc(GL_ALWAYS);
 	glActiveTexture(GL_TEXTURE0); 
 	glBindTexture(GL_TEXTURE_2D, Texture::lightColorTexture);
-		
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, Texture::fontColorTexture);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);	
-	glDepthFunc(GL_LESS);
+
 	glBindVertexArray(0);
 	Shader::unuse();
+        
+        Debug::getGLError("FrameEnd");
+        App::Debug::printErrors();
 }
 void gl::initScreenVAO()
 {

@@ -29,8 +29,8 @@ in Vertex{
 
 void main(){
 	ambientBuffer = texture(amb_texture, inVertex.uv);
-	diffuseBuffer = vec4(1.0, 1.0, 1.0, 1.0);//texture(diff_texture, inVertex.uv);
-	specularBuffer = vec4(1.0, 1.0, 1.0, 1.0);//texture(spec_texture, inVertex.uv);
+	diffuseBuffer = texture(diff_texture, inVertex.uv);
+	specularBuffer = texture(spec_texture, inVertex.uv);
 	posBuffer = inVertex.pos;
 	normalBuffer = inVertex.normal;
 	

@@ -6,14 +6,12 @@
 
 glm::dvec2 App::Input::relativeCursorPosition;
 glm::uvec2 App::Input::absoluteCursorPosition;
-
+std::vector<App::Input::MouseKeyEvent> App::Input::mouseButtonEventBuffer;
 App::Input::KeyCondition App::Input::mouseButtons[3];
 int App::Input::scroll;
 glm::vec2 App::Input::cursorFrameDelta;
 int App::Input::centerCursor;
 int App::Input::track_mouse;
-unsigned int App::Input::mouseEventSlotOffset = 0;
-unsigned int App::Input::mouseEventSlotCount = 0;
 
 void App::Input::toggleTrackMouseRef(int* pMode)
 {
@@ -40,9 +38,9 @@ void App::Input::checkMouseEvents()
 	unsigned int signalCount = 0;
 
 	for (unsigned int e = 0; e < mouseKeyEventCount; ++e) {
-		KeyEvent& kev = mouseButtonEventBuffer[e];
-		for (unsigned int ks = 0; ks < mouseEventSlotCount; ++ks) {
-			EventSlot<KeyEvent>& slot = EventSlot<KeyEvent>::get(mouseEventSlotOffset + ks);
+		MouseKeyEvent& kev = mouseButtonEventBuffer[e];
+		for (unsigned int ks = 0; ks < EventSlot<MouseKeyEvent>::instance_count(); ++ks) {
+			EventSlot<MouseKeyEvent>& slot = EventSlot<MouseKeyEvent>::get_instance(ks);
 			if (slot.evnt == kev) {
 				signalBuffer[signalOffset + signalCount++] = slot.signal_index;
 			}

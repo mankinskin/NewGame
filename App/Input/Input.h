@@ -7,16 +7,17 @@
 #include <utility>
 #include <initializer_list>
 #include "Event.h"
+#include "Keys.h"
 namespace App {
 	namespace Input {
 		
 		void init();
                 void initMenuSignals();
-		void initGameGUISignals();
 		void fetchEvents();
 		void checkEvents();
                 void callFunctions();
 		void clearSignals();
+                void revalidateSignals();
                 void end();
 		
 
@@ -32,5 +33,7 @@ namespace App {
 		static void scroll_Callback(GLFWwindow* window, double pX, double pY);
 
 
-}
+                
+
+        }
 }

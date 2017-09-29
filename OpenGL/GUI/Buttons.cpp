@@ -13,9 +13,8 @@ unsigned int gl::GUI::buttonIndexShader;
 void gl::GUI::rasterButtons() {
         Debug::getGLError("rasterButtons()1");
         if (App::Input::allButtonQuads.size()) {
-                glDepthFunc(GL_ALWAYS);
                 glBindFramebuffer(GL_FRAMEBUFFER, gl::Texture::buttonFBO);
-                
+                glDepthFunc(GL_ALWAYS);
                 glBindVertexArray(buttonVAO);
                 gl::Shader::use(buttonIndexShader);
                 //
@@ -23,8 +22,8 @@ void gl::GUI::rasterButtons() {
                 //
                 gl::Shader::unuse();
                 glBindVertexArray(0);
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
                 glDepthFunc(GL_LESS);
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
                 Debug::getGLError("rasterButtons()");
         }
 }

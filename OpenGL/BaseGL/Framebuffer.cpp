@@ -20,6 +20,10 @@ unsigned int gl::Texture::buttonFBO;
 unsigned int gl::Texture::buttonIndexTexture;
 unsigned int gl::Texture::buttonDepthTexture;
 
+unsigned int gl::Texture::fontFBO;
+unsigned int gl::Texture::fontColorTexture;
+unsigned int gl::Texture::fontDepthTexture;
+
 void gl::Texture::initGBuffer()
 {
 	glCreateFramebuffers(1, &gBuffer);
@@ -86,6 +90,28 @@ void gl::Texture::initButtonFBO(){
 		App::Debug::pushError("Framebuffer incomplete");
 	}
         
-        glClearColor(0, 0, 0, 0);
+        
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void gl::Texture::initFontFBO()
+{
+        glCreateFramebuffers(1, &fontFBO);
+        fontColorTexture = createTexture2D(screenWidth, screenHeight, GL_RGBA16F, GL_RGBA, GL_FLOAT, 0);
+        fontDepthTexture = createTexture2D(screenWidth, screenHeight, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, fontFBO);
+
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fontColorTexture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fontDepthTexture, 0);
+
+        unsigned int attachments[1] = { GL_COLOR_ATTACHMENT0 };
+        glDrawBuffers(1, &attachments[0]);
+        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+        if (status != GL_FRAMEBUFFER_COMPLETE) {
+                App::Debug::pushError("Framebuffer incomplete");
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

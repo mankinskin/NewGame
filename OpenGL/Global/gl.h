@@ -127,11 +127,9 @@ namespace gl {
         void initGLEW();
         void initGeneralQuadVBO();
         void updateGeneralUniformBuffer();
-        void frameStart();
-        void frameEnd();
         void loadModels();
 	void initScreenShader();
 	void initScreenVAO();
-	void renderScreenQuad();
+	void renderFrame();
         void initGeneralUniformBuffer();
 }

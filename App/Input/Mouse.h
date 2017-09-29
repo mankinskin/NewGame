@@ -1,11 +1,22 @@
 #pragma once
-#include "Input.h"
 #include "Keys.h"
 
 namespace App {
 	namespace Input{
-		extern std::vector<KeyEvent> mouseButtonEventBuffer;
-		extern std::vector<EventSlot<KeyEvent>> allMouseButtonSignals;
+                struct MouseKeyEvent{
+                        MouseKeyEvent()
+                                :key(-1), change(KeyCondition()) {}
+                        MouseKeyEvent(Key pKey, KeyCondition pChange)
+                                :key(pKey), change(pChange) {}
+                        MouseKeyEvent(Key pKey, int pAction, int pMods)
+                                :key(pKey), change(KeyCondition(pAction, pMods)) {}
+                        Key key;
+                        KeyCondition change;
+                };
+                inline bool operator==(MouseKeyEvent const & l, MouseKeyEvent const& r) {
+                        return l.key == r.key && l.change == r.change;
+                }
+		extern std::vector<MouseKeyEvent> mouseButtonEventBuffer;
 		extern KeyCondition mouseButtons[3];
 		extern glm::dvec2 relativeCursorPosition;
 		extern glm::uvec2 absoluteCursorPosition;
@@ -13,8 +24,6 @@ namespace App {
 		extern int scroll;
 		extern int track_mouse;
 		extern int centerCursor;
-		extern unsigned int mouseEventSlotOffset;
-		extern unsigned int mouseEventSlotCount;
 		void toggleTrackMouseRef(int* pMode);
 		void toggleTrackMouse();
 		void checkMouseEvents();

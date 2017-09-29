@@ -62,13 +62,9 @@ void gl::Models::storeMaterials()
 void gl::Models::render()
 {
         //for depth test
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl::Texture::gBuffer);
-        glBlitFramebuffer(0, 0, screenWidth, screenHeight, 0, 0, screenWidth, screenHeight,
-                GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-
+       
         glBindFramebuffer(GL_FRAMEBUFFER, Texture::gBuffer);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glBindVertexArray(meshVAO);
         Shader::use(meshShaderProgram);
 
@@ -79,11 +75,11 @@ void gl::Models::render()
                         for (unsigned int msh = 0; msh < model.meshCount; ++msh) {
                                 Models::Mesh& mesh = Models::allMeshes[model.meshOffset + msh];
                                 glActiveTexture(GL_TEXTURE0);//amb
-                                glBindTexture(GL_TEXTURE_2D, 0);
+                                glBindTexture(GL_TEXTURE_2D, mesh.texture);
                                 glActiveTexture(GL_TEXTURE1);//diff
                                 glBindTexture(GL_TEXTURE_2D, mesh.texture);
                                 glActiveTexture(GL_TEXTURE2);//spec
-                                glBindTexture(GL_TEXTURE_2D, 0);
+                                glBindTexture(GL_TEXTURE_2D,0);
 
 
                                 glDrawElementsInstanced(GL_TRIANGLES, mesh.indexCount, GL_UNSIGNED_INT, 0, model.entityCount);
