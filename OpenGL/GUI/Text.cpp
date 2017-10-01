@@ -296,15 +296,12 @@ void gl::GUI::Text::
 renderGlyphs()
 {
 	if (allTextboxes.size()) {
-		glBindFramebuffer(GL_FRAMEBUFFER, Texture::fontFBO);
-                glDepthFunc(GL_ALWAYS);
-		glBindVertexArray(fontVAO);
+		//glBindFramebuffer(GL_FRAMEBUFFER, Texture::fontFBO);
+                //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 
+		glBindVertexArray(fontVAO);
 		Shader::use(glyphShapeProgram);
-		
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		Shader::setUniform(GUI::Text::glyphShapeProgram, "atlas", (int)0);
-		//VAO::setUniform(glyphShapeProgram, "ortho", ortho);
+
 		glActiveTexture(GL_TEXTURE0);
 		for (unsigned int fo = 0; fo < allFonts.size(); ++fo) {
 			Font& font = allFonts[fo];
@@ -319,12 +316,9 @@ renderGlyphs()
 				
 			}
 		}
-                glDepthFunc(GL_LESS);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		Debug::getGLError("renderGlyphs():");
 		Shader::unuse();
 		glBindVertexArray(0);
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 }
 

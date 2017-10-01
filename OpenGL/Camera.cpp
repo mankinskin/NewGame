@@ -46,7 +46,7 @@ void gl::Camera::init()
 	nearPlane = 0.01f;
 	farPlane = 1000.0f;
 	viewMatrix = glm::lookAt(pos, lookAt, normal);
-	projectionMatrix = glm::perspective(FOV, (float)(App::mainWindow.width*resolution) / (float)(App::mainWindow.height*resolution), nearPlane, farPlane);
+	projectionMatrix = glm::perspective(FOV, (float)(App::mainWindow.width) / (float)(App::mainWindow.height), nearPlane, farPlane);
 	infiniteProjectionMatrix = projectionMatrix;
 	infiniteProjectionMatrix[2][2] = eulerian - 1.0f;
 	infiniteProjectionMatrix[3][2] = nearPlane*(eulerian - 2.0f);

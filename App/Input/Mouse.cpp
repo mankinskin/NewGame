@@ -2,16 +2,18 @@
 #include "Mouse.h"
 #include "..\Global\App.h"
 #include "..\ContextWindow.h"
-
-
+#include <OpenGL\GUI\Buttons.h>
+#include <algorithm>
 glm::dvec2 App::Input::relativeCursorPosition;
 glm::uvec2 App::Input::absoluteCursorPosition;
-std::vector<App::Input::MouseKeyEvent> App::Input::mouseButtonEventBuffer;
-App::Input::KeyCondition App::Input::mouseButtons[3];
+std::vector<App::Input::MouseKeyEvent> App::Input::mouseKeyEventBuffer;
+std::vector<App::Input::MouseEvent> App::Input::mouseEventBuffer;
+App::Input::KeyCondition App::Input::mouseKeys[3];
 int App::Input::scroll;
-glm::vec2 App::Input::cursorFrameDelta;
+glm::dvec2 App::Input::cursorFrameDelta;
 int App::Input::centerCursor;
 int App::Input::track_mouse;
+unsigned int App::Input::hovered_button = 0;
 
 void App::Input::toggleTrackMouseRef(int* pMode)
 {
@@ -32,13 +34,13 @@ void App::Input::toggleTrackMouse()
 
 void App::Input::checkMouseEvents()
 {
-	size_t mouseKeyEventCount = mouseButtonEventBuffer.size();
+	size_t mouseKeyEventCount = mouseKeyEventBuffer.size();
 	unsigned int signalOffset = signalBuffer.size();
-	signalBuffer.resize(signalOffset + mouseKeyEventCount);
+	signalBuffer.resize(signalOffset + mouseKeyEventCount*3);
 	unsigned int signalCount = 0;
 
 	for (unsigned int e = 0; e < mouseKeyEventCount; ++e) {
-		MouseKeyEvent& kev = mouseButtonEventBuffer[e];
+		MouseKeyEvent& kev = mouseKeyEventBuffer[e];
 		for (unsigned int ks = 0; ks < EventSlot<MouseKeyEvent>::instance_count(); ++ks) {
 			EventSlot<MouseKeyEvent>& slot = EventSlot<MouseKeyEvent>::get_instance(ks);
 			if (slot.evnt == kev) {
@@ -47,6 +49,27 @@ void App::Input::checkMouseEvents()
 		}
 
 	}
-	mouseButtonEventBuffer.clear();
+
+        unsigned int cursor_pos = App::mainWindow.width * (App::Input::absoluteCursorPosition.y) + (App::Input::absoluteCursorPosition.x);
+        unsigned int now_hovered_button = gl::GUI::buttonIndexMap[cursor_pos];
+
+        for (unsigned int e = 0; e < mouseKeyEventCount; ++e) {
+                MouseKeyEvent& kev = mouseKeyEventBuffer[e];
+                for (unsigned int ks = 0; ks < EventSlot<MouseEvent>::instance_count(); ++ks) {
+                        EventSlot<MouseEvent>& slot = EventSlot<MouseEvent>::get_instance(ks);
+                        if (slot.evnt == MouseEvent(hovered_button, kev)) {
+                                signalBuffer[signalOffset + signalCount++] = slot.signal_index;
+                        }
+                        if (hovered_button!= now_hovered_button && slot.evnt == MouseEvent(now_hovered_button, kev)) {
+                                signalBuffer[signalOffset + signalCount++] = slot.signal_index;
+                        }
+                }
+
+        }
+
+        hovered_button = now_hovered_button;
+        
+
+        mouseKeyEventBuffer.clear();
 	signalBuffer.resize(signalOffset + signalCount);
 }

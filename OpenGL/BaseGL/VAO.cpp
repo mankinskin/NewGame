@@ -93,16 +93,17 @@ void gl::VAO::streamStorage(Storage& pStorage, unsigned int pUploadSize, void* p
 	unsigned int updateSize = std::max(pUploadSize, stream.alignment);
 	
 	stream.updateOffset = stream.updateOffset * (1 - (stream.updateOffset + updateSize > pStorage.capacity));
-	stream.lastUpdateSize = updateSize;
-
-	std::memcpy((char*)stream.mappedPtr + stream.updateOffset, pData, pUploadSize);
-	
-	if (pStorage.target == GL_UNIFORM_BUFFER) {
+        if (pStorage.target == GL_UNIFORM_BUFFER) {
 		glBindBufferRange(GL_UNIFORM_BUFFER, pStorage.binding, pStorage.ID, stream.updateOffset, updateSize);
 	}
 	else if (pStorage.target == GL_ARRAY_BUFFER) {
 		glVertexArrayVertexBuffer(pStorage.vaoID, pStorage.binding, pStorage.ID, stream.updateOffset, pStorage.stride);
 	}
+	stream.lastUpdateSize = updateSize;
+
+	std::memcpy((char*)stream.mappedPtr + stream.updateOffset, pData, pUploadSize);
+	
+	
 	Debug::getGLError("updateStreamStorage():");
 }
 

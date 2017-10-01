@@ -78,12 +78,13 @@ void gl::Lighting::reservePointLightSpace(unsigned int pCount){
 }
 void gl::Lighting::renderLights()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, Texture::lightFBO);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDepthFunc(GL_ALWAYS);
+        glDepthMask(0);
+        
+        
+        glBlendFunc(GL_ONE, GL_ONE);
 	glBindVertexArray(lightVAO);
 	Shader::use(lightShaderProgram);
-        //glBlendFunc(GL_ONE, GL_ONE);
+        glBlendFunc(GL_ONE, GL_ONE);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, Texture::gAmbientTexture);
         glActiveTexture(GL_TEXTURE1);
@@ -94,17 +95,19 @@ void gl::Lighting::renderLights()
 	glBindTexture(GL_TEXTURE_2D, Texture::gPosTexture);
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, Texture::gNormalTexture);
-	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, Texture::gDepthTexture);
-	Debug::getGLError("renderLights()3");
+
         glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, allLightIndexRanges.size());
         
-        glDepthFunc(GL_LESS);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	Shader::unuse();
-	glBindVertexArray(0);	
-	Debug::getGLError("renderLights()4");
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        Shader::unuse();
+	glBindVertexArray(0);
+        glDepthMask(1);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, Texture::gBuffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        glBlitFramebuffer(0, 0, screenWidth * resolution, screenHeight * resolution, 0, 0, screenWidth, screenHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        
+        Debug::getGLError("renderLights()4");
 }
 void gl::Lighting::setLightPos(unsigned int pLightIndex, glm::vec3& pPos){
 	std::memcpy(&allLightData[allLightIndexRanges[pLightIndex].offset], &pPos, sizeof(float)*3);

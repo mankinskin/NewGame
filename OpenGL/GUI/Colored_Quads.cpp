@@ -33,9 +33,9 @@ void gl::GUI::colorQuad(unsigned int pQuad, unsigned int pColor){
 void gl::GUI::renderColoredQuads(){
     glBindVertexArray(coloredQuadVAO);    
     Shader::use(coloredQuadShader);
-    glDepthFunc(GL_ALWAYS);
+    
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, allColoredQuads.size());
-    glDepthFunc(GL_LESS);
+
     Shader::unuse();
     glBindVertexArray(0);    
 }

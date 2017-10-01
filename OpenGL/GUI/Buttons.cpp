@@ -4,26 +4,29 @@
 #include "../BaseGL/Framebuffer.h"
 #include "../BaseGL/Shader.h"
 #include "../BaseGL/VAO.h"
-#include <App/Input/Buttons.h>
+#include <App/Input/Mouse.h>
 
 unsigned int gl::GUI::buttonVAO;
 unsigned int gl::GUI::buttonBuffer;
 unsigned int gl::GUI::buttonIndexShader;
+std::vector<int> gl::GUI::allButtonFlags;
+std::vector<unsigned int> gl::GUI::allButtonQuads;
+std::vector<unsigned int> gl::GUI::buttonIndexMap;
+
 
 void gl::GUI::rasterButtons() {
-        Debug::getGLError("rasterButtons()1");
-        if (App::Input::allButtonQuads.size()) {
-                glBindFramebuffer(GL_FRAMEBUFFER, gl::Texture::buttonFBO);
-                glDepthFunc(GL_ALWAYS);
+        if (allButtonQuads.size()) {
+                glBindFramebuffer(GL_FRAMEBUFFER, gl::Texture::guiFBO);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                glDepthMask(0);
                 glBindVertexArray(buttonVAO);
                 gl::Shader::use(buttonIndexShader);
-                //
-                glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, App::Input::allButtonQuads.size());
-                //
+                
+                glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, allButtonQuads.size());
+                
                 gl::Shader::unuse();
                 glBindVertexArray(0);
-                glDepthFunc(GL_LESS);
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                glDepthMask(1);
                 Debug::getGLError("rasterButtons()");
         }
 }
@@ -46,11 +49,38 @@ void gl::GUI::initButtonBuffer()
         gl::VAO::setVertexArrayVertexStorage(buttonVAO, 1, buttonBuffer, sizeof(unsigned int));
         gl::VAO::setVertexAttrib(buttonVAO, 1, 1, 1, GL_UNSIGNED_INT, 0);
         glVertexArrayBindingDivisor(buttonVAO, 1, 1);
+
+        buttonIndexMap.resize(gl::screenWidth * gl::screenHeight);
 }
 
 void gl::GUI::updateButtonBuffer()
 {
-        if (App::Input::allButtonQuads.size()) {
-                gl::VAO::streamStorage(buttonBuffer, sizeof(unsigned int)*App::Input::allButtonQuads.size(), &App::Input::allButtonQuads[0]);
+        if (allButtonQuads.size()) {
+                gl::VAO::streamStorage(buttonBuffer, sizeof(unsigned int)*allButtonQuads.size(), &allButtonQuads[0]);
         }
+}
+
+unsigned int gl::GUI::addButton(unsigned int pQuadIndex)
+{
+        allButtonQuads.push_back(pQuadIndex);
+        return allButtonQuads.size();
+}
+void gl::GUI::toggleButton(unsigned int pButtonID) {
+        allButtonFlags[pButtonID - 1] = !allButtonFlags[pButtonID - 1];
+}
+void gl::GUI::hideButton(unsigned int pButtonID) {
+        allButtonFlags[pButtonID - 1] = 0;
+}
+void gl::GUI::unhideButton(unsigned int pButtonID) {
+        allButtonFlags[pButtonID - 1] = 1;
+}
+void gl::GUI::fetchButtonMap()
+{
+        //get button id pixels
+        glGetTextureImage(gl::Texture::buttonIndexTexture, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, gl::screenWidth * gl::screenHeight, &buttonIndexMap[0]);
+}
+void gl::GUI::clearButtons()
+{
+        allButtonFlags.clear();
+        allButtonQuads.clear();
 }

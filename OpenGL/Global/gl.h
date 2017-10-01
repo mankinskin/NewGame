@@ -104,10 +104,6 @@ namespace gl {
         extern float resolution;
         extern unsigned int screenWidth;
         extern unsigned int screenHeight;
-        extern unsigned int mergeComputeShader;
-        extern unsigned int finalMergeShader;
-        extern unsigned int mainFrame;
-        extern unsigned int mainFBO;
         extern unsigned int quadVBO; 
         extern unsigned int quadEBO;
         extern unsigned int generalUniformBuffer;
@@ -128,8 +124,5 @@ namespace gl {
         void initGeneralQuadVBO();
         void updateGeneralUniformBuffer();
         void loadModels();
-	void initScreenShader();
-	void initScreenVAO();
-	void renderFrame();
         void initGeneralUniformBuffer();
 }

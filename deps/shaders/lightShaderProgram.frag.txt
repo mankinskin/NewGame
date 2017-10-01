@@ -6,9 +6,8 @@ layout(binding = 1)uniform sampler2D diffuse_texture;
 layout(binding = 2)uniform sampler2D specular_texture;
 layout(binding = 3)uniform sampler2D pos_texture;
 layout(binding = 4)uniform sampler2D normal_texture;
-layout(binding = 5)uniform sampler2D depth_texture;
 
-out vec4 color;
+layout(location = 0)out vec4 color;
 
 layout(std140)uniform GeneralUniformBuffer{
         vec4 generalUniformBuffer[9];
@@ -24,7 +23,7 @@ in flat uvec2 i_rng;
 void main(){
         const float gamma = 2.2;
 		float exposure = 1.0f;
-        vec3 amb = vec3(0.2, 0.2, 0.2);
+        vec3 amb = vec3(0.01, 0.01, 0.01);
 
         vec4 light_pos_data = lightDataBuffer[i_rng.x];
         vec4 light_color_data = lightDataBuffer[i_rng.x + 1];
@@ -36,32 +35,29 @@ void main(){
         float light_range = light_color_data.w;
         vec3 cam_pos = generalUniformBuffer[8].xyz;       
                 
-        vec4 g_ambient_albedo =  texture(ambient_texture, uv);
-        vec4 g_diffuse_albedo = texture(diffuse_texture, uv);
-        vec4 g_specular_albedo = texture(specular_texture, uv);
-		g_ambient_albedo.xyz = amb;
-		g_diffuse_albedo.xyz = vec3(1.0, 1.0, 1.0);
-		g_specular_albedo.xyz = vec3(1.0, 1.0, 1.0);
+        vec4 g_ambient_albedo =  texture(ambient_texture, uv)+ vec4(vec3(1.0, 1.0, 1.0), 0.0);
+        vec4 g_diffuse_albedo = texture(diffuse_texture, uv) + vec4(1.0, 1.0, 1.0, 0.0);
+        vec4 g_specular_albedo = texture(specular_texture, uv) + vec4(1.0, 1.0, 1.0, 2000.0);
+		
         vec3 pos = texture(pos_texture, uv).xyz;
-        vec3 normal = texture(normal_texture, uv).xyz;
-        float depth = texture(depth_texture, uv).x;
+        vec3 normal = normalize(texture(normal_texture, uv).xyz);
                 
         vec3 cam_vec = cam_pos - pos;
         vec3 cam_dir = normalize(cam_vec);
         vec3 light_vec = light_pos - pos * light_pos_w;
         vec3 light_dir = normalize(light_vec);
         float light_dist = length(light_vec)*light_pos_w;
-        float att_linear = 0.1;
-        float att_quadric = 0.01;
+        float att_linear = 1.0/(light_range)*0.1;
+        float att_quadric = 1.0/(light_range*light_range)*0.1;;
         float attenuation = max(1.0/(1.0 + att_linear * light_dist + att_quadric * light_dist * light_dist), 0.0);
         
         vec3 reflection_ray = -reflect(light_dir, normal);
         float diffuse_dot = clamp(dot(light_dir, normal), 0.0, 1.0);
         float specular_dot = clamp(  dot(cam_dir, reflection_ray), 0.0, 1.0);
         
-        vec3 ambient_light = g_ambient_albedo.xyz * light_color;
+        vec3 ambient_light = g_ambient_albedo.xyz * light_color*amb;
         vec3 diffuse_light = g_diffuse_albedo.xyz * light_color * diffuse_dot * attenuation;
-        vec3 specular_light = g_specular_albedo.xyz * light_color * pow(specular_dot, 16) * attenuation;
+        vec3 specular_light = g_specular_albedo.xyz * light_color * pow(specular_dot, g_specular_albedo.w) * attenuation;
         
-        color = vec4(specular_light + diffuse_light + ambient_light, g_diffuse_albedo.w);//vec4(specular_light+diffuse_light+ambient_light, g_diffuse_albedo.w); 
+        color = vec4(specular_light + diffuse_light + ambient_light, g_diffuse_albedo.w*g_specular_albedo.w*g_ambient_albedo.w);
 }

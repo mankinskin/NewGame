@@ -39,9 +39,6 @@
     <ClCompile Include="Input\Event.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Input\Buttons.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Input\Keys.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -75,9 +72,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Input\Keys.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Input\Buttons.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Input\Mouse.h">

@@ -4,7 +4,6 @@
 #include "..\Input\Input.h"
 #include "..\Input\Event.h"
 #include "..\Input\Mouse.h"
-#include "..\Input\Buttons.h"
 #include <conio.h>
 #include <thread>
 #include <chrono>
@@ -20,7 +19,7 @@
 #include <OpenGL/Lighting\Lights.h>
 #include <OpenGL/GUI/Buttons.h>
 #include <OpenGL/GUI/Colored_Quads.h>
-
+#include <OpenGL/BaseGL/Framebuffer.h>
 App::State App::state = App::State::Init;
 App::ContextWindow::Window App::mainWindow = App::ContextWindow::Window();
 double App::timeFactor = 1.0;
@@ -63,22 +62,33 @@ void App::initGLFW()
 void App::mainMenuLoop()
 {
         //Buttons
-        unsigned int quitButtonQuad = gl::GUI::createQuad(-1.0f, -0.8f, 0.2f, 0.1f);
-        gl::GUI::colorQuad(quitButtonQuad, 0);
-        unsigned quit_button = Input::addButton(quitButtonQuad);
+        unsigned int quitButtonQuad = gl::GUI::createQuad(-1.0f, -0.9f, 0.2f, 0.1f);
+        unsigned int playButtonQuad = gl::GUI::createQuad(-1.0f, -0.7f, 0.2f, 0.1f);
+        unsigned int pullButtonQuad = gl::GUI::createQuad(-0.495f, 0.19f, 0.29f, 0.05f);
+        unsigned int windowQuad = gl::GUI::createQuad(-0.5f, 0.2f, 0.3f, 0.3f);
+        
+
+        gl::GUI::colorQuad(quitButtonQuad, 5);
+        gl::GUI::colorQuad(playButtonQuad, 5);
+        gl::GUI::colorQuad(windowQuad, 7);
+        gl::GUI::colorQuad(pullButtonQuad, 6);
+        
+        unsigned quit_button = gl::GUI::addButton(quitButtonQuad);
+        unsigned pull_button = gl::GUI::addButton(pullButtonQuad);
         //Signals
         using Input::EventSlot;
         using Input::KeyEvent;
         using Input::KeyCondition;
-        using Input::ButtonEvent;
-        using Input::ButtonCondition;
         using Input::MouseKeyEvent;
+        using Input::MouseEvent;
         using Input::FuncSlot;
-
-        EventSlot<KeyEvent>::reserve_slots(15);//reserve EventSlots for EventType KeyEvent
+        using Input::Signal;
+        EventSlot<KeyEvent>::reserve_slots(28);//reserve EventSlots for EventType KeyEvent
         EventSlot<KeyEvent> esc_press_slot(KeyEvent(GLFW_KEY_ESCAPE, KeyCondition(1, 0)));
         EventSlot<KeyEvent> c_press_slot(KeyEvent(GLFW_KEY_C, KeyCondition(1, 0)));
-        EventSlot<KeyEvent> g_press_slot(KeyEvent(GLFW_KEY_C, KeyCondition(1, 0)));
+        EventSlot<KeyEvent> g_press_slot(KeyEvent(GLFW_KEY_G, KeyCondition(1, 0)));
+        EventSlot<KeyEvent> h_press_slot(KeyEvent(GLFW_KEY_H, KeyCondition(1, 0)));
+        EventSlot<KeyEvent> i_press_slot(KeyEvent(GLFW_KEY_I, KeyCondition(1, 0)));
 
         EventSlot<KeyEvent> w_press_slot  (KeyEvent(GLFW_KEY_W, KeyCondition(1, 0)));
         EventSlot<KeyEvent> w_release_slot(KeyEvent(GLFW_KEY_W, KeyCondition(0, 0)));
@@ -92,17 +102,47 @@ void App::mainMenuLoop()
         EventSlot<KeyEvent> space_release_slot(KeyEvent(GLFW_KEY_SPACE, KeyCondition(0, 0)));
         EventSlot<KeyEvent> z_press_slot  (KeyEvent(GLFW_KEY_Z, KeyCondition(1, 0)));
         EventSlot<KeyEvent> z_release_slot(KeyEvent(GLFW_KEY_Z, KeyCondition(0, 0)));
+        //
+        EventSlot<KeyEvent> up_press_slot(KeyEvent(GLFW_KEY_UP, KeyCondition(1, 0)));
+        EventSlot<KeyEvent> up_release_slot(KeyEvent(GLFW_KEY_UP, KeyCondition(0, 0)));
+        EventSlot<KeyEvent> down_press_slot(KeyEvent(GLFW_KEY_DOWN, KeyCondition(1, 0)));
+        EventSlot<KeyEvent> down_release_slot(KeyEvent(GLFW_KEY_DOWN, KeyCondition(0, 0)));
+        EventSlot<KeyEvent> left_press_slot(KeyEvent(GLFW_KEY_LEFT, KeyCondition(1, 0)));
+        EventSlot<KeyEvent> left_release_slot(KeyEvent(GLFW_KEY_LEFT, KeyCondition(0, 0)));
+        EventSlot<KeyEvent> right_press_slot(KeyEvent(GLFW_KEY_RIGHT, KeyCondition(1, 0)));
+        EventSlot<KeyEvent> right_release_slot(KeyEvent(GLFW_KEY_RIGHT, KeyCondition(0, 0)));
+        EventSlot<KeyEvent> o_press_slot(KeyEvent(GLFW_KEY_O, KeyCondition(1, 0)));
+        EventSlot<KeyEvent> o_release_slot(KeyEvent(GLFW_KEY_O, KeyCondition(0, 0)));
+        EventSlot<KeyEvent> l_press_slot(KeyEvent(GLFW_KEY_L, KeyCondition(1, 0)));
+        EventSlot<KeyEvent> l_release_slot(KeyEvent(GLFW_KEY_L, KeyCondition(0, 0)));
 
-        EventSlot<MouseKeyEvent>::reserve_slots(2);
+
+        EventSlot<MouseKeyEvent>::reserve_slots(4);
+        EventSlot<MouseKeyEvent> lmb_press_slot(MouseKeyEvent(GLFW_MOUSE_BUTTON_1, KeyCondition(1, 0)));
+        EventSlot<MouseKeyEvent> lmb_release_slot(MouseKeyEvent(GLFW_MOUSE_BUTTON_1, KeyCondition(0, 0)));
+
         EventSlot<MouseKeyEvent> rmb_press_slot(MouseKeyEvent(GLFW_MOUSE_BUTTON_2, KeyCondition(1, 0)));
         EventSlot<MouseKeyEvent> rmb_release_slot(MouseKeyEvent(GLFW_MOUSE_BUTTON_2, KeyCondition(0, 0)));
 
-        EventSlot<ButtonEvent>::reserve_slots(1);
-        EventSlot<ButtonEvent> quit_button_press_slot(ButtonEvent(quit_button, ButtonCondition(1, 0)));
+        EventSlot<MouseEvent>::reserve_slots(1);
+        EventSlot<MouseEvent> pull_button_press(MouseEvent(pull_button, MouseKeyEvent(0, 1, 0)));
 
-        FuncSlot<void>::reserve_slots(2);
+        FuncSlot<void, unsigned int>::reserve_slots(3);
+        FuncSlot<void, unsigned int> quadFollowFunc(gl::GUI::moveQuadByMouseDelta, pullButtonQuad);
+        FuncSlot<void, unsigned int> windowFollowFunc(gl::GUI::moveQuadByMouseDelta, windowQuad);
+        FuncSlot<void, unsigned int> quadstartFollowFunc(Input::setSignalStay, pull_button_press.signal_index);
+        FuncSlot<void, unsigned int> quadstopFollowFunc(Input::stopSignalStay, pull_button_press.signal_index);
+        quadFollowFunc.listen({ pull_button_press.signal_index  });
+        windowFollowFunc.listen({ pull_button_press.signal_index });
+        quadstartFollowFunc.listen({ pull_button_press.signal_index });
+        quadstopFollowFunc.listen({ lmb_release_slot.signal_index });
+        FuncSlot<void>::reserve_slots(21);
+
         FuncSlot<void> quitFunc(quit);//define functions
         FuncSlot<void> toggleMouseTrack(Input::toggleTrackMouse);
+        FuncSlot<void> toggleGrid(gl::Debug::toggleGrid);
+        FuncSlot<void> toggleCoord(gl::Debug::toggleCoord);
+        FuncSlot<void> togglePrintInfo(App::Debug::togglePrintInfo);
 
         FuncSlot<void> moveForwardFunc(gl::Camera::forward);
         FuncSlot<void> moveBackFunc(gl::Camera::back);
@@ -115,9 +155,24 @@ void App::mainMenuLoop()
         FuncSlot<void> moveUpFunc(gl::Camera::up);
         FuncSlot<void> moveDownFunc(gl::Camera::down);
         FuncSlot<void> stopYFunc(gl::Camera::stop_y);
+        //
+        FuncSlot<void> moveLightForwardFunc([]() {App::light_mov.z = -1.0f; });
+        FuncSlot<void> moveLightBackFunc([]() {App::light_mov.z = 1.0f; });
+        FuncSlot<void> stopLightZFunc([]() {App::light_mov.z = 0.0f; });
 
-        quitFunc.listen({ esc_press_slot.signal_index, quit_button_press_slot.signal_index });
+        FuncSlot<void> moveLightLeftFunc([]() {App::light_mov.x = -1.0f; });
+        FuncSlot<void> moveLightRightFunc([]() {App::light_mov.x = 1.0f; });
+        FuncSlot<void> stopLightXFunc([]() {App::light_mov.x = 0.0f; });
+
+        FuncSlot<void> moveLightUpFunc([]() {App::light_mov.y = 1.0f; });
+        FuncSlot<void> moveLightDownFunc([]() {App::light_mov.y = -1.0f; });
+        FuncSlot<void> stopLightYFunc([]() {App::light_mov.y = 0.0f; });
+        
+        quitFunc.listen({ esc_press_slot.signal_index });
         toggleMouseTrack.listen({ c_press_slot.signal_index, rmb_press_slot.signal_index, rmb_release_slot.signal_index });
+        toggleGrid.listen({g_press_slot.signal_index});
+        toggleCoord.listen({ h_press_slot.signal_index });
+        togglePrintInfo.listen({ i_press_slot.signal_index });
         
         moveForwardFunc.listen({ w_press_slot.signal_index });
         moveBackFunc.listen({ s_press_slot.signal_index });
@@ -130,7 +185,18 @@ void App::mainMenuLoop()
         moveUpFunc.listen({ space_press_slot.signal_index });
         moveDownFunc.listen({ z_press_slot.signal_index });
         stopYFunc.listen({ space_release_slot.signal_index , z_release_slot.signal_index });
+        //
+        moveLightForwardFunc.listen({ up_press_slot.signal_index });
+        moveLightBackFunc.listen({ down_press_slot.signal_index });
+        stopLightZFunc.listen({ up_release_slot.signal_index , down_release_slot.signal_index });
 
+        moveLightLeftFunc.listen({ left_press_slot.signal_index });
+        moveLightRightFunc.listen({ right_press_slot.signal_index });
+        stopLightXFunc.listen({ left_release_slot.signal_index , right_release_slot.signal_index });
+
+        moveLightUpFunc.listen({ o_press_slot.signal_index });
+        moveLightDownFunc.listen({ l_press_slot.signal_index });
+        stopLightYFunc.listen({ o_release_slot.signal_index , l_release_slot.signal_index });
 
         Input::set_up_lock(w_press_slot.signal_index, w_release_slot.signal_index, { s_press_slot.signal_index, s_release_slot.signal_index });
         Input::set_up_lock(s_press_slot.signal_index, s_release_slot.signal_index, { w_press_slot.signal_index, w_release_slot.signal_index });
@@ -140,40 +206,64 @@ void App::mainMenuLoop()
 
         Input::set_up_lock(space_press_slot.signal_index, space_release_slot.signal_index, { z_press_slot.signal_index, z_release_slot.signal_index });
         Input::set_up_lock(z_press_slot.signal_index, z_release_slot.signal_index, { space_press_slot.signal_index, space_release_slot.signal_index });
+        //
+        Input::set_up_lock(up_press_slot.signal_index, up_release_slot.signal_index, { down_press_slot.signal_index, down_release_slot.signal_index });
+        Input::set_up_lock(down_press_slot.signal_index, down_release_slot.signal_index, { up_press_slot.signal_index, up_release_slot.signal_index });
+
+        Input::set_up_lock(left_press_slot.signal_index, left_release_slot.signal_index, { right_press_slot.signal_index, right_release_slot.signal_index });
+        Input::set_up_lock(right_press_slot.signal_index, right_release_slot.signal_index, { left_press_slot.signal_index, left_release_slot.signal_index });
+
+        Input::set_up_lock(o_press_slot.signal_index, o_release_slot.signal_index, { l_press_slot.signal_index, z_release_slot.signal_index });
+        Input::set_up_lock(l_press_slot.signal_index, l_release_slot.signal_index, { o_press_slot.signal_index, o_release_slot.signal_index });
+        
+        
         //Text
         gl::GUI::Text::createTextboxMetrics(0, 1.0, 1.0, 1.0, 1.0);
-        unsigned int tb = gl::GUI::Text::createTextbox(quitButtonQuad, 0, 0);
-        gl::GUI::Text::setTextboxString(tb, gl::GUI::Text::String("QUIT"));
+        unsigned int pl_tb = gl::GUI::Text::createTextbox(playButtonQuad, 0, 0);
+        unsigned int qu_tb = gl::GUI::Text::createTextbox(quitButtonQuad, 0, 0);
+        
+        gl::GUI::Text::setTextboxString(qu_tb, gl::GUI::Text::String("QUIT"));
+        gl::GUI::Text::setTextboxString(pl_tb, gl::GUI::Text::String("Play"));
         gl::GUI::Text::loadTextboxes();
 
         //Lights
-        gl::Lighting::reservePointLightSpace(2);
-        gl::Lighting::createLight(glm::vec4(1.0, 1.0, 1.0, 1.0), glm::vec4(1.0, 1.0, 1.0, 100.0));
-        gl::Lighting::createLight(glm::vec4(1.0, 1.0, -1.0, 1.0), glm::vec4(0.5, 0.8, 1.0, 100.0));
+        gl::Lighting::createLight(glm::vec4(1.0f, 1.0f, 1.0f, 0.0f), glm::vec4(1.0f, 0.95f, 0.1f, 10.0f));
+        gl::Lighting::createLight(glm::vec4(3.0f, 5.0f, 3.0f, 1.0f), glm::vec4(0.5f, 1.0f, 1.0f, 10.0f));
+
         
         while (state == App::MainMenu) {
 
-                fetchInput();
+                light_pos += light_mov;
+                gl::Lighting::setLightPos(1, light_pos);
                 gl::Camera::look(Input::cursorFrameDelta);
+                
                 gl::Camera::update();
                 gl::updateGeneralUniformBuffer();
-                gl::GUI::updateQuadBuffer();
-                gl::GUI::updateColoredQuads();
-                gl::Lighting::updateLightDataBuffer();
-                gl::Lighting::updateLightIndexRangeBuffer();
-                gl::GUI::Text::updateCharStorage();
                 gl::Models::updateBuffers();
+                gl::Lighting::updateLightIndexRangeBuffer();
+                gl::Lighting::updateLightDataBuffer();
+                gl::GUI::Text::updateCharStorage();
+                gl::GUI::updateColoredQuads();
+                gl::GUI::updateQuadBuffer();
                 
-                gl::Debug::drawGrid();
+
+                glBindFramebuffer(GL_FRAMEBUFFER, gl::Texture::gBuffer);
+                glViewport(0, 0, gl::screenWidth*gl::resolution, gl::screenHeight*gl::resolution);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 gl::Models::render();
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                glViewport(0, 0, gl::screenWidth, gl::screenHeight);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 gl::Lighting::renderLights();
-                
-                
-                gl::renderFrame();
+                gl::Debug::drawGrid();
+                //GUI
+                glDepthFunc(GL_ALWAYS);
                 gl::GUI::renderColoredQuads();
                 gl::GUI::Text::renderGlyphs();
-                glfwSwapBuffers(mainWindow.window);
+                glDepthFunc(GL_LESS);
                 
+                glfwSwapBuffers(mainWindow.window);
+                fetchInput();
 
 		Debug::printErrors();
 		updateTime();
@@ -189,7 +279,8 @@ void App::fetchInput()
 {
         gl::GUI::updateButtonBuffer();
         gl::GUI::rasterButtons();
-        Input::fetchEvents();
+        Input::fetchGLFWEvents();
+        gl::GUI::fetchButtonMap();
         Input::checkEvents();
         Input::callFunctions();
         Input::end();
@@ -208,7 +299,6 @@ void App::frameLoop()
  		gl::updateGeneralUniformBuffer();
 
 
-		gl::renderFrame();
 		
 		updateTime();
 		updateTimeFactor();

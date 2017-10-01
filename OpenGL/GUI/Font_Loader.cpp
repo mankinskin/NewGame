@@ -368,10 +368,7 @@ integrateFont(LoadFont& pFont) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mipmap_min_flag);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mipmap_mag_flag);
 
-
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	storeGlyphs(font, pFont);
 	std::pair<unsigned int, unsigned int> range = convertKerning(pFont.kerningMap);

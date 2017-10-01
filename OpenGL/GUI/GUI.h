@@ -4,7 +4,7 @@
 namespace gl {
 	namespace GUI {
 
-		
+                void moveQuadByMouseDelta(unsigned int pQuadIndex);
 		
 		void setQuadVisibility(unsigned int pQuadIndex, int pHide);
                 unsigned createQuad(glm::vec4 pQuad);

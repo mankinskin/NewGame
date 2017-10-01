@@ -33,10 +33,6 @@ float gl::resolution = 1.0f;
 int gl::MAX_TEXTURE_UNIT_COUNT;
 unsigned int gl::screenWidth = 0;
 unsigned int gl::screenHeight = 0;
-unsigned int gl::mergeComputeShader = 0;
-unsigned int gl::finalMergeShader;
-unsigned int gl::mainFrame = 0;
-unsigned int gl::mainFBO  = 0;
 unsigned int gl::quadVBO = 0;
 unsigned int gl::quadEBO = 0; 
 unsigned int gl::generalUniformBuffer = 0;
@@ -48,7 +44,6 @@ void gl::init()
 {
 	initGLEW();
 	getOpenGLInitValues();
-        setViewport(App::mainWindow);
 	Debug::init();
 	Camera::init();
         initFramebuffers();
@@ -62,13 +57,21 @@ void gl::init()
 
         
         //-----------
-        unsigned int sphere = 0;
-        EntityRegistry::createEntities(1, &sphere);
-
-        EntityRegistry::setPos(sphere, glm::vec3(1.0f, 0.0f, -10.0f));
-        EntityRegistry::setScale(sphere, glm::vec3(0.2f, 0.2f, 0.2f));
+        unsigned int gridwidth = 15;
+        glm::vec3 gridpos = glm::vec3(0.0f, 0.0f, 0.0f);
+        float gridscale = 10.0f;
+        std::vector<unsigned> spheres(gridwidth*gridwidth);
+        EntityRegistry::createEntities(gridwidth*gridwidth, &spheres[0]);
+        
+        for (unsigned int x = 0; x < gridwidth; ++x) {
+                for (unsigned int z = 0; z < gridwidth; ++z) {
+                        EntityRegistry::setPos(spheres[x * gridwidth + z], glm::vec3(gridpos.x + (float)x*gridscale, gridpos.y, gridpos.z + (float)z*gridscale));
+                        EntityRegistry::setScale(spheres[x * gridwidth + z], glm::vec3(0.2f, 0.2f, 0.2f));
+                }
+        }
+        
         EntityRegistry::updateMatrices();
-        gl::Models::allModels[0].addInstances({ sphere });
+        gl::Models::allModels[0].addInstances({ spheres });
         gl::Models::Model::revalidateMeshOffsets();
         gl::Models::Model::revalidateEntityOffsets();
         //----------
@@ -80,16 +83,13 @@ void gl::init()
 void gl::initFramebuffers()
 {
         Texture::initGBuffer();
-        Texture::initLightFBO();
-        Texture::initButtonFBO();
-        Texture::initFontFBO();
+        Texture::initGUIFBO();
 }
 
 void gl::initShaders()
 {
         //include shaders
         Debug::initDebugShader();
-        initScreenShader();
         Models::initNormalShader();
         Models::initMeshShader();
         Lighting::initLightShader();
@@ -104,18 +104,18 @@ void gl::initGeneralBuffers()
 {
         initGeneralUniformBuffer();
         initGeneralQuadVBO();
-        initScreenVAO();
 }
 
 void gl::initGUI()
 {
-        
-        gl::GUI::createColor(glm::vec4(1.0, 1.0, 1.0, 1.0), "white");
         gl::GUI::createColor(glm::vec4(0.0, 0.0, 0.0, 1.0), "black");
+        gl::GUI::createColor(glm::vec4(1.0, 1.0, 1.0, 1.0), "white");
         gl::GUI::createColor(glm::vec4(1.0, 0.0, 0.0, 1.0), "red");
         gl::GUI::createColor(glm::vec4(0.0, 1.0, 0.0, 1.0), "green");
         gl::GUI::createColor(glm::vec4(0.0, 0.0, 1.0, 1.0), "blue");
         gl::GUI::createColor(glm::vec4(0.0, 0.0, 0.0, 0.0), "none");
+        gl::GUI::createColor(glm::vec4(0.5, 0.5, 0.5, 1.0), "grey");
+        gl::GUI::createColor(glm::vec4(0.2, 0.2, 0.2, 1.0), "dark_grey");
         GUI::storeGUIColors();
         GUI::initQuadBuffer();
         GUI::initColoredQuadVAO();
@@ -162,7 +162,6 @@ void gl::initLighting()
 void gl::bindUniformBufferLocations()
 {
         //bind uniform buffers to shaders
-
         Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, Lighting::lightDataUBO, "LightDataBuffer");
 
         Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
@@ -181,7 +180,6 @@ void gl::bindUniformBufferLocations()
         Shader::bindUniformBufferToShader(gl::GUI::coloredQuadShader, gl::GUI::quadColorBuffer, "ColorBuffer");
         Shader::bindUniformBufferToShader(gl::GUI::coloredQuadShader, gl::GUI::quadBuffer, "QuadBuffer");
 }
-
 
 void gl::setViewport(App::ContextWindow::Window& pViewport) {
 	screenWidth = pViewport.width;
@@ -213,8 +211,7 @@ void gl::getOpenGLInitValues()
 	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &MAX_TEXTURE_UNIT_COUNT);
 	glGetIntegerv(GL_MIN_MAP_BUFFER_ALIGNMENT, &VAO::MIN_MAP_BUFFER_ALIGNMENT);
 	
-        screenWidth = App::mainWindow.width;
-	screenHeight = App::mainWindow.height;
+        setViewport(App::mainWindow);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
@@ -238,7 +235,6 @@ void gl::initGLEW() {
 
 void gl::initGeneralQuadVBO()
 {
-
 	/*        Colored-Quad
 	2---3     0,0------1,0
 	|   |      |        |
@@ -253,7 +249,7 @@ void gl::initGeneralQuadVBO()
 		1.0f, 1.0f
 	};
 	unsigned int iarr[6] = {
-		0, 1, 2, 2, 1, 3
+		2, 0, 1, 1, 3, 2
 	};
 	quadVBO = VAO::createStorage(sizeof(float) * 4 * 2, &varr[0], 0);
 	quadEBO = VAO::createStorage(sizeof(unsigned int) * 6, &iarr[0], 0);
@@ -286,45 +282,9 @@ void gl::updateGeneralUniformBuffer()
 	Debug::getGLError("gl::update():");
 }
 
-
 void gl::loadModels()
 {
         Models::Loader::includeModel("sphere.3ds");
         Models::Loader::loadModelFiles();
-
 }
 
-
-void gl::renderFrame(){
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        Debug::drawGrid();
-	glBindVertexArray(screenQuadVAO);
-	Shader::use(screenShaderProgram);
-	glActiveTexture(GL_TEXTURE0); 
-	glBindTexture(GL_TEXTURE_2D, Texture::lightColorTexture);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, Texture::fontColorTexture);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);	
-
-	glBindVertexArray(0);
-	Shader::unuse();
-        
-        Debug::getGLError("FrameEnd");
-        App::Debug::printErrors();
-}
-void gl::initScreenVAO()
-{
-	glCreateVertexArrays(1, &screenQuadVAO);
-	glVertexArrayVertexBuffer(screenQuadVAO, 0, quadVBO + 1, 0, sizeof(float) * 2);
-	glVertexArrayElementBuffer(screenQuadVAO, quadEBO + 1);
-	VAO::setVertexAttrib(screenQuadVAO, 0, 0, 2, GL_FLOAT, 0);
-}
-
-void gl::initScreenShader()
-{
-	screenShaderProgram = Shader::newProgram("screenShaderProgram", Shader::newModule("screenShaderProgram.vert"), Shader::newModule("screenShaderProgram.frag")).ID;
-	Shader::addVertexAttribute(screenShaderProgram, "corner_pos", 0);
-
-	
-}

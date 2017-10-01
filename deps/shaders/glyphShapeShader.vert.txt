@@ -50,9 +50,9 @@ void main(){
 	Glyph gly = Glyph(vgly.xy, vgly.zw);
 	
 	outVer.style = styleBuffer[styleIndex];
-	outVer.uv = vec2(gly.min.x * (1.0 - pos.x) + gly.max.x * pos.x, gly.min.y * pos.y + gly.max.y * (1.0 - pos.y));// pos;//
-	
-	gl_Position = vec4(qud.pos.x + pos.x * qud.size.x, qud.pos.y -qud.size.y + pos.y  * qud.size.y, 0.0, 1.0);
+	outVer.uv = vec2(gly.min.x * (1.0 - pos.x) + gly.max.x * pos.x, gly.min.y * pos.y + gly.max.y * (1.0 - pos.y));
+	 
+	gl_Position = vec4(qud.pos.x + pos.x * qud.size.x, qud.pos.y - (qud.size.y *(1.0 - pos.y)), 0.0, 1.0);
 }
 
 

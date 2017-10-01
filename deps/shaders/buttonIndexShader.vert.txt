@@ -1,4 +1,5 @@
 #version 450
+
 const unsigned int MAX_QUAD_COUNT = 10000;
 layout(location = 0)in vec2 corner_pos;
 layout(location = 1)in unsigned int quad_index;

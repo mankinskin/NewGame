@@ -131,7 +131,6 @@
     <ClCompile Include="ContextWindow.cpp" />
     <ClCompile Include="edid-parse.c" />
     <ClCompile Include="Global\Debug.cpp" />
-    <ClCompile Include="Input\Buttons.cpp" />
     <ClCompile Include="Input\Event.cpp" />
     <ClCompile Include="Input\Input.cpp" />
     <ClCompile Include="Input\Keys.cpp" />
@@ -143,7 +142,6 @@
   <ItemGroup>
     <ClInclude Include="ContextWindow.h" />
     <ClInclude Include="edid.h" />
-    <ClInclude Include="Input\Buttons.h" />
     <ClInclude Include="Input\Keys.h" />
     <ClInclude Include="Input\Mouse.h" />
     <ClInclude Include="World\EntityRegistry.h" />

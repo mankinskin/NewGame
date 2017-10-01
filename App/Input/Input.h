@@ -12,12 +12,10 @@ namespace App {
 	namespace Input {
 		
 		void init();
-                void initMenuSignals();
-		void fetchEvents();
+		void fetchGLFWEvents();
 		void checkEvents();
                 void callFunctions();
 		void clearSignals();
-                void revalidateSignals();
                 void end();
 		
 
@@ -29,7 +27,7 @@ namespace App {
 		static void char_Callback(GLFWwindow* window, unsigned int pCodepoint);
 		static void cursorPosition_Callback(GLFWwindow* window, double pX, double pY);
 		static void cursorEnter_Callback(GLFWwindow * window, int pEntered);
-		static void mouseButton_Callback(GLFWwindow* window, int pButton, int pAction, int pMods);
+		static void mouseKey_Callback(GLFWwindow* window, int pKey, int pAction, int pMods);
 		static void scroll_Callback(GLFWwindow* window, double pX, double pY);
 
 

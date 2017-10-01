@@ -7,7 +7,7 @@ namespace App {
 	enum State {
 		Init,
 		MainMenu,
-		Running,
+                Running, 
 		Exit
 	};
 

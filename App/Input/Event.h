@@ -36,27 +36,38 @@ namespace App {
 	namespace Input {
 
 		struct Signal {
-			Signal(int pOn, int pStay)
-				:on(pOn), stay(pStay) {}
+			Signal(int pOn, int pMult)
+				:on(pOn), mult(pMult) {}
 			Signal()
-				:on(0), stay(0) {}
+				:on(0), mult(0) {}
 			
-			void set(int set = 1) {
-				on = set;
-			}
-			void set_stay(int set = 1) {
-				stay = set;
-			}
 			void reset() {
-				on = stay;
+				on = on*mult;
 			}
 			int on;
-			int stay;//the value to assign to 'on' when resetting it
+			int mult;//if the signal should stay on when resetting it
 		};
 		extern std::vector<Signal> allSignalSlots; // 1 = signaled
 		extern std::vector<int> allSignalLocks; // 1 = locked 
                 
-
+                static void setSignal(unsigned int pSignalIndex, Signal pSignal) {
+                        allSignalSlots[pSignalIndex] = pSignal;
+                }
+                static void setSignalOff(unsigned int pSignalIndex) {
+                        allSignalSlots[pSignalIndex].on = 0;
+                }
+                static void setSignalOn(unsigned int pSignalIndex) {
+                        allSignalSlots[pSignalIndex].on = 1;
+                }
+                static void toggleSignal(unsigned int pSignalIndex) {
+                        allSignalSlots[pSignalIndex].on = !allSignalSlots[pSignalIndex].on;
+                }
+                static void setSignalStay(unsigned int pSignalIndex) {
+                        allSignalSlots[pSignalIndex].mult = 1;
+                }
+                static void stopSignalStay(unsigned int pSignalIndex) {
+                        allSignalSlots[pSignalIndex].mult = 0;
+                }
 		//this might be kinda slow. it should store an array of indices for each "LockSignal" which is a signal which either lock or unlock the array of other signals
 		extern std::unordered_map<unsigned int, std::vector<unsigned int>> signalLockBindings;
 		extern std::unordered_map<unsigned int, std::vector<unsigned int>> signalUnlockBindings;
@@ -133,8 +144,8 @@ namespace App {
 		template<class EventType>
 		class EventSlot {
 		public:
-			EventSlot(EventType pEvent) :signal_index(allSignalSlots.size()), evnt(pEvent) {
-                                allSignalSlots.push_back(Signal());
+			EventSlot(EventType pEvent, Signal pSignal = Signal()) :signal_index(allSignalSlots.size()), evnt(pEvent) {
+                                allSignalSlots.push_back(pSignal);
                                 allSignalLocks.push_back(0);
 				instances.push_back(*this);
 			}

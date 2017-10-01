@@ -4,6 +4,7 @@
 #include "..\BaseGL\Shader.h"
 #include "..\Camera.h"
 #include "../BaseGL/VAO.h"
+#include "../BaseGL/Framebuffer.h"
 
 unsigned int gl::Debug::vertexBuffer;
 unsigned int gl::Debug::indexBuffer;
@@ -150,8 +151,8 @@ void gl::Debug::init()
 
 void gl::Debug::drawGrid()
 {
+        glDepthMask(0);
 	glBindVertexArray(VAO);
-	glDepthFunc(GL_ALWAYS);
 	Shader::use(lineShaderID);
 	for (unsigned int m = 0; m < debugMeshes.size(); ++m) {
 		if (meshFlags[m]) {
@@ -160,9 +161,10 @@ void gl::Debug::drawGrid()
 			glDrawElements(GL_LINES, count, GL_UNSIGNED_INT, (void*)(offset*sizeof(unsigned int)));
 		}
 	}
-	glDepthFunc(GL_LESS);
+        
 	Shader::unuse();
 	glBindVertexArray(0);
+        glDepthMask(1);
 	getGLError("drawGrid():");
 }
 
