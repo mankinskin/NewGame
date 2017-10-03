@@ -6,11 +6,28 @@
 #include <App\Global\Debug.h>
 #include <App\Input\Input.h>
 #include <App\Input\Mouse.h>
+#include "Window.h"
 std::vector<glm::vec4> gl::GUI::allQuads;
 std::vector<int> gl::GUI::allQuadFlags;
 unsigned int gl::GUI::MAX_QUAD_COUNT = 10000;
 unsigned int gl::GUI::quadBuffer;
+unsigned int gl::GUI::colorBuffer;
+std::unordered_map<std::string, unsigned int> gl::GUI::colorLookup;
 
+unsigned int gl::GUI::createColor(glm::vec4 pColor, std::string pColorName) {
+	unsigned int i = allColors.size();
+	allColors.push_back(pColor);
+	if (pColorName.size()) {
+		colorLookup.insert(std::pair<std::string, unsigned int>(pColorName, i));
+	}
+	return i;
+}
+
+void gl::GUI::storeGUIColors()
+{
+	colorBuffer = VAO::createStorage(sizeof(glm::vec4)*allColors.size(), &allColors[0], 0);
+	VAO::bindStorage(GL_UNIFORM_BUFFER, colorBuffer);
+}
 
 void gl::GUI::clearBuffers()
 {
@@ -22,6 +39,11 @@ void gl::GUI::moveQuadByMouseDelta(unsigned int pQuadIndex)
 {
         allQuads[pQuadIndex].x = glm::clamp(allQuads[pQuadIndex].x + App::Input::cursorFrameDelta.x, -1.0, 1.0 - allQuads[pQuadIndex].z);
         allQuads[pQuadIndex].y = glm::clamp(allQuads[pQuadIndex].y + App::Input::cursorFrameDelta.y, -1.0 + allQuads[pQuadIndex].w, 1.0);
+}
+
+void gl::GUI::moveQuadGroupByMouseDelta(unsigned int GroupIndex)
+{
+	moveGroup(GroupIndex, App::Input::cursorFrameDelta);
 }
 
 void gl::GUI::setQuadVisibility(unsigned int pQuadIndex, int pHide) {

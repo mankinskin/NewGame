@@ -6,7 +6,7 @@
 #include <tuple>
 #include <utility>
 #include <initializer_list>
-#include "Event.h"
+#include "Signal.h"
 #include "Keys.h"
 namespace App {
 	namespace Input {

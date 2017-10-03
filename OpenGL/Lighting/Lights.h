@@ -4,12 +4,12 @@
 namespace gl{ 
 	namespace Lighting{ 
 
-        struct LightIndexRange{ 
+		struct LightIndexRange{ 
 			LightIndexRange(unsigned int pOffset, unsigned int pCount)
 				:offset(pOffset), count(pCount) {}
-            unsigned int offset;
-		    unsigned int count;
-	    };
+			unsigned int offset;
+			unsigned int count;
+		};
 
 		extern std::vector<glm::vec4> allLightData; 
 		extern std::vector<LightIndexRange>allLightIndexRanges;

@@ -20,6 +20,7 @@
 #include "../Lighting/Lights.h"
 #include "../GUI/Colored_Quads.h"
 #include "../GUI/Buttons.h"
+#include "../GUI/Line.h"
 #include <App/World/EntityRegistry.h>
 int gl::MAX_WORK_GROUP_COUNT = 0;
 glm::ivec3 gl::MAX_WORK_GROUP_SIZE = {};
@@ -96,7 +97,7 @@ void gl::initShaders()
         GUI::initButtonIndexShader();
         GUI::initColoredQuadShader();
         GUI::Text::initFontShader();
-
+	GUI::initLineShader();
         Shader::Loader::buildShaderPrograms();
 }
 
@@ -116,10 +117,12 @@ void gl::initGUI()
         gl::GUI::createColor(glm::vec4(0.0, 0.0, 0.0, 0.0), "none");
         gl::GUI::createColor(glm::vec4(0.5, 0.5, 0.5, 1.0), "grey");
         gl::GUI::createColor(glm::vec4(0.2, 0.2, 0.2, 1.0), "dark_grey");
+	gl::GUI::createColor(glm::vec4(0.7, 0.7, 0.7, 1.0), "light_grey");
         GUI::storeGUIColors();
         GUI::initQuadBuffer();
         GUI::initColoredQuadVAO();
         GUI::initButtonBuffer();
+	GUI::initLineVAO();
         /*FONTS
         times,
         FreeSans,
@@ -162,6 +165,7 @@ void gl::initLighting()
 void gl::bindUniformBufferLocations()
 {
         //bind uniform buffers to shaders
+	
         Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, Lighting::lightDataUBO, "LightDataBuffer");
 
         Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
@@ -175,10 +179,11 @@ void gl::bindUniformBufferLocations()
         Shader::bindUniformBufferToShader(Models::meshShaderProgram, Models::transformIndexBuffer, "TransformIndexBuffer");
         App::Debug::printErrors();
 
-        Shader::bindUniformBufferToShader(gl::GUI::buttonIndexShader, gl::GUI::quadBuffer, "QuadBuffer");
-
-        Shader::bindUniformBufferToShader(gl::GUI::coloredQuadShader, gl::GUI::quadColorBuffer, "ColorBuffer");
-        Shader::bindUniformBufferToShader(gl::GUI::coloredQuadShader, gl::GUI::quadBuffer, "QuadBuffer");
+        Shader::bindUniformBufferToShader(GUI::buttonIndexShader, gl::GUI::quadBuffer, "QuadBuffer");
+	
+	Shader::bindUniformBufferToShader(GUI::guiLineShader, GUI::colorBuffer, "ColorBuffer");
+        Shader::bindUniformBufferToShader(GUI::coloredQuadShader, GUI::colorBuffer, "ColorBuffer");
+        Shader::bindUniformBufferToShader(GUI::coloredQuadShader, GUI::quadBuffer, "QuadBuffer");
 }
 
 void gl::setViewport(App::ContextWindow::Window& pViewport) {

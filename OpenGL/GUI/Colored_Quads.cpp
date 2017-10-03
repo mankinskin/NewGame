@@ -6,26 +6,13 @@
 #include "../Global/gl.h"
 std::vector<glm::vec4> gl::GUI::allColors;
 std::vector<gl::GUI::Colored_Quad> gl::GUI::allColoredQuads;
-std::unordered_map<std::string, unsigned int> gl::GUI::colorLookup;
+
 unsigned int gl::GUI::coloredQuadBuffer;
-unsigned int gl::GUI::quadColorBuffer;
+
 unsigned int gl::GUI::coloredQuadVAO;
 unsigned int gl::GUI::coloredQuadShader;
 
-unsigned int gl::GUI::createColor(glm::vec4 pColor, std::string pColorName){
-        unsigned int i = allColors.size();
-        allColors.push_back(pColor);
-        if(pColorName.size()){
-                colorLookup.insert(std::pair<std::string, unsigned int>(pColorName, i));
-        }
-        return i;
-}
 
-void gl::GUI::storeGUIColors()
-{
-        quadColorBuffer = VAO::createStorage(sizeof(glm::vec4)*allColors.size(), &allColors[0], 0);
-        VAO::bindStorage(GL_UNIFORM_BUFFER, quadColorBuffer);
-}
 void gl::GUI::colorQuad(unsigned int pQuad, unsigned int pColor){
         allColoredQuads.push_back(Colored_Quad(pQuad, pColor));
 }
