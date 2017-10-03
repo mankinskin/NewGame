@@ -34,9 +34,9 @@ namespace App {
                 extern std::vector<MouseKeyEvent> mouseKeyEventBuffer;
                 extern std::vector<MouseEvent> mouseEventBuffer;
 		extern KeyCondition mouseKeys[3];
-		extern glm::dvec2 relativeCursorPosition;
+		extern glm::vec2 relativeCursorPosition;
 		extern glm::uvec2 absoluteCursorPosition;
-		extern glm::dvec2 cursorFrameDelta;
+		extern glm::vec2 cursorFrameDelta;
 		extern int scroll;
 		extern int track_mouse;
 		extern int centerCursor;

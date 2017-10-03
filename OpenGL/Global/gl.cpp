@@ -22,6 +22,7 @@
 #include "../GUI/Buttons.h"
 #include "../GUI/Line.h"
 #include <App/World/EntityRegistry.h>
+
 int gl::MAX_WORK_GROUP_COUNT = 0;
 glm::ivec3 gl::MAX_WORK_GROUP_SIZE = {};
 unsigned int gl::MAX_LIGHT_COUNT = 100;

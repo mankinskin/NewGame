@@ -1,5 +1,5 @@
 #include "../Global/stdafx.h"
-#include"Line.h"
+#include "Line.h"
 #include "../BaseGL/VAO.h"
 #include "../BaseGL/Shader.h"
 std::vector<glm::vec4> gl::GUI::allLines;

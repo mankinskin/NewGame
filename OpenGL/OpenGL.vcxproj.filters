@@ -20,8 +20,8 @@
     <ClCompile Include="GUI\Text.cpp" />
     <ClCompile Include="GUI\Colored_Quads.cpp" />
     <ClCompile Include="GUI\Buttons.cpp" />
-    <ClCompile Include="GUI\Window.cpp" />
     <ClCompile Include="GUI\Line.cpp" />
+    <ClCompile Include="GUI\Group.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -49,8 +49,8 @@
     <ClInclude Include="GUI\Text.h" />
     <ClInclude Include="GUI\Colored_Quads.h" />
     <ClInclude Include="GUI\Buttons.h" />
-    <ClInclude Include="GUI\Window.h" />
     <ClInclude Include="GUI\Line.h" />
+    <ClInclude Include="GUI\Group.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Text">

@@ -4,13 +4,13 @@
 #include "..\ContextWindow.h"
 #include <OpenGL\GUI\Buttons.h>
 #include <algorithm>
-glm::dvec2 App::Input::relativeCursorPosition;
+glm::vec2 App::Input::relativeCursorPosition;
 glm::uvec2 App::Input::absoluteCursorPosition;
 std::vector<App::Input::MouseKeyEvent> App::Input::mouseKeyEventBuffer;
 std::vector<App::Input::MouseEvent> App::Input::mouseEventBuffer;
 App::Input::KeyCondition App::Input::mouseKeys[3];
 int App::Input::scroll;
-glm::dvec2 App::Input::cursorFrameDelta;
+glm::vec2 App::Input::cursorFrameDelta;
 int App::Input::centerCursor;
 int App::Input::track_mouse;
 unsigned int App::Input::hovered_button = 0;

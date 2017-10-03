@@ -6,7 +6,7 @@
 #include <App\Global\Debug.h>
 #include <App\Input\Input.h>
 #include <App\Input\Mouse.h>
-#include "Window.h"
+#include "Group.h"
 std::vector<glm::vec4> gl::GUI::allQuads;
 std::vector<int> gl::GUI::allQuadFlags;
 unsigned int gl::GUI::MAX_QUAD_COUNT = 10000;
@@ -37,8 +37,8 @@ void gl::GUI::clearBuffers()
 
 void gl::GUI::moveQuadByMouseDelta(unsigned int pQuadIndex)
 {
-        allQuads[pQuadIndex].x = glm::clamp(allQuads[pQuadIndex].x + App::Input::cursorFrameDelta.x, -1.0, 1.0 - allQuads[pQuadIndex].z);
-        allQuads[pQuadIndex].y = glm::clamp(allQuads[pQuadIndex].y + App::Input::cursorFrameDelta.y, -1.0 + allQuads[pQuadIndex].w, 1.0);
+        allQuads[pQuadIndex].x = glm::clamp(allQuads[pQuadIndex].x + App::Input::cursorFrameDelta.x, -1.0f, 1.0f - allQuads[pQuadIndex].z);
+        allQuads[pQuadIndex].y = glm::clamp(allQuads[pQuadIndex].y + App::Input::cursorFrameDelta.y, -1.0f + allQuads[pQuadIndex].w, 1.0f);
 }
 
 void gl::GUI::moveQuadGroupByMouseDelta(unsigned int GroupIndex)

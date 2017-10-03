@@ -21,7 +21,7 @@
 #include <OpenGL/GUI/Colored_Quads.h>
 #include <OpenGL/BaseGL/Framebuffer.h>
 #include "../Input/Controller.h"
-#include <OpenGL\GUI\Window.h>
+#include <OpenGL\GUI\Group.h>
 #include <OpenGL\GUI\Line.h>
 App::State App::state = App::State::Init;
 App::ContextWindow::Window App::mainWindow = App::ContextWindow::Window();
@@ -80,8 +80,9 @@ void App::mainMenuLoop()
         gl::GUI::colorQuad(pullButtonQuad, 6);
 	gl::GUI::colorQuad(sliderButtonQuad, 3);
 	unsigned int window_group = gl::GUI::createGroup(windowQuad);
-	gl::GUI::addQuadsToGroup(window_group, { pullButtonQuad });
-	gl::GUI::addLinesToGroup(window_group, { line });
+	gl::GUI::addQuadToGroup(windowQuad, window_group);
+	gl::GUI::addQuadToGroup(pullButtonQuad, window_group);
+	gl::GUI::addLineToGroup(line, window_group);
         unsigned quit_button = gl::GUI::addButton(quitButtonQuad);
         unsigned pull_button = gl::GUI::addButton(pullButtonQuad);
         //Signals
@@ -253,7 +254,7 @@ void App::mainMenuLoop()
                 light_pos += light_mov;
                 gl::Lighting::setLightPos(1, light_pos);
                 gl::Camera::look(Input::cursorFrameDelta);
-		gl::GUI::updateQuadGroupQuads();
+		gl::GUI::updateGroups();
                 gl::Camera::update();
                 gl::updateGeneralUniformBuffer();
                 gl::Models::updateBuffers();

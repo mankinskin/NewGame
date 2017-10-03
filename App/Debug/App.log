@@ -1,4 +1,4 @@
 ﻿  App.cpp
-c:\users\linus\source\repos\newgame\app\global\app.cpp(268): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+c:\users\linus\source\repos\newgame\app\global\app.cpp(269): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
   App.vcxproj -> C:\Users\Linus\source\repos\NewGame\Debug\NewGame.exe
   App.vcxproj -> C:\Users\Linus\source\repos\NewGame\Debug\NewGame.pdb (Partial PDB)

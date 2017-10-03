@@ -66,8 +66,8 @@ void App::Input::fetchGLFWEvents()
         double pY = 0.0f;
         glfwGetCursorPos(App::mainWindow.window, &pX, &pY);
         absoluteCursorPosition = glm::uvec2(std::clamp((unsigned int)pX, (unsigned int)0, mainWindow.width - 1), std::clamp(mainWindow.height - (unsigned int)pY - 1, (unsigned int)0, mainWindow.height - 1));
-        glm::dvec2 newRelativeCursorPosition = glm::dvec2(((pX / (double)App::mainWindow.width)*2.0) - 1.0, 1.0 - (pY / (double)App::mainWindow.height)*2.0);
-        cursorFrameDelta = glm::dvec2(  (newRelativeCursorPosition.x - relativeCursorPosition.x),
+        glm::vec2 newRelativeCursorPosition = glm::vec2(((pX / (float)App::mainWindow.width)*2.0f) - 1.0f, 1.0f - (pY / (float)App::mainWindow.height)*2.0f);
+        cursorFrameDelta = glm::vec2(  (newRelativeCursorPosition.x - relativeCursorPosition.x),
                                         (newRelativeCursorPosition.y - relativeCursorPosition.y) );
         relativeCursorPosition = newRelativeCursorPosition;
 }
