@@ -9,60 +9,6 @@ namespace gl {
         using std::string;
         using std::vector;
 
-        struct Index {
-                Index(int i) {
-                        index = i;
-                }
-                Index(int pIndex, unsigned int pID) {
-                        index = pIndex;
-                        ID = pID;
-                }
-                Index() {
-                        index = -1;
-                        ID = 0;
-                }
-                int index = -1;
-                unsigned int ID = 0;
-
-                Index operator++() {
-                        ++index;
-                        return *this;
-                }
-                Index operator++(int) {
-                        Index ind(index);
-                        ++index;
-                        return ind;
-                }
-                Index operator--() {
-                        --index;
-                        return *this;
-                }
-                Index operator--(int) {
-                        Index ind(index);
-                        --index;
-                        return ind;
-                }
-                void operator=(const int &i) {
-                        index = i;
-                }
-                bool operator<(const int &i) {
-                        return index < i ? true : false;
-                }
-                bool operator>(const int &i) {
-                        return index > i ? true : false;
-                }
-                bool operator==(const int &i) {
-                        return index == i ? true : false;
-                }
-                bool operator<=(const int &i) {
-                        return index <= i ? true : false;
-                }
-                bool operator>=(const int &i) {
-                        return index >= i ? true : false;
-                }
-
-        };
-
         struct Vertex {
                 Vertex() {}
                 Vertex(float pPosX, float pPosY, float pPosZ, float pNormX, float pNormY, float pNormZ, float pUVCoordS, float pUVCoordT)

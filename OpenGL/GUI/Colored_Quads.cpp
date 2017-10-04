@@ -42,7 +42,7 @@ void gl::GUI::initColoredQuadVAO(){
 }
 
 void gl::GUI::initColoredQuadShader(){
-        coloredQuadShader = Shader::newProgram("coloredQuadShader", Shader::newModule("coloredQuadShader.vert"), Shader::newModule("coloredQuadShader.frag")).ID; 
+        coloredQuadShader = Shader::newProgram("coloredQuadShader", Shader::createModule("coloredQuadShader.vert"), Shader::createModule("coloredQuadShader.frag"));
         Shader::addVertexAttribute(coloredQuadShader, "corner_pos", 0);
         Shader::addVertexAttribute(coloredQuadShader, "colored_quad", 1);
 }

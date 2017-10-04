@@ -31,7 +31,7 @@ void gl::GUI::rasterButtons() {
         }
 }
 void gl::GUI::initButtonIndexShader() {
-        buttonIndexShader = gl::Shader::newProgram("buttonIndexShader", gl::Shader::newModule("buttonIndexShader.vert"), gl::Shader::newModule("buttonIndexShader.frag")).ID;
+        buttonIndexShader = gl::Shader::newProgram("buttonIndexShader", gl::Shader::createModule("buttonIndexShader.vert"), gl::Shader::createModule("buttonIndexShader.frag"));
         gl::Shader::addVertexAttribute(buttonIndexShader, "corner_pos", 0);
         gl::Shader::addVertexAttribute(buttonIndexShader, "quad_index", 1);
 }

@@ -5,18 +5,13 @@
 #include <deps/include/SOIL/SOIL.h>
 #define DEFAULT_TEXTURE_DIRECTORY "..//assets//textures//"
 std::vector<gl::Texture::Texture2D> gl::Texture::all2DTextures;
-std::unordered_map<std::string, gl::Index> gl::Texture::textureLookup;
+std::unordered_map<std::string, unsigned int> gl::Texture::textureLookup;
 std::string gl::Texture::TEXTURE_DIR = DEFAULT_TEXTURE_DIRECTORY;
 
 
 
-gl::Texture::Texture2D::Texture2D(unsigned int pWidth, unsigned int pHeight, GLenum pInternalFormat, GLenum pFormat, GLenum pType) {
-	width = pWidth;
-	height = pHeight;
-	internalFormat = pInternalFormat;
-	format = pFormat;
-	type = pType;
-}
+gl::Texture::Texture2D::Texture2D(unsigned int pWidth, unsigned int pHeight, GLenum pInternalFormat, GLenum pFormat, GLenum pType) 
+	:width(pWidth), height(pHeight), internalFormat(pInternalFormat), format(pFormat), type(pType) {}
 
 
 void gl::Texture::loadTextureBuffer(TextureBuffer & pBuffer, std::string pFilename, int pForceChannels)
@@ -25,7 +20,6 @@ void gl::Texture::loadTextureBuffer(TextureBuffer & pBuffer, std::string pFilena
         if (!pBuffer.data) {
                 App::Debug::pushError("Texture not found: \"" + (TEXTURE_DIR + pFilename) + "\" !!!");
         }
-
 }
 
 unsigned int gl::Texture::createTexture2D(unsigned int pWidth, unsigned int pHeight, GLenum pInternalFormat, GLenum pFormat, GLenum pType, const void* pData)
@@ -47,7 +41,7 @@ unsigned int gl::Texture::createTexture2D(unsigned int pWidth, unsigned int pHei
 	return texture.ID;
 }
 
-unsigned int gl::Texture::createTexture2D(std::string pFilename) 
+unsigned int gl::Texture::createTexture2D(std::string& pFilename) 
 {
         TextureBuffer buffer;
         loadTextureBuffer(buffer, pFilename);
@@ -93,7 +87,7 @@ void gl::Texture::setTextureFilter(unsigned int pTextureIndex, unsigned int pMag
 	glTextureParameteri(all2DTextures[pTextureIndex].ID, GL_TEXTURE_MAG_FILTER, pMagFilter);
 }
 
-void gl::Texture::setTextureDirectory(std::string pDirectory)
+void gl::Texture::setTextureDirectory(std::string& pDirectory)
 {
 	TEXTURE_DIR = pDirectory;
 }

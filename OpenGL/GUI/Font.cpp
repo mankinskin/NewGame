@@ -18,7 +18,7 @@ std::vector<gl::GUI::Text::FontInstructions> gl::GUI::Text::allFontInstructions;
 void gl::GUI::Text::
 initFontShader()
 {
-	glyphShapeProgram = Shader::newProgram("glyphShapeShader", Shader::newModule("glyphShapeShader.vert"), Shader::newModule("glyphShapeShader.frag")).ID;
+	glyphShapeProgram = Shader::newProgram("glyphShapeShader", Shader::createModule("glyphShapeShader.vert"), Shader::createModule("glyphShapeShader.frag"));
 	Shader::addVertexAttribute(glyphShapeProgram, "pos", 0);
 	Shader::addVertexAttribute(glyphShapeProgram, "quad", 1);
 	Shader::addVertexAttribute(glyphShapeProgram, "index", 2);

@@ -8,12 +8,11 @@ namespace App {
 				Warning,
 				Trivial,
 				Fatal
-			}severity;
-
-			Error(std::string pMsg, Severity pSev) {
-				msg = pMsg;
-				severity = pSev;
-			}
+			};
+			Error():msg(""), severity(Warning) {}
+			Error(std::string& pMsg, Severity& pSev)
+			:msg(pMsg), severity(pSev){}
+			Severity severity;
 			std::string msg = "";
 		};
 

@@ -71,7 +71,7 @@ void gl::Models::Loader::loadMaterials(const aiScene* pScene) {
         
         for (unsigned int m = 0; m < pScene->mNumMaterials; ++m) {
                 aiMaterial* mat = pScene->mMaterials[m];
-
+		//continue... 
                  
         }
 }
@@ -96,7 +96,7 @@ void gl::Models::Loader::loadModelFile(std::string pFilename)
        allModels.push_back(model);
 }
 
-void gl::Models::Loader::setModelDirectory(std::string pDirectory)
+void gl::Models::Loader::setModelDirectory(std::string&& pDirectory)
 {
 	MODEL_DIR = pDirectory;
 }

@@ -68,23 +68,26 @@ void App::mainMenuLoop()
         unsigned int quitButtonQuad = gl::GUI::createQuad(-1.0f, -0.9f, 0.2f, 0.1f);
         unsigned int playButtonQuad = gl::GUI::createQuad(-1.0f, -0.7f, 0.2f, 0.1f);
        
-	unsigned int sliderButtonQuad = gl::GUI::createQuad(-0.495f, 0.19f, 0.02f, 0.05f);
+	unsigned int sliderButtonQuad = gl::GUI::createQuad(-0.495f, 0.1f, 0.02f, 0.05f);
 	unsigned int pullButtonQuad = gl::GUI::createQuad(-0.495f, 0.19f, 0.29f, 0.05f);
         unsigned int windowQuad = gl::GUI::createQuad(-0.5f, 0.2f, 0.3f, 0.3f);
 	//Gui Lines
-	unsigned int line = gl::GUI::createLine(glm::vec2(0.4f, 0.3f), glm::vec2(0.5f, 0.3), 8);
+	//unsigned int line = gl::GUI::createLine(glm::vec2(0.4f, 0.3f), glm::vec2(0.5f, 0.3), 8);
 
         gl::GUI::colorQuad(quitButtonQuad, 1);
         gl::GUI::colorQuad(playButtonQuad, 5);
         gl::GUI::colorQuad(windowQuad, 7);
         gl::GUI::colorQuad(pullButtonQuad, 6);
-	gl::GUI::colorQuad(sliderButtonQuad, 3);
+	gl::GUI::colorQuad(sliderButtonQuad, 6);
+
 	unsigned int window_group = gl::GUI::createGroup(windowQuad);
-	gl::GUI::addQuadToGroup(windowQuad, window_group);
-	gl::GUI::addQuadToGroup(pullButtonQuad, window_group);
-	gl::GUI::addLineToGroup(line, window_group);
+	gl::GUI::addGroupQuad(window_group, windowQuad);
+	gl::GUI::addGroupQuad(window_group, pullButtonQuad);
+	gl::GUI::addGroupQuad(window_group, sliderButtonQuad);
+	//gl::GUI::addGroupLine(window_group, line);
         unsigned quit_button = gl::GUI::addButton(quitButtonQuad);
         unsigned pull_button = gl::GUI::addButton(pullButtonQuad);
+	unsigned slider_button = gl::GUI::addButton(sliderButtonQuad);
         //Signals
         using Input::EventSlot;
         using Input::KeyEvent;
@@ -163,17 +166,28 @@ void App::mainMenuLoop()
         EventSlot<MouseKeyEvent> rmb_press_slot(MouseKeyEvent(GLFW_MOUSE_BUTTON_2, KeyCondition(1, 0)));
         EventSlot<MouseKeyEvent> rmb_release_slot(MouseKeyEvent(GLFW_MOUSE_BUTTON_2, KeyCondition(0, 0)));
 
-        EventSlot<MouseEvent>::reserve_slots(1);
+        EventSlot<MouseEvent>::reserve_slots(3);
 	EventSlot<MouseEvent> quit_button_press(MouseEvent(quit_button, MouseKeyEvent(0, 1, 0)));
         EventSlot<MouseEvent> pull_button_press(MouseEvent(pull_button, MouseKeyEvent(0, 1, 0)));
+	EventSlot<MouseEvent> slider_button_press(MouseEvent(slider_button, MouseKeyEvent(0, 1, 0)));
 
-        FuncSlot<void, unsigned int>::reserve_slots(2);
+        FuncSlot<void, unsigned int>::reserve_slots(5);
+	FuncSlot<void, unsigned int> sliderFollowFunc(gl::GUI::moveQuadByMouseDelta, sliderButtonQuad);
+	FuncSlot<void, unsigned int> sliderstartFollowFunc(Input::startRule, slider_button_press.signal_index);
+	FuncSlot<void, unsigned int> sliderstopFollowFunc(Input::stopRule, slider_button_press.signal_index);
+
 	FuncSlot<void, unsigned int> quadFollowFunc(gl::GUI::moveQuadGroupByMouseDelta, window_group);
         FuncSlot<void, unsigned int> quadstartFollowFunc(Input::startRule, pull_button_press.signal_index);
         FuncSlot<void, unsigned int> quadstopFollowFunc(Input::stopRule, pull_button_press.signal_index);
+
+	sliderFollowFunc.listen({ slider_button_press.signal_index });
+	sliderstartFollowFunc.listen({ slider_button_press.signal_index });
+	sliderstopFollowFunc.listen({ lmb_release_slot.signal_index });
+
 	quadFollowFunc.listen({ pull_button_press.signal_index });
 	quadstartFollowFunc.listen({ pull_button_press.signal_index  });
         quadstopFollowFunc.listen({ lmb_release_slot.signal_index });
+
         FuncSlot<void>::reserve_slots(21);
 
         FuncSlot<void> quitFunc(quit);//define functions

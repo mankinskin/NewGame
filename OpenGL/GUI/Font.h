@@ -15,7 +15,7 @@ namespace gl {
 			};
 
 			struct Font {
-				Font() :kerningOffset(0), kerningCount(0), metricOffset(0), metricCount(0), glyphStorageIndex(0), atlasID(0), fontMetric(FontMetric()), stringOffset(0), stringCount(0) {}
+				Font() :instructions(0), kerningOffset(0), kerningCount(0), metricOffset(0), metricCount(0), glyphStorageIndex(0), atlasID(0), fontMetric(FontMetric()), stringOffset(0), stringCount(0) {}
 				unsigned int atlasID;
 				FontMetric fontMetric;
 				unsigned int instructions;

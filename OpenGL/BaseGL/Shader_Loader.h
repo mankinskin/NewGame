@@ -8,11 +8,11 @@ namespace gl {
 			extern std::string SHADER_DIR;
 
 			void buildShaderPrograms();
-			void setShaderDirectory(std::string pDirectory);
+			void setShaderDirectory(std::string& pDirectory);
 			void resetShaderDirectory();
 
-			void compileModule(Index pModuleID);
-			void linkProgram(Index pProgramID);
+			void compileModule(unsigned int pModuleIndex);
+			void linkProgram(unsigned int pProgramID);
 			void compileAndLink();
 		}
 	}

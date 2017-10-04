@@ -26,7 +26,7 @@ void gl::Models::initMeshVAO()
 
 void gl::Models::initMeshShader()
 {
-	meshShaderProgram = Shader::newProgram("meshShader", Shader::newModule("meshShader.vert"), Shader::newModule("meshShader.frag")).ID;
+	meshShaderProgram = Shader::newProgram("meshShader", Shader::createModule("meshShader.vert"), Shader::createModule("meshShader.frag"));
 	Shader::addVertexAttribute(meshShaderProgram, "pos", 0);
 	Shader::addVertexAttribute(meshShaderProgram, "normal", 1);
 	Shader::addVertexAttribute(meshShaderProgram, "uv", 2);
@@ -115,7 +115,7 @@ void gl::Models::renderNormals()
 
 void gl::Models::initNormalShader()
 {
-        normalShaderProgram = Shader::newProgram("meshNormalShader", Shader::newModule("meshNormalShader.vert"), Shader::newModule("meshNormalShader.geo"), Shader::newModule("meshNormalShader.frag")).ID;
+        normalShaderProgram = Shader::newProgram("meshNormalShader", Shader::createModule("meshNormalShader.vert"), Shader::createModule("meshNormalShader.geo"), Shader::createModule("meshNormalShader.frag"));
         Shader::addVertexAttribute(normalShaderProgram, "pos", 0);
         Shader::addVertexAttribute(normalShaderProgram, "normal", 1);
 }

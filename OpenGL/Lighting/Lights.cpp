@@ -49,7 +49,7 @@ void gl::Lighting::updateLightIndexRangeBuffer(){
 	}
 }
 void gl::Lighting::initLightShader(){
-        lightShaderProgram =  Shader::newProgram("lightShaderProgram", Shader::newModule("lightShaderProgram.vert"), Shader::newModule("lightShaderProgram.frag")).ID;
+        lightShaderProgram =  Shader::newProgram("lightShaderProgram", Shader::createModule("lightShaderProgram.vert"), Shader::createModule("lightShaderProgram.frag"));
         Shader::addVertexAttribute(lightShaderProgram, "corner_pos", 0);
         Shader::addVertexAttribute(lightShaderProgram, "index_range", 1);
 }

@@ -3,13 +3,13 @@
 #include "GUI.h"
 #include "Font.h"
 
-
 #define TEXT_LAYOUT_BOUND_LEFT 00000001
 #define TEXT_LAYOUT_BOUND_RIGHT 00000010
 #define TEXT_LAYOUT_CENTER_X 00001000
 #define TEXT_LAYOUT_CENTER_Y 00000100
 #define TEXT_LAYOUT_CENTER_BOTH 00001100
 #define TEXT_LAYOUT_FREE_LINES 00010000
+
 namespace gl {
 	namespace GUI {
 		namespace Text {
@@ -38,7 +38,7 @@ namespace gl {
 			
 			struct Textbox {
 				Textbox()
-					:chars(String()), pos(0), size(0), marging(0.0f), flags(0) {}
+					:metrics(0), chars(String()), pos(0), size(0), marging(0.0f), flags(0) {}
 				
 				String chars;
 				unsigned int metrics;

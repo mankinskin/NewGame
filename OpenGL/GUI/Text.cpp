@@ -193,13 +193,12 @@ loadTextboxGlyphs(Textbox& pTextbox, TextboxMetrics& pTextMetrics, Font& pFont, 
 	float thisLineGreatestAscend = 0.0f;
 	float thisLineGreatestDescend = 0.0f;
 	
-	unsigned int glyphIndex = 0;
 	unsigned int str_nonCharCount = 0;
 	//iterate string chars
 	for (unsigned int c = 0; c < pTextbox.chars.count;) {
 		//get glyph metrics
 		unsigned int charCode = allChars[pTextbox.chars.offset + c];
-		glyphIndex = std::max((unsigned int)0, std::min(charCode - font_inst.startCode, font_inst.glyphCount - 1));
+		unsigned int glyphIndex = std::max((unsigned int)0, std::min(charCode - font_inst.startCode, font_inst.glyphCount - 1));
 		GlyphMetrics& met = allMetrics[pFont.metricOffset + glyphIndex];
 		
 		if (charCode != '\n' && (cursor + met.advanceX * pTextMetrics.advanceScale) < (allTextboxSizes[pTextbox.size].x - pTextbox.marging*2.0f) ) {

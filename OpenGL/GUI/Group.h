@@ -7,8 +7,8 @@ namespace gl{
                 
 		void moveGroup(unsigned int pGroupIndex, glm::vec2 pDir);
 		unsigned int createGroup(unsigned int pGroupQuad);
-		void addQuadToGroup(unsigned int pQuadIndex, unsigned int pGroupIndex);
-		void addLineToGroup(unsigned int pLineIndex, unsigned int pGroupIndex);
+		void addGroupQuad(unsigned int pGroupIndex, unsigned int pQuadIndex);
+		void addGroupLine(unsigned int pGroupIndex, unsigned int pLineIndex);
 		void updateGroups();
 		
 		struct QuadElement {

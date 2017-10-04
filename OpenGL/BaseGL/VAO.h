@@ -24,12 +24,12 @@ namespace gl {
 		unsigned int createStorage(unsigned int pCapacity, const void* pData, unsigned int pFlags);
 		
 		struct Stream{
-			Stream() {}
+			Stream() : mapFlags(0), mappedPtr(nullptr), alignment(16), updateOffset(0), lastUpdateSize(0) {}
 			unsigned int mapFlags;
 			void* mappedPtr;
-			unsigned int alignment = 16;
-			unsigned int updateOffset = 0;
-			unsigned int lastUpdateSize = 0;
+			unsigned int alignment;
+			unsigned int updateOffset;
+			unsigned int lastUpdateSize;
 		};
 
 		unsigned int createStream(unsigned int pStorageIndex, unsigned int pMapFlags);

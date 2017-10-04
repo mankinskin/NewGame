@@ -17,7 +17,7 @@ void gl::Shader::Loader::buildShaderPrograms()
 	compileAndLink();
 }
 
-void gl::Shader::Loader::setShaderDirectory(std::string pDirectory)
+void gl::Shader::Loader::setShaderDirectory(std::string& pDirectory)
 {
 	SHADER_DIR = pDirectory;
 }
@@ -27,9 +27,9 @@ void gl::Shader::Loader::resetShaderDirectory()
 	SHADER_DIR = DEFAULT_SHADER_DIRECTORY;
 }
 
-void gl::Shader::Loader::compileModule(Index pModuleID)
+void gl::Shader::Loader::compileModule(unsigned int pModuleIndex)
 {
-	Module& module = allModules[pModuleID.index];
+	Module& module = allModules[pModuleIndex];
 	if (module.fileName.find(".vert") != std::string::npos) {
 		module.ID = glCreateShader(GL_VERTEX_SHADER);
 		module.type = ModuleType::Vertex;
@@ -50,14 +50,14 @@ void gl::Shader::Loader::compileModule(Index pModuleID)
 		App::Debug::pushError("\nShader::loadShader(): invalid shader file name " + module.fileName + "!\nHas to include '.vert', '.frag', '.geo' or '.comp'!", App::Debug::Error::Fatal);
 		return;
 	}
-	pModuleID.ID = module.ID;
-
+	gl::Debug::getGLError("GLERROR: Shader::Loader::compileModule()1: at " + module.fileName);
 	std::ifstream moduleFile;
 	moduleFile.open(SHADER_DIR + module.fileName + ".txt");
 	if (moduleFile.fail()) {
 		App::Debug::pushError("Failed to compile Shader: Could not open " + SHADER_DIR + module.fileName + ".txt" + "!\n");
 		return;
 	}
+
 	module.content = static_cast<std::stringstream const&>(std::stringstream() << moduleFile.rdbuf()).str();
 	const char* content = module.content.c_str();
 	int length = module.content.length();
@@ -73,25 +73,23 @@ void gl::Shader::Loader::compileModule(Index pModuleID)
 		App::Debug::pushError("Failed to compile " + module.fileName + "\nOpenGL Error Log: " + string(&(errorLog[0])) + "\n", App::Debug::Error::Fatal);
 		return;
 	}
-	allModules[pModuleID.index] = module;
+	allModules[pModuleIndex] = module;
 	gl::Debug::getGLError("GLERROR: Shader::Loader::compileModule(): at " + module.fileName);
 }
 
-void gl::Shader::Loader::linkProgram(gl::Index pProgramID)
+void gl::Shader::Loader::linkProgram(unsigned int pProgramIndex)
 {
-	Program& program = allPrograms[pProgramID.index];
+	Program& program = allPrograms[pProgramIndex];
 
 	if (program.type == ProgramType::Compute) {
-		program.stages[0].ID = allModules[program.stages[0].index].ID;
-		glAttachShader(program.ID, program.stages[0].ID);
+		program.stages[0] = allModules[program.stages[0]].ID;
+		glAttachShader(program.ID, program.stages[0]);
 	}
 	else
 	{
-
-
 		for (unsigned int i = 0; i < program.shaderCount; ++i) {
-			program.stages[i].ID = allModules[program.stages[i].index].ID;
-			glAttachShader((GLuint)program.ID, (GLuint)program.stages[i].ID);
+			program.stages[i] = allModules[program.stages[i]].ID;
+			glAttachShader((GLuint)program.ID, (GLuint)program.stages[i]);
 		}
 	}
 	glLinkProgram(program.ID);
@@ -112,17 +110,18 @@ void gl::Shader::Loader::linkProgram(gl::Index pProgramID)
 	}
 
 	for (unsigned int i = 0; i < program.shaderCount; ++i) {
-		glDetachShader(program.ID, program.stages[i].ID);
+		glDetachShader(program.ID, program.stages[i]);
 	}
 	gl::Debug::getGLError("GLERROR: ShaderProgram::linkProgram(): at " + program.name);
 }
 
 void gl::Shader::Loader::compileAndLink()
 {
-	for (Index s = 0; s < MODULE_COUNT; ++s) {
+	gl::Debug::getGLError("GLERROR: before compileAndLink():");
+	for (unsigned int s = 0; s < allModules.size(); ++s) {
 		compileModule(s);
 	}
-	for (Index p = 0; p < PROGRAM_COUNT; ++p) {
+	for (unsigned int p = 0; p < allPrograms.size(); ++p) {
 		linkProgram(p);
 	}
 }

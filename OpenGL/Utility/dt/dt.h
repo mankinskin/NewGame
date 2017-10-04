@@ -90,7 +90,7 @@ static void dt(image<float> *im) {
     delete [] d;
   }
 
-  delete f;
+  delete[] f;
 }
 
 

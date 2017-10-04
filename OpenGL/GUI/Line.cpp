@@ -64,7 +64,7 @@ void gl::GUI::renderLines()
 }
 
 void gl::GUI::initLineShader() {
-	guiLineShader = Shader::newProgram("guiLineShader", Shader::newModule("guiLineShader.vert"), Shader::newModule("guiLineShader.frag")).ID;
+	guiLineShader = Shader::newProgram("guiLineShader", Shader::createModule("guiLineShader.vert"), Shader::createModule("guiLineShader.frag"));
 	Shader::addVertexAttribute(guiLineShader, "vertex_pair", 0);
 	Shader::addVertexAttribute(guiLineShader, "color_index", 1);
 }

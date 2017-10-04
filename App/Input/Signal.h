@@ -108,7 +108,7 @@ namespace App {
 			std::vector<unsigned int> signal_bindings;
 			static std::vector<FuncSlot<R, Args...>> instances;
 			
-			FuncSlot() : fun(nullptr), args(std::tuple<Args...>()), signal_bindings(std::vector<unsigned>())
+			FuncSlot() : fun(nullptr), args(std::tuple<Args...>()), signal_bindings(std::vector<unsigned>()), slot_index(-1)
 			{}
 
 			FuncSlot(R(*pF)(Args...), Args... pArgs)

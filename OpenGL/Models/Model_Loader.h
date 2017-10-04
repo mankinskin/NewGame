@@ -17,7 +17,7 @@ namespace gl {
                         void loadMaterials(const aiScene * pScene);
                         void loadModelFile(std::string pFilename);
                         
-			void setModelDirectory(std::string pDirectory);
+			void setModelDirectory(std::string&& pDirectory);
 			void resetModelDirectory();
 
 			extern std::string MODEL_DIR;

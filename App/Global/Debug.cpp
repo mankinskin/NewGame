@@ -62,7 +62,7 @@ void App::Debug::printInfo()
 		App::lastFrameMS = std::max(1.0, App::lastFrameMS);
 		//system("CLS");
 		printf("\nlastFrameMS %i\n", (int)App::lastFrameMS);
-		printf("FPS\nActual %i\nPotential %i\n", (unsigned int)(1000 / (App::lastFrameMS + std::max((int)0, (int)(App::targetFrameMS - App::lastFrameMS)))), (unsigned int)(1000 / (App::lastFrameMS)));
+		printf("FPS\nActual %i\nPotential %i\n", (int)(1000 / (App::lastFrameMS + std::max((int)0, (int)(App::targetFrameMS - App::lastFrameMS)))), (int)(1000 / (App::lastFrameMS)));
 
 	}
 }

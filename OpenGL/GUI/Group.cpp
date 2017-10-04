@@ -24,12 +24,12 @@ unsigned int gl::GUI::createGroup(unsigned int pGroupQuad)
 	return allGroupDeltas.size() - 1;
 }
 
-void gl::GUI::addQuadToGroup(unsigned int pQuadIndex, unsigned int pGroupIndex)
+void gl::GUI::addGroupQuad(unsigned int pGroupIndex, unsigned int pQuadIndex)
 {
 	allQuadElements.push_back(QuadElement(pQuadIndex, pGroupIndex));
 }
 
-void gl::GUI::addLineToGroup(unsigned int pLineIndex, unsigned int pGroupIndex)
+void gl::GUI::addGroupLine(unsigned int pGroupIndex, unsigned int pLineIndex)
 {
 	allLineElements.push_back(LineElement(pLineIndex, pGroupIndex));
 }

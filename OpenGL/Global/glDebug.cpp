@@ -108,9 +108,7 @@ void gl::Debug::generateDebugGrid(std::string pName, float pTileSizeX, float pTi
 		v += 2;
 		ind += 2;
 	}
-	vertexCount += v;
 	indexCount += ind;
-
 	//add vertices and indices to debug geometry arrays
 	dMesh dmesh;
 	dmesh.offset = indexOffset;
@@ -210,8 +208,7 @@ void gl::Debug::initCoordinateSystem(std::string pName)
 
 void gl::Debug::initDebugShader()
 {
-	Index lineShader = Shader::newProgram("debugLine", Shader::newModule("gridShader.vert"), Shader::newModule("gridShader.frag"));
-	lineShaderID = lineShader.ID;
+	lineShaderID = Shader::newProgram("debugLine", Shader::createModule("gridShader.vert"), Shader::createModule("gridShader.frag"));
 	Shader::addVertexAttribute(lineShaderID, "position", 0);
 	Shader::addVertexAttribute(lineShaderID, "color", 1);
 }
