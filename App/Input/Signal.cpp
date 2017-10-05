@@ -1,8 +1,72 @@
 #include "../Global/stdafx.h"
 #include "Signal.h"
+#include <algorithm>
+std::vector<App::Input::SignalInternal::SignalSlot> App::Input::SignalInternal::allSignals;
 
-std::vector<App::Input::Signal> App::Input::allSignalSlots;
-std::vector<int> App::Input::allSignalLocks;
 
-std::unordered_map<unsigned int, std::vector<unsigned int>> App::Input::signalLockBindings;
-std::unordered_map<unsigned int, std::vector<unsigned int>> App::Input::signalUnlockBindings;
+
+bool App::Input::is_on(unsigned int pSignalIndex)
+{
+	return SignalInternal::allSignals[pSignalIndex].signaled;
+}
+
+void App::Input::clearSignals() {
+	SignalInternal::allSignals.clear();
+}
+
+//void App::Input::checkSignals() {
+//	using namespace intrnl;
+//
+//	//at this point all signals occurred this frame are buffered in signalBuffer
+//	for (unsigned int& sig : signalBuffer) {
+//		if (!allSignalSlots[sig].blocked) {
+//			allSignalSlots[sig].on = 1;//set signal if not blocked
+//		}
+//		else {//if blocked, check next frame again
+//			rejected.push_back(sig);
+//		}
+//	}
+//	signalBuffer.clear();
+//}
+
+void App::Input::callFunctions()
+{
+	using namespace SignalInternal;
+	for (FuncSlot<void>& inst : FuncSlot<void>::instances) {
+
+		//blocking/unblocking
+		//if (inst.blocked) {
+		//	inst.blocked = !std::any_of(inst.unblockSignals.begin(), inst.unblockSignals.end(), is_on);
+		//	
+		//}
+		//else {
+		//	inst.blocked = std::any_of(inst.blockSignals.begin(), inst.blockSignals.end(), is_on);
+		//}
+		
+		//check signals
+		int call = std::any_of(inst.signalBindings.begin(), inst.signalBindings.end(), is_on) || inst.rule;
+		
+		if (call) {
+			inst.invoke();
+		}
+	}
+	for (FuncSlot<void, Func<void>>& inst : FuncSlot<void, Func<void>>::instances) {
+
+		
+		//check signals
+		int call = std::any_of(inst.signalBindings.begin(), inst.signalBindings.end(), is_on) || inst.rule;
+
+		if (call) {
+			inst.invoke();
+		}
+	}
+
+	//any other FuncSlot templates here
+
+	for (SignalSlot& signal : allSignals) {
+		signal.signaled *= signal.remain;
+	}
+}
+
+
+

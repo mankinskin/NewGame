@@ -2,6 +2,7 @@
 #include <vector>
 #include <unordered_map>
 #include <initializer_list>
+#include <functional>
 /*
 ---
 This is a structure which allows you to call functions of any type upon certain events. 
@@ -10,7 +11,7 @@ Use EventSlot<EventType>::instance_count() and ::get_instance(index) to compare 
 If an Event matches an EventSlot, the Slot will set its assigned signal to 'signaled'. 
 These signals can be watched by FuncSlots. FuncSlots store the function pointers and arguments of any function you want to call.
 They are assigned a set of signalIDs and call their function once they find one of their signals 'signaled'.
----Usuage-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---Usage-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - create EventSlots/Signals -
         - (it is recommended to call EventSlot<EventType>::reserve_slots(slotCount); before defining slots)
         - EventSlot<KeyEvent> w_press_slot(KeyEvent(GLFW_KEY_W, 1, 0)); //creates a signal which becomes 'signaled' when KeyEvent(GLFW_KEY_W, 1, 0) appears in the eventBuffer
@@ -23,9 +24,9 @@ They are assigned a set of signalIDs and call their function once they find one 
         - moveRightSlot.listen({ d_press_slot });
         - stopXSlot.listen({ d_release_slot, a_release_slot });
 ---
-- Optionally you can set signals to lock other signals from being signaled. This way you can synchronize many, possibly conflicting Events.
+- Optionally you can set signals to block other signals from being signaled. This way you can synchronize many, possibly conflicting Events.
         - signal_lock(w_press_slot.signal, { s_press_slot.signal, s_release_slot.signal });
-        //when 'W' is pressed, the signals of s_press and s_release are locked. they will not change anymore and any events matching these slots will be ignored.
+        //when 'W' is pressed, the signals of s_press and s_release are blocked. they will not change anymore and any events matching these slots will be ignored.
         //You will need a signal to explicitly unlock locked signals to use them again.
         - signal_unlock(w_release_slot.signal, { s_press_slot.signal, s_release_slot.signal });
         //You have to make sure that all locks will be released at some point (unless you have specific intentions ofc), this is why you should generally use
@@ -33,146 +34,151 @@ They are assigned a set of signalIDs and call their function once they find one 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 */
 namespace App {
-	namespace Input {
+    namespace Input {
+	namespace SignalInternal {
 
-		struct Signal {
-			Signal(int pOn, int pMult)
-				:on(pOn), mult(pMult) {}
-			Signal()
-				:on(0), mult(0) {}
-			
-			void reset() {
-				on = on*mult;
-			}
-			int on;
-			int mult;//if the signal should stay on when resetting it
+		struct SignalSlot {
+			SignalSlot() :signaled(0), remain(0) {}
+			int signaled = 0;
+			int remain = 0;
 		};
-		extern std::vector<Signal> allSignalSlots; // 1 = signaled
-		extern std::vector<int> allSignalLocks; // 1 = locked 
-                
-                static void setSignal(unsigned int pSignalIndex, Signal pSignal) {
-                        allSignalSlots[pSignalIndex] = pSignal;
-                }
-                static void setSignalOff(unsigned int pSignalIndex) {
-                        allSignalSlots[pSignalIndex].on = 0;
-                }
-                static void setSignalOn(unsigned int pSignalIndex) {
-                        allSignalSlots[pSignalIndex].on = 1;
-                }
-                static void toggleSignal(unsigned int pSignalIndex) {
-                        allSignalSlots[pSignalIndex].on = !allSignalSlots[pSignalIndex].on;
-                }
-                static void startRule(unsigned int pSignalIndex) {
-                        allSignalSlots[pSignalIndex].mult = 1;
-                }
-                static void stopRule(unsigned int pSignalIndex) {
-                        allSignalSlots[pSignalIndex].mult = 0;
-                }
-		//this might be kinda slow. it should store an array of indices for each "LockSignal" which is a signal which either lock or unlock the array of other signals
-		extern std::unordered_map<unsigned int, std::vector<unsigned int>> signalLockBindings;
-		extern std::unordered_map<unsigned int, std::vector<unsigned int>> signalUnlockBindings;
-                
-                
-                
-                static void signal_lock(unsigned int pLockSignal, std::initializer_list<unsigned int> pTargetSignals) {
-		        auto it = signalLockBindings.find(pLockSignal);
-		        if (it == signalLockBindings.end()) {
-		               signalLockBindings.insert(std::pair<unsigned int, std::vector<unsigned int>>(pLockSignal, std::vector<unsigned int>(pTargetSignals)));
-		               return;
-		        }
-		        it->second.insert(it->second.end(), pTargetSignals.begin(), pTargetSignals.end());
-		}
-		// set pLockSignal to set the locks of pTargetSignals to pLock
-		static void signal_unlock(unsigned int pUnlockSignal, std::initializer_list<unsigned int> pTargetSignals) {
-			auto it = signalUnlockBindings.find(pUnlockSignal);
-			if (it == signalUnlockBindings.end()) {
-				signalUnlockBindings.insert(std::pair<unsigned int, std::vector<unsigned int>>(pUnlockSignal, std::vector<unsigned int>(pTargetSignals)));
-				return;
-			}
-			it->second.insert(it->second.end(), pTargetSignals.begin(), pTargetSignals.end());
-		}
-                static void set_up_lock(unsigned int pLockSignal, unsigned int pUnlockSignal, std::initializer_list<unsigned int> pTargetSignals) {
-                        signal_lock(pLockSignal, pTargetSignals);
-                        signal_unlock(pUnlockSignal, pTargetSignals);
-                }
+		extern std::vector<SignalSlot> allSignals;
+		
 
+		template<class EventType>
+		class EventSlot {
+		public:
+			EventSlot(EventType pEvent, unsigned int pSignalIndex) :signalIndex(allSignals.size()), evnt(pEvent) {}
+
+			static void reserve_slots(unsigned int pCount) {
+				allSignals.reserve(allSignals.size() + pCount);
+				instances.reserve(instances.size() + pCount);
+			}
+			static unsigned int instance_count() {
+				return instances.size();
+			}
+			static EventSlot<EventType> get_instance(unsigned int index) {
+				return instances[index];
+			}
+			static void clear() {
+				instances.clear();
+			}
+
+			EventType evnt;
+			unsigned signalIndex;//this event´s signal slot
+			static std::vector<EventSlot<EventType>> instances;
+
+		};
+		template<class EventType>
+		std::vector<EventSlot<EventType>> EventSlot<EventType>::instances = std::vector<EventSlot<EventType>>();
+
+
+		//funcs
+		
 		//TO-DO: CHECK IF RETURN ARGUMENT REALLY IS NEEDED ... (why not? .. might come in use later)
 		template<typename R, typename... Args>
 		class FuncSlot {
 		private:
-			R(*fun)(Args...);
+			std::function<R(Args...)> fun;
 			std::tuple<Args...> args;
-			unsigned int slot_index;
 			
 		public:
-			std::vector<unsigned int> signal_bindings;
 			static std::vector<FuncSlot<R, Args...>> instances;
-			
-			FuncSlot() : fun(nullptr), args(std::tuple<Args...>()), signal_bindings(std::vector<unsigned>()), slot_index(-1)
+			std::vector<unsigned int> blockSignals;
+			std::vector<unsigned int> unblockSignals;
+			std::vector<unsigned int> signalBindings;
+
+			bool rule = 0;//always call
+			FuncSlot() : fun(), args(std::tuple<Args...>())
 			{}
 
-			FuncSlot(R(*pF)(Args...), Args... pArgs)
-				:fun(pF), args(std::forward_as_tuple(pArgs)...), signal_bindings(), slot_index(instances.size()) {
-
-				instances.push_back(*this);
-			}
+			FuncSlot(std::function<R(Args...)> pF, Args... pArgs)
+				:fun(pF), args(std::forward_as_tuple(pArgs)...), signalBindings(){}
 			static void clear() {
 				instances.clear();
 			}
 			static void reserve_slots(unsigned int pCount) {
 				instances.reserve(pCount);
 			}
-			void listen(std::initializer_list<unsigned int> pSignals)
+
+			static void listen(FuncSlot<R, Args...>& pSlot, std::initializer_list<unsigned int>& pSignals)
 			{
-				instances[slot_index].signal_bindings = std::vector<unsigned>(pSignals);
-			}
-			void listen(FuncSlot<R, Args...>& pSlot, std::initializer_list<unsigned int> pSignals)
-			{
-				instances[pSlot.slot_index].signal_bindings = std::vector<unsigned>(pSignals);
+				pSlot.signalBindings.insert(pSlot.signalBindings.end(), pSignals.begin(), pSignals.end());
 			}
 			R invoke() const {
 				return std::apply(fun, args);
 			}
-			R callFunc(Args... pArgs) const {
-				return fun(pArgs...);
-			}
-			
 		};
 		template<typename R, typename... Args>
 		std::vector<FuncSlot<R, Args...>> FuncSlot<R, Args...>::instances = std::vector<FuncSlot<R, Args...>>();
-
-		template<class EventType>
-		class EventSlot {
-		public:
-			EventSlot(EventType pEvent, Signal pSignal = Signal()) :signal_index(allSignalSlots.size()), evnt(pEvent) {
-                                allSignalSlots.push_back(pSignal);
-                                allSignalLocks.push_back(0);
-				instances.push_back(*this);
-			}
-                        static void reserve_slots(unsigned int pCount) {
-                                allSignalSlots.reserve(allSignalSlots.size() + pCount);
-                                allSignalLocks.reserve(allSignalLocks.size() + pCount);
-				instances.reserve(instances.size() + pCount);
-			}
-			static unsigned int instance_count() {
-				return instances.size();
-			}
-                        static EventSlot<EventType> get_instance(unsigned int index) {
-                                return instances[index];
-                        }
-			static void clear() {
-				instances.clear();
-			}
-
-			EventType evnt;
-			unsigned signal_index;//this event´s signal slot
-		private:
-
-			static std::vector<EventSlot<EventType>> instances;
-			
-		};
-		template<class EventType>
-		std::vector<EventSlot<EventType>> EventSlot<EventType>::instances = std::vector<EventSlot<EventType>>();
 		
+		
+	}//end Internal
+
+	bool is_on(unsigned int pSignalIndex);
+
+	void clearSignals();
+	//void checkSignals();
+	void callFunctions();
+	//FuncSlots
+	template<typename R, typename... Args>
+	struct Func {//interface object
+		Func(unsigned int pSlotIndex) :slotIndex(pSlotIndex) {}
+		unsigned int slotIndex;
+		void listen(std::initializer_list<unsigned int> pSignals) {
+			SignalInternal::FuncSlot<R, Args...>::listen(SignalInternal::FuncSlot<R, Args...>::instances[slotIndex], pSignals);
+		}
+	};
+	template<typename R, typename... Args>
+	void reserve_funcs(unsigned pCount) {
+		SignalInternal::FuncSlot<R, Args...>::reserve_slots(pCount);
 	}
-}
+	template<typename R, typename... Args>
+	Func<R, Args...> create_func(R(*pF)(Args...), Args... pArgs) {
+		using namespace SignalInternal;
+		FuncSlot<R, Args...>::instances.push_back(FuncSlot<R, Args...>(pF, pArgs...));
+		return Func<R, Args...>(FuncSlot<R, Args...>::instances.size() - 1);
+	}
+	
+	template<typename R, typename... Args>
+	void func_start_rule(Func<R, Args...> pFunc)
+	{
+		SignalInternal::FuncSlot<R, Args...>::instances[pFunc.slotIndex].rule = 1;
+	}
+	template<typename R, typename... Args>
+	void func_stop_rule(Func<R, Args...> pFunc)
+	{
+		SignalInternal::FuncSlot<R, Args...>::instances[pFunc.slotIndex].rule = 0;
+	}
+	template<typename R, typename... Args>
+	void func_block(Func<R, Args...> pFunc, unsigned int pBlockSignal) 
+	{
+		SignalInternal::FuncSlot<R, Args...>::instances[pFunc.slotIndex].blockSignals.push_back(pBlockSignal);
+	}
+	template<typename R, typename... Args>
+	void func_unblock(Func<R, Args...> pFunc, unsigned int pUnblockSignal)
+	{
+		SignalInternal::FuncSlot<R, Args...>::instances[pFunc.slotIndex].unblockSignals.push_back(pUnblockSignal);
+	}
+	template<typename R, typename... Args>
+	void set_up_func_block(Func<R, Args...> pFunc, unsigned int pBlockSignal, unsigned int pUnblockSignal)
+	{
+		func_block(pFunc, pBlockSignal);
+		func_unblock(pFunc, pUnblockSignal);
+	}
+	
+	//Signals
+	
+	template<typename EventType>
+	void reserve_signals(unsigned pCount) {
+		SignalInternal::EventSlot<EventType>::reserve_slots(pCount);
+	}
+	template<typename EventType>
+	unsigned int create_signal(EventType pEvent) {
+		using namespace SignalInternal;
+		EventSlot<EventType>::instances.push_back(EventSlot<EventType>(pEvent, allSignals.size()));
+		allSignals.push_back(SignalSlot());
+		return allSignals.size() - 1;
+	};
+}//end Input
+}//end internal

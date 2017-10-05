@@ -1,6 +1,6 @@
 #pragma once
 #include "Input.h"
-#include "Signal.h"
+
 namespace App {
 	namespace Input {
 		using Key = int;

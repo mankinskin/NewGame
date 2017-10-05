@@ -10,9 +10,7 @@
 #include <OpenGL\GUI\Buttons.h>
 #include <algorithm>
 
-std::vector<void(*)()> App::Input::callbackBuffer;
-std::vector<unsigned int> App::Input::signalBuffer;
-std::vector<unsigned int> App::Input::rejectedSignals;
+
 /*
 button-pipeline
 to set up
@@ -43,19 +41,6 @@ void App::Input::init()
 	glfwSetScrollCallback(App::mainWindow.window, scroll_Callback);
 }
 
-
-
-void App::Input::clearSignals() {
-	EventSlot<KeyEvent>::clear();
-	FuncSlot<void>::clear();
-	allSignalSlots.clear();
-	allSignalLocks.clear();
-	signalLockBindings.clear();
-	signalUnlockBindings.clear();
-}
-
-
-
 void App::Input::fetchGLFWEvents()
 {
 	//updates the states of the mouse buttons, mouse wheel and all tracked keys
@@ -78,26 +63,8 @@ void App::Input::checkEvents() {
 	checkMouseEvents();
         
 
-	//set signals if they are not locked
-	rejectedSignals.insert(rejectedSignals.end(), signalBuffer.begin(), signalBuffer.end());
-	std::vector<unsigned int> rejected;
-	rejected.reserve(rejectedSignals.size());
-	signalBuffer.resize(rejectedSignals.size());
-	unsigned int passed = 0;
-	for (unsigned int& sig : rejectedSignals) {
- 		if (!allSignalLocks[sig]) {
-			allSignalSlots[sig].on = 1;
-			signalBuffer[passed++] = sig;
-		}
-		else {
-			rejected.push_back(sig);
-		}
-	}
-	signalBuffer.clear();
-	rejectedSignals = rejected;
+	//checkSignals();
 }
-
-
 
 void App::Input::end()
 {
@@ -107,50 +74,6 @@ void App::Input::end()
 	}
 	if (glfwWindowShouldClose(App::mainWindow.window)) {
 		App::state = App::State::Exit;
-	}
-}
-
-void App::Input::callFunctions()
-{
-	for (FuncSlot<void>& inst : FuncSlot<void>::instances) {
-		for (unsigned s : inst.signal_bindings) {
-			if (allSignalSlots[s].on) {
-				inst.invoke();
-				break;
-			}
-		}
-	}
-
-        for (FuncSlot<void, unsigned int>& inst : FuncSlot<void, unsigned int>::instances) {
-                for (unsigned s : inst.signal_bindings) {
-                        if (allSignalSlots[s].on) {
-                                inst.invoke();
-                                break;
-                        }
-                }
-        }
-		//any other function template here
-	
-	//reset signals and lock signals
-        for(auto& to_lock : signalLockBindings){
-                if (allSignalSlots[to_lock.first].on) {
-                        for (unsigned int l = 0; l < to_lock.second.size(); ++l) {
-                                allSignalLocks[to_lock.second[l]] = 1;
-                        }
-                }
-	}
-        for (auto& to_unlock : signalUnlockBindings) {
-                if (allSignalSlots[to_unlock.first].on) {
-                        for (unsigned int l = 0; l < to_unlock.second.size(); ++l) {
-                                allSignalLocks[to_unlock.second[l]] = 0;
-                        }
-                }
-	}
-	
-	//reset signals
-	//some signals will be set off, others (rules) will stay on untill they are explicitly turned off
-	for (unsigned int s = 0; s < allSignalSlots.size(); ++s) {
-		allSignalSlots[s].reset();
 	}
 }
 
