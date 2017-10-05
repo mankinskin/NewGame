@@ -1,6 +1,8 @@
-deps/include/boost/
-*.obj
+deps/
 .vs/
+assets/
+Debug/
+*.obj
 *.log
 *.vcxproj
 *.tlog
@@ -10,3 +12,5 @@ deps/include/boost/
 *.pdb
 *.ilk
 *.exp
+*.exe
+*.dll
