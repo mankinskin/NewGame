@@ -3,11 +3,11 @@
 #include "Group.h"
 #include "Line.h"
 #include <algorithm>
-std::vector<unsigned int> gl::GUI::allGroupBounds;
-std::vector<glm::vec2> gl::GUI::allGroupDeltas;
-std::vector<gl::GUI::QuadElement> gl::GUI::allQuadElements;
-std::vector<gl::GUI::LineElement> gl::GUI::allLineElements;
 
+std::vector<unsigned int> allGroupBounds;
+std::vector<glm::vec2> allGroupDeltas;
+std::vector<gl::GUI::QuadElement> allQuadElements;
+std::vector<gl::GUI::LineElement> allLineElements;
 
 void gl::GUI::moveGroup(unsigned int pGroupIndex, glm::vec2 pDir)
 {

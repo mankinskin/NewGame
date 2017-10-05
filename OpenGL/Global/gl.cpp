@@ -280,9 +280,9 @@ void gl::updateGeneralUniformBuffer()
 {
 	std::vector<float> generalUniformData(36);
 	
-	std::memcpy(&generalUniformData[0], glm::value_ptr(Camera::infiniteProjectionMatrix), sizeof(float) * 16);
-	std::memcpy(&generalUniformData[16], glm::value_ptr(Camera::viewMatrix), sizeof(float) * 16);
-	std::memcpy(&generalUniformData[32], glm::value_ptr(Camera::pos), sizeof(float) * 3);
+	std::memcpy(&generalUniformData[0], glm::value_ptr(Camera::getProjection()), sizeof(float) * 16);
+	std::memcpy(&generalUniformData[16], glm::value_ptr(Camera::getView()), sizeof(float) * 16);
+	std::memcpy(&generalUniformData[32], glm::value_ptr(Camera::getPos()), sizeof(float) * 3);
 	VAO::streamStorage(generalUniformBuffer, sizeof(float) * 36, &generalUniformData[0]);
 	
 	Debug::getGLError("gl::update():");

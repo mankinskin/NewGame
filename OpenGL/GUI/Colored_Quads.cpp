@@ -4,9 +4,8 @@
 #include "../BaseGL/VAO.h"
 #include "../BaseGL/Shader.h"
 #include "../Global/gl.h"
-std::vector<glm::vec4> gl::GUI::allColors;
-std::vector<gl::GUI::Colored_Quad> gl::GUI::allColoredQuads;
 
+std::vector<gl::GUI::Colored_Quad> gl::GUI::allColoredQuads;
 unsigned int gl::GUI::coloredQuadBuffer;
 
 unsigned int gl::GUI::coloredQuadVAO;

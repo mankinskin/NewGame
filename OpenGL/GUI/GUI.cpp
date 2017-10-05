@@ -7,8 +7,10 @@
 #include <App\Input\Input.h>
 #include <App\Input\Mouse.h>
 #include "Group.h"
+
+std::vector<glm::vec4> allColors;
 std::vector<glm::vec4> gl::GUI::allQuads;
-std::vector<int> gl::GUI::allQuadFlags;
+std::vector<int> allQuadFlags;
 unsigned int gl::GUI::MAX_QUAD_COUNT = 10000;
 unsigned int gl::GUI::quadBuffer;
 unsigned int gl::GUI::colorBuffer;

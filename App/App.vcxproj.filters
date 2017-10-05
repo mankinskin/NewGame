@@ -74,9 +74,6 @@
     <ClInclude Include="Input\Mouse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Input\Controller.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Input\Signal.h">
       <Filter>Header Files</Filter>
     </ClInclude>

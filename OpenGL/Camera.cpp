@@ -1,6 +1,7 @@
 #include "Global\stdafx.h"
 #include "Camera.h"
 #include "Global\gl.h"
+#include <glm\glm.hpp>
 #include <GLM\gtc\matrix_transform.hpp>
 #include <GLM\gtx\rotate_vector.hpp>
 #include <glm\gtc\type_ptr.hpp>
@@ -8,36 +9,35 @@
 #include <math.h>
 #include "Global\glDebug.h"
 #include <algorithm>
-glm::mat4 gl::Camera::viewMatrix = {};
-glm::mat4 gl::Camera::projectionMatrix = {};
-glm::mat4 gl::Camera::infiniteProjectionMatrix = {};
-glm::vec3 gl::Camera::pos = {};
-glm::vec3 gl::Camera::normal = {};
-glm::vec3 gl::Camera::lookAt = {};
-glm::vec3 gl::Camera::cross_right = {};
-glm::vec3 gl::Camera::UP = {};
-glm::vec2 gl::Camera::lookRotation = {};
-glm::mat4 gl::Camera::translationMatrix = {};
+
+glm::vec3 lookAt = {};
+glm::vec3 cross_right = {};
+glm::vec3 UP = {};
 glm::vec3 vel = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 mov = glm::vec3(0.0f, 0.0f, 0.0f);
-float gl::Camera::cam_speed = 0.1f;
-float gl::Camera::FOV = 70.0f;
-float gl::Camera::sensitivity = 0.5f;
-float gl::Camera::yRestrictionAngle = 3.0f;
-float gl::Camera::nearPlane = 0.0f;
-float gl::Camera::farPlane = 10.0f;
-const float gl::Camera::eulerian = 0.0001f;
-glm::vec3 gl::Camera::LOOK_AT_CENTER = glm::vec3(0.0, 0.0, -1.0);
-int gl::Camera::expect_x_stop = 0;
-int gl::Camera::expect_y_stop = 0;
-int gl::Camera::expect_z_stop = 0;
+float cam_speed = 0.1f;
+float FOV = 70.0f;
+float yRestrictionAngle = 3.0f;
+float nearPlane = 0.0f;
+float farPlane = 10.0f;
+const float eulerian = 0.0001f;
+int expect_x_stop = 0;
+int expect_y_stop = 0;
+int expect_z_stop = 0;
+glm::vec3 LOOK_AT_CENTER = glm::vec3(1.0, 0.0, 1.0);
+glm::vec3 pos = {};
+glm::vec3 normal = {};
+float sensitivity = 0.5f;
+glm::mat4 viewMatrix = {};
+glm::mat4 projectionMatrix = {};
+glm::mat4 infiniteProjectionMatrix = {};
 
 
 void gl::Camera::init()
 {
 
 	FOV = 70.0f;
-	pos = glm::vec3(0.0, 2.0, 0.0);
+	pos = glm::vec3(0.0, 5.0, 0.0);
 	UP = glm::vec3(0.0, 1.0, 0.0);
 	lookAt = LOOK_AT_CENTER;
 	normal = UP;
@@ -62,7 +62,7 @@ void gl::Camera::setPosition(glm::vec3 pPos)
 void gl::Camera::translateLocal(glm::vec3 pDir)
 {
 	glm::vec3 d = ((cross_right * pDir.x) + (-lookAt * pDir.z) + (normal * pDir.y))*cam_speed * (float)App::timeFactor;
-	translationMatrix = glm::translate(translationMatrix, d);
+	
 	pos += d;
 }
 
@@ -100,9 +100,10 @@ void gl::Camera::update()
 	//update camera matrices
 	cross_right = glm::normalize(glm::cross(lookAt, UP));
 	normal = glm::normalize(glm::cross(cross_right, lookAt));
-	vel = vel + mov;
+	
 	if (mov != glm::vec3()) {
 		translateLocal(normalize(mov));
+		mov = glm::vec3();
 	}
 	
 	
@@ -162,5 +163,20 @@ void gl::Camera::stop_y() {
 }
 
 void gl::Camera::move(glm::vec3 pDir) {
-	mov = mov + pDir;
+	mov += pDir;
+}
+
+glm::vec3 & gl::Camera::getPos()
+{
+	return pos;
+}
+
+glm::mat4 & gl::Camera::getProjection()
+{
+	return projectionMatrix;
+}
+
+glm::mat4 & gl::Camera::getView()
+{
+	return viewMatrix;
 }

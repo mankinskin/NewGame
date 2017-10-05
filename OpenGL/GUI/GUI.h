@@ -16,9 +16,7 @@ namespace gl {
 		void clearBuffers();
 		void initQuadBuffer();
 		void updateQuadBuffer();
-		extern std::vector<glm::vec4> allColors;
 		extern std::unordered_map<std::string, unsigned int> colorLookup;
-                extern std::vector<int> allQuadFlags;
 		extern std::vector<glm::vec4> allQuads;
 		extern unsigned int MAX_QUAD_COUNT;
 		extern unsigned int quadBuffer;

@@ -23,10 +23,6 @@ namespace gl{
 			unsigned int line_index;
 			unsigned int parent_group;
 		};
-		extern std::vector<unsigned int> allGroupBounds;
-		extern std::vector<glm::vec2> allGroupDeltas;
-		extern std::vector<QuadElement> allQuadElements;
-		extern std::vector<LineElement> allLineElements;
 		
         }
 }

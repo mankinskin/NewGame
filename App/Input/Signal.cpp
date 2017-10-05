@@ -34,29 +34,26 @@ void App::Input::callFunctions()
 	using namespace SignalInternal;
 	for (FuncSlot<void>& inst : FuncSlot<void>::instances) {
 
-		//blocking/unblocking
-		//if (inst.blocked) {
-		//	inst.blocked = !std::any_of(inst.unblockSignals.begin(), inst.unblockSignals.end(), is_on);
-		//	
-		//}
-		//else {
-		//	inst.blocked = std::any_of(inst.blockSignals.begin(), inst.blockSignals.end(), is_on);
-		//}
-		
-		//check signals
-		int call = std::any_of(inst.signalBindings.begin(), inst.signalBindings.end(), is_on) || inst.rule;
-		
-		if (call) {
+		if (std::any_of(inst.signalBindings.begin(), inst.signalBindings.end(), is_on) || inst.rule) {
 			inst.invoke();
 		}
 	}
+	for (FuncSlot<void, unsigned int>& inst : FuncSlot<void, unsigned int>::instances) {
+
+		if (std::any_of(inst.signalBindings.begin(), inst.signalBindings.end(), is_on) || inst.rule) {
+			inst.invoke();
+		}
+	}
+
 	for (FuncSlot<void, Func<void>>& inst : FuncSlot<void, Func<void>>::instances) {
 
-		
-		//check signals
-		int call = std::any_of(inst.signalBindings.begin(), inst.signalBindings.end(), is_on) || inst.rule;
+		if (std::any_of(inst.signalBindings.begin(), inst.signalBindings.end(), is_on) || inst.rule) {
+			inst.invoke();
+		}
+	}
+	for (FuncSlot<void, Func<void, unsigned int>>& inst : FuncSlot<void, Func<void, unsigned int>>::instances) {
 
-		if (call) {
+		if (std::any_of(inst.signalBindings.begin(), inst.signalBindings.end(), is_on) || inst.rule) {
 			inst.invoke();
 		}
 	}

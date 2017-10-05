@@ -84,8 +84,6 @@ namespace App {
 			
 		public:
 			static std::vector<FuncSlot<R, Args...>> instances;
-			std::vector<unsigned int> blockSignals;
-			std::vector<unsigned int> unblockSignals;
 			std::vector<unsigned int> signalBindings;
 
 			bool rule = 0;//always call

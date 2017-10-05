@@ -3,17 +3,28 @@
 #include "Text.h"
 #include "../BaseGL/Shader.h"
 
-unsigned int gl::GUI::Text::glyphShapeProgram = 0;
-unsigned int gl::GUI::Text::MAX_CHARS = 1000;
 
-std::vector<gl::GUI::Text::Font> gl::GUI::Text::allFonts;
-unsigned int gl::GUI::Text::quadStorage = 0;
-unsigned int gl::GUI::Text::charStorage = 0;
+unsigned int MAX_CHARS = 1000;
 
-std::vector<float> gl::GUI::Text::allKerning;
-std::vector<gl::GUI::Text::GlyphMetrics> gl::GUI::Text::allMetrics;
+
+unsigned int quadStorage = 0;
+unsigned int charStorage = 0;
+std::vector<gl::GUI::Text::String> allStrings;
+
+
+
+
+unsigned int styleStorage = 0;
+std::vector<gl::GUI::Text::TextStyle> allTextStyles;
+
+
 unsigned int gl::GUI::Text::fontVAO = 0;
+unsigned int gl::GUI::Text::glyphShapeProgram = 0;
+std::vector<unsigned int> gl::GUI::Text::glyphIndexBuffer;
+std::vector<gl::GUI::Text::Font> gl::GUI::Text::allFonts;
 std::vector<gl::GUI::Text::FontInstructions> gl::GUI::Text::allFontInstructions;
+std::vector<gl::GUI::Text::GlyphMetrics> gl::GUI::Text::allMetrics;
+std::vector<float> gl::GUI::Text::allKerning;
 
 void gl::GUI::Text::
 initFontShader()
@@ -44,4 +55,56 @@ initFontVAO() {
 
 	VAO::setVertexArrayVertexStorage(fontVAO, 1, quadStorage, sizeof(CharQuad));
 	VAO::setVertexArrayVertexStorage(fontVAO, 2, charStorage, sizeof(unsigned int));
+}
+
+void gl::GUI::Text::revalidateFontStringIndices()
+{
+	unsigned int off = 0;
+	for (Font& fon : allFonts) {
+		fon.stringOffset = off;
+		off += fon.stringCount;
+	}
+}
+void gl::GUI::Text::insertFontString(Font & pFont, String pString)
+{
+	if (!pFont.stringCount) {//if first textbox of this font
+		pFont.stringOffset = allFontStrings.size();//dedicate a new range of tb indices to this font
+	}
+	++pFont.stringCount;
+	allFontStrings.insert(allFontStrings.begin() + pFont.stringOffset, pString);
+}
+unsigned int gl::GUI::Text::createTextStyle(TextStyle & pStyle)
+{
+	allTextStyles.push_back(pStyle);
+	return allTextStyles.size() - 1;
+}
+void gl::GUI::Text::initStyleBuffer() {
+
+	allTextStyles.reserve(2);
+	createTextStyle(1.5f, 0.8f);
+	createTextStyle(1.2f, 0.8f);
+	styleStorage = VAO::createStorage(sizeof(TextStyle)*allTextStyles.size(), &allTextStyles[0], 0);
+
+	Shader::bindUniformBufferToShader(glyphShapeProgram, styleStorage, "StyleBuffer");
+}
+
+void gl::GUI::Text::updateCharStorage()
+{
+	if (charQuadBuffer.size()) {
+		VAO::streamStorage(quadStorage, sizeof(CharQuad)*charQuadBuffer.size(), &charQuadBuffer[0]);
+		VAO::streamStorage(charStorage, sizeof(unsigned int)*glyphIndexBuffer.size(), &glyphIndexBuffer[0]);
+	}
+}
+
+void gl::GUI::Text::clearCharStorage()
+{
+	for (Font& font : allFonts) {
+		font.stringOffset = 0;
+		font.stringCount = 0;
+	}
+	allChars.clear();
+	glyphIndexBuffer.clear();
+	charQuadBuffer.clear();
+	allStrings.clear();
+	allFontStrings.clear();
 }

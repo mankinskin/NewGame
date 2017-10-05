@@ -11,16 +11,10 @@ namespace gl{
 			unsigned int count;
 		};
 
-		extern std::vector<glm::vec4> allLightData; 
-		extern std::vector<LightIndexRange>allLightIndexRanges;
+		extern unsigned int lightDataUBO;
+		extern unsigned int lightShaderProgram;
 		extern unsigned int MAX_LIGHT_COUNT;
 
-		extern unsigned int lightShaderProgram;
-		extern unsigned int lightVAO;
-		extern unsigned int lightIndexVBO;
-		//buffer of ivec2 ranges into the lightDataUniformBuffer
-		extern unsigned int lightDataUBO;
-		//buffer for all arbitiary data about the lights
 		void initLightVAO();
 		void initLightDataBuffer();
 		void updateLightDataBuffer();

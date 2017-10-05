@@ -39,12 +39,12 @@ namespace gl {
 				unsigned int pointSize = 11;
 				int flags = 0;
 				unsigned int upsampling = 4;
-			}; extern std::vector<FontInstructions> allFontInstructions;
+			}; 
+
 			inline bool operator==(const FontInstructions& l, const FontInstructions& r) {
 				return  l.pointSize == r.pointSize && l.startCode == r.startCode && l.glyphCount == r.glyphCount && l.flags == r.flags;
 			}
 
-			//Glyphs
 			struct Glyph {
 				Glyph() {  }
 				Glyph(float minX, float minY, float maxX, float maxY)
@@ -72,16 +72,16 @@ namespace gl {
 			void initFontVAO();
 			void updateCharStorage();
 			void clearCharStorage();
+			void revalidateFontStringIndices();
 
-			extern unsigned int quadStorage;
-			extern unsigned int charStorage;
-			extern unsigned int glyphShapeProgram;
 			extern unsigned int fontVAO;
-			extern unsigned int MAX_CHARS;
+			extern unsigned int glyphShapeProgram;
+			extern std::vector<unsigned int> glyphIndexBuffer;
 			extern std::vector<Font> allFonts;
-			extern std::vector<float> allKerning;
-			extern std::vector<GlyphMetrics> allMetrics;
 			
+			extern std::vector<FontInstructions> allFontInstructions;
+			extern std::vector<GlyphMetrics> allMetrics;
+			extern std::vector<float> allKerning;
 		}
 	}
 }

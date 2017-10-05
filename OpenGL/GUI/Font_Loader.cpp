@@ -15,12 +15,50 @@
 #include <App/ContextWindow.h>
 #define DEFAULT_TTF_DIR "..//assets//fonts//"
 #define DEFAULT_STORE_DIR "..//assets//glyph_atlas_fonts//"
-std::vector<gl::GUI::Text::Initializer::LoadFont> gl::GUI::Text::Initializer::loadFontBuffer = {};
-std::string gl::GUI::Text::Initializer::font_input_directory = DEFAULT_TTF_DIR;
-std::string gl::GUI::Text::Initializer::font_store_directory = DEFAULT_STORE_DIR;
-FT_Library gl::GUI::Text::Initializer::ftLib;
-int gl::GUI::Text::Initializer::showDistanceField = 1;
 
+struct LoadFontMetrics {
+	unsigned int ppem_x;
+	unsigned int ppem_y;
+	unsigned int scale_x;
+	unsigned int scale_y;
+	unsigned int lineGap;
+};
+
+struct LoadGlyphQuad {
+	unsigned int minX;
+	unsigned int minY;
+	unsigned int maxX;
+	unsigned int maxY;
+};
+
+struct LoadGlyphMetrics {
+	unsigned int advanceX;
+	int xBearing;
+	int yBearing;
+};
+
+struct LoadAtlas {
+	unsigned int width;
+	unsigned int height;
+	int flags;
+	std::vector<LoadGlyphQuad> quads;
+	std::vector<unsigned char> buffer;
+};
+
+struct LoadFont {
+	std::string fileName;
+	gl::GUI::Text::FontInstructions instructions;
+	LoadFontMetrics fontMetrics;
+	LoadAtlas atlas;
+	std::vector<LoadGlyphMetrics> metrics;
+	std::vector<int> kerningMap;
+};
+
+std::vector<LoadFont> loadFontBuffer = {};
+std::string font_input_directory = DEFAULT_TTF_DIR;
+std::string font_store_directory = DEFAULT_STORE_DIR;
+FT_Library ftLib;
+int showDistanceField = 1;
 /*
 PIPELINE FOR FONT LOADING
 - Include desired font paths 
@@ -32,25 +70,9 @@ PIPELINE FOR FONT LOADING
 //inline T square(T p) {
 //	return p*p;
 //}
-void gl::GUI::Text::Initializer::
-loadFonts()
-{
-	
-	unsigned int queueCount = loadFontBuffer.size();
-	unsigned int fontCount = allFonts.size();
-	allFonts.resize(fontCount + queueCount);
-	for (unsigned int f = 0; f < queueCount; ++f) {
-		LoadFont load_font = loadFontBuffer[f];
-		loadFont(load_font);
-		Font font = integrateFont(load_font);
-		allFonts[fontCount + f] = font;
-	}
-	fontCount += queueCount;
-	loadFontBuffer.clear();
-}
 
-std::vector<int> gl::GUI::Text::Initializer::
-getKerningMap(FT_Face pFace, unsigned int pStartCode, unsigned int pGlyphCount)
+
+std::vector<int> getKerningMap(FT_Face pFace, unsigned int pStartCode, unsigned int pGlyphCount)
 {
 	std::vector<int> kerning(pGlyphCount*pGlyphCount);
 	//Get Kerning
@@ -71,8 +93,7 @@ getKerningMap(FT_Face pFace, unsigned int pStartCode, unsigned int pGlyphCount)
 
 
 
-void gl::GUI::Text::Initializer::
-setFontSize(FT_Face& pFace, LoadFontMetrics& pFontMetrics, FontInstructions& pInstructions) {
+void setFontSize(FT_Face& pFace, LoadFontMetrics& pFontMetrics, gl::GUI::Text::FontInstructions& pInstructions) {
 	
 	unsigned int dpi_x = 100;
 	unsigned int dpi_y = 100;
@@ -91,32 +112,10 @@ setFontSize(FT_Face& pFace, LoadFontMetrics& pFontMetrics, FontInstructions& pIn
 }
 
 
-void gl::GUI::Text::Initializer::
-loadFont(LoadFont& pFont)
-{
-	
-
-	FT_Face ftface;
-	std::string fontPath = font_input_directory + pFont.fileName + ".ttf";
-	FontInstructions& font_instructions = pFont.instructions;
-
-	FT_New_Face(ftLib, (fontPath).c_str(), 0, &ftface);
-	
-
-	pFont.instructions.pointSize = font_instructions.pointSize;
-
-	setFontSize(ftface, pFont.fontMetrics, pFont.instructions);
-	loadAtlas(ftface, font_instructions, pFont.fontMetrics, pFont.atlas, pFont.metrics);
-	pFont.kerningMap = getKerningMap(ftface, font_instructions.startCode, font_instructions.glyphCount);
-	
-
-	FT_Done_Face(ftface);
-
-}
 
 
-void gl::GUI::Text::Initializer::
-loadAtlas(FT_Face& pFace, FontInstructions& pFontInstructions, LoadFontMetrics& pFontMetrics, LoadAtlas& pAtlas, std::vector<LoadGlyphMetrics>& pMetrics)
+
+void loadAtlas(FT_Face& pFace, gl::GUI::Text::FontInstructions& pFontInstructions, LoadFontMetrics& pFontMetrics, LoadAtlas& pAtlas, std::vector<LoadGlyphMetrics>& pMetrics)
 {
 	const unsigned int width_glyphs = (unsigned int)ceil(sqrt((float)pFontInstructions.glyphCount));
 	unsigned int pad_pixels = 0;
@@ -289,7 +288,38 @@ loadAtlas(FT_Face& pFace, FontInstructions& pFontInstructions, LoadFontMetrics& 
 	}
 }
 
+void loadFont(LoadFont& pFont)
+{
 
+
+	FT_Face ftface;
+	std::string fontPath = font_input_directory + pFont.fileName + ".ttf";
+	gl::GUI::Text::FontInstructions& font_instructions = pFont.instructions;
+
+	FT_New_Face(ftLib, (fontPath).c_str(), 0, &ftface);
+
+
+	pFont.instructions.pointSize = font_instructions.pointSize;
+
+	setFontSize(ftface, pFont.fontMetrics, pFont.instructions);
+	loadAtlas(ftface, font_instructions, pFont.fontMetrics, pFont.atlas, pFont.metrics);
+	pFont.kerningMap = getKerningMap(ftface, font_instructions.startCode, font_instructions.glyphCount);
+
+
+	FT_Done_Face(ftface);
+
+}
+void gl::GUI::Text::Initializer::
+setFontInputDir(std::string pNewDirectory) {
+
+	font_input_directory = pNewDirectory;
+}
+
+void gl::GUI::Text::Initializer::
+setFontStoreDir(std::string pNewDirectory) {
+
+	font_store_directory = pNewDirectory;
+}
 void gl::GUI::Text::Initializer::
 initFreeType()
 {
@@ -305,7 +335,16 @@ includeFont(std::string pFontFileName, unsigned int pPointSize,  unsigned int pS
 {
 	return includeFont(pFontFileName, FontInstructions(pPointSize, pStartCode, pGlyphCount, pFlags, pUpsampling));
 }
-
+void removeFileExtension(std::string& pFileName) {
+	unsigned int nameCharCount = pFileName.size();
+	for (unsigned int i = 0; i < 4; ++i) {
+		if (pFileName[nameCharCount - i - 1] == '.') {
+			nameCharCount = nameCharCount - i - 1;
+			break;
+		}
+	}
+	pFileName.resize(nameCharCount);
+}
 unsigned int gl::GUI::Text::Initializer::
 includeFont(std::string pFontFileName, FontInstructions& pLoadInstructions)
 {
@@ -335,24 +374,42 @@ createFontInstructions(FontInstructions & pInstructions)
 	return sz;
 }
 
-void gl::GUI::Text::Initializer::
-removeFileExtension(std::string& pFileName) {
-	unsigned int nameCharCount = pFileName.size();
-	for (unsigned int i = 0; i < 4; ++i) {
-		if (pFileName[nameCharCount - i - 1] == '.') {
-			nameCharCount = nameCharCount - i - 1;
-			break;
-		}
+//Font file integration
+void storeGlyphs(gl::GUI::Text::Font& pFont, const LoadFont & pLoadFont)
+{
+	unsigned int glyCount = pLoadFont.atlas.quads.size();
+	std::vector<gl::GUI::Text::Glyph> glyphs(glyCount);
+	pFont.metricOffset = gl::GUI::Text::allMetrics.size();
+	pFont.metricCount = glyCount;
+	gl::GUI::Text::allMetrics.resize(pFont.metricOffset + pFont.metricCount);
+
+	for (unsigned int g = 0; g < glyCount; ++g) {
+		const LoadGlyphQuad& qud = pLoadFont.atlas.quads[g];
+		const LoadGlyphMetrics& met = pLoadFont.metrics[g];
+		glyphs[g] = gl::GUI::Text::Glyph((float)qud.minX / (float)pLoadFont.atlas.width, (float)qud.minY / (float)pLoadFont.atlas.height, (float)(qud.maxX) / (float)pLoadFont.atlas.width, (float)(qud.maxY) / (float)pLoadFont.atlas.height);
+		gl::GUI::Text::allMetrics[pFont.metricOffset + g] = gl::GUI::Text::GlyphMetrics((float)(qud.maxX - qud.minX) / ((float)gl::screenWidth / 2.0f), (float)(qud.maxY - qud.minY) / ((float)gl::screenHeight / 2.0f), (float)met.advanceX / ((float)gl::screenWidth / 2.0f), (float)met.xBearing / ((float)gl::screenWidth / 2.0f), (float)met.yBearing / ((float)gl::screenHeight / 2.0f));
+		//allMetrics[pSize.metricOffset + g] = GlyphMetrics((float)met.width, (float)met.height, (float)met.advanceX, (float)met.xBearing, (float)met.yBearing);
 	}
-	pFileName.resize(nameCharCount);
+	pFont.glyphStorageIndex = gl::VAO::createStorage(sizeof(gl::GUI::Text::Glyph)*glyCount, &glyphs[0], 0);
+	gl::VAO::bindStorage(GL_UNIFORM_BUFFER, pFont.glyphStorageIndex);
+
 }
 
-//Font file integration
-gl::GUI::Text::Font gl::GUI::Text::Initializer::
-integrateFont(LoadFont& pFont) {
-	Debug::getGLError("before integrateFont():");
+std::pair<unsigned int, unsigned int> convertKerning(std::vector<int>& pKerningMap)
+{
+	unsigned int count = pKerningMap.size();
+	unsigned int offset = gl::GUI::Text::allKerning.size();
+	gl::GUI::Text::allKerning.resize(offset + count);
+	for (unsigned int i = 0; i < count; ++i) {
+		gl::GUI::Text::allKerning[offset + i] = (float)pKerningMap[i] / ((float)gl::screenWidth / 2.0f);
+	}
+	return std::pair<unsigned int, unsigned int>(offset,count);
+}
+
+gl::GUI::Text::Font integrateFont(LoadFont& pFont) {
+	gl::Debug::getGLError("before integrateFont():");
 	App::Debug::printErrors();
-	Font font;//TODO make font support multiple fontSizes
+	gl::GUI::Text::Font font;//TODO make font support multiple fontSizes
 	glGenTextures(1, &font.atlasID);
 	glBindTexture(GL_TEXTURE_2D, font.atlasID);
 
@@ -374,97 +431,34 @@ integrateFont(LoadFont& pFont) {
 	std::pair<unsigned int, unsigned int> range = convertKerning(pFont.kerningMap);
 	font.kerningOffset = range.first;
 	font.kerningCount = range.second;
-	font.fontMetric.lineGap = (float)pFont.fontMetrics.lineGap / ((float)screenHeight / 2.0f);
+	font.fontMetric.lineGap = (float)pFont.fontMetrics.lineGap / ((float)gl::screenHeight / 2.0f);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, pFont.atlas.width, pFont.atlas.height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, &pFont.atlas.buffer[0]);
 		
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	unsigned int off = allFontInstructions.size();
-	allFontInstructions.push_back(pFont.instructions);
+	unsigned int off = gl::GUI::Text::allFontInstructions.size();
+	gl::GUI::Text::allFontInstructions.push_back(pFont.instructions);
 	font.instructions = off;
 	return font;
 }
 
-std::pair<unsigned int, unsigned int> gl::GUI::Text::Initializer::
-convertKerning(std::vector<int>& pKerningMap)
-{
-	unsigned int count = pKerningMap.size();
-	unsigned int offset = allKerning.size();
-	allKerning.resize(offset + count);
-	for (unsigned int i = 0; i < count; ++i) {
-		allKerning[offset + i] = (float)pKerningMap[i] / ((float)screenWidth / 2.0f);
-	}
-	return std::pair<unsigned int, unsigned int>(offset,count);
-}
-
 void gl::GUI::Text::Initializer::
-storeGlyphs(Font& pFont, const LoadFont & pLoadFont)
+loadFonts()
 {
-	unsigned int glyCount = pLoadFont.atlas.quads.size();
-	std::vector<Glyph> glyphs(glyCount);
-	pFont.metricOffset = allMetrics.size();
-	pFont.metricCount = glyCount;
-	allMetrics.resize(pFont.metricOffset + pFont.metricCount);
 
-	for (unsigned int g = 0; g < glyCount; ++g) {
-		const LoadGlyphQuad& qud = pLoadFont.atlas.quads[g];
-		const LoadGlyphMetrics& met = pLoadFont.metrics[g];
-		glyphs[g] = Glyph((float)qud.minX / (float)pLoadFont.atlas.width, (float)qud.minY / (float)pLoadFont.atlas.height, (float)(qud.maxX) / (float)pLoadFont.atlas.width, (float)(qud.maxY) / (float)pLoadFont.atlas.height);
-		allMetrics[pFont.metricOffset + g] = GlyphMetrics((float)(qud.maxX - qud.minX) / ((float)screenWidth / 2.0f), (float)(qud.maxY - qud.minY) / ((float)screenHeight / 2.0f), (float)met.advanceX / ((float)screenWidth / 2.0f), (float)met.xBearing / ((float)screenWidth / 2.0f), (float)met.yBearing / ((float)screenHeight / 2.0f));
-		//allMetrics[pSize.metricOffset + g] = GlyphMetrics((float)met.width, (float)met.height, (float)met.advanceX, (float)met.xBearing, (float)met.yBearing);
+	unsigned int queueCount = loadFontBuffer.size();
+	unsigned int fontCount = allFonts.size();
+	allFonts.resize(fontCount + queueCount);
+	for (unsigned int f = 0; f < queueCount; ++f) {
+		LoadFont load_font = loadFontBuffer[f];
+		loadFont(load_font);
+		Font font = integrateFont(load_font);
+		allFonts[fontCount + f] = font;
 	}
-	pFont.glyphStorageIndex = VAO::createStorage(sizeof(Glyph)*glyCount, &glyphs[0], 0);
-	VAO::bindStorage(GL_UNIFORM_BUFFER, pFont.glyphStorageIndex);
-
+	fontCount += queueCount;
+	loadFontBuffer.clear();
 }
 
-//Font Serialization
-void gl::GUI::Text::Initializer::
-setFontInputDir(std::string pNewDirectory){
-	
-	font_input_directory = pNewDirectory;
-}
 
-void gl::GUI::Text::Initializer::
-setFontStoreDir(std::string pNewDirectory) {
+//TODO: Font Serialization
 
-	font_store_directory = pNewDirectory;
-}
-
-void gl::GUI::Text::Initializer::
-saveFontFile(std::string pFileName, LoadFont * pFont)
-{
-	puts("saving font file...");
-	std::string filePath(font_store_directory + pFileName);
-	removeFileExtension(pFileName);
-	FontInstructions& instructions = pFont->instructions;
-	std::string instruction_str('_' + std::to_string(instructions.pointSize) +  '_' + std::to_string(instructions.startCode) + '_' + std::to_string(instructions.glyphCount));
-	filePath += instruction_str + ".gaf";
-
-	std::ofstream file(filePath);
-	{
-		
-	}
-
-}
-
-int gl::GUI::Text::Initializer::
-loadFontFile(std::string pFileName, LoadFont* pFont)
-{
-	puts("loading font file...");
-	int ret = 0;
-	std::string filePath(font_store_directory + pFileName);
-	FontInstructions& instructions = pFont->instructions;
-	std::string instruction_str('_' + std::to_string(instructions.pointSize) + '_' + std::to_string(instructions.startCode) + '_' + std::to_string(instructions.glyphCount));
-	filePath += instruction_str + ".gaf";
-	std::ifstream ifs(filePath);
-	if (ifs.fail()) {
-		ret = 1;
-		puts("fail!");
-	}
-	else {
-		
-	}
-
-	return ret;
-}
