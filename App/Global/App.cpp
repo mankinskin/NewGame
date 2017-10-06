@@ -64,29 +64,29 @@ void App::initGLFW()
 void App::mainMenuLoop()
 {
         //Buttons
-        unsigned int quitButtonQuad = gl::GUI::createQuad(-1.0f, -0.9f, 0.2f, 0.1f);
+        unsigned int quitButtonQuad = gl::GUI::createQuad(-1.0f, -0.9f, 0.2f, 0.05f);
         unsigned int playButtonQuad = gl::GUI::createQuad(-1.0f, -0.7f, 0.2f, 0.1f);
        
-	unsigned int sliderButtonQuad = gl::GUI::createQuad(-0.495f, 0.1f, 0.02f, 0.05f);
+	unsigned int sliderQuad = gl::GUI::createQuad(-0.495f, 0.1f, 0.02f, 0.05f);
 	unsigned int pullButtonQuad = gl::GUI::createQuad(-0.495f, 0.19f, 0.29f, 0.05f);
         unsigned int windowQuad = gl::GUI::createQuad(-0.5f, 0.2f, 0.3f, 0.3f);
 	//Gui Lines
 	unsigned int line = gl::GUI::createLine(glm::vec2(-0.495f, 0.075f), glm::vec2(-0.205f, 0.075f), 8);
 
-        gl::GUI::colorQuad(quitButtonQuad, 1);
-        gl::GUI::colorQuad(playButtonQuad, 5);
+        gl::GUI::colorQuad(quitButtonQuad, 7);
+        gl::GUI::colorQuad(playButtonQuad, 7);
         gl::GUI::colorQuad(windowQuad, 7);
         gl::GUI::colorQuad(pullButtonQuad, 6);
-	gl::GUI::colorQuad(sliderButtonQuad, 6);
+	gl::GUI::colorQuad(sliderQuad, 6);
 
 	unsigned int window_group = gl::GUI::createGroup(windowQuad);
 	gl::GUI::addGroupQuad(window_group, windowQuad);
 	gl::GUI::addGroupQuad(window_group, pullButtonQuad);
-	gl::GUI::addGroupQuad(window_group, sliderButtonQuad);
+	gl::GUI::addGroupQuad(window_group, sliderQuad);
 	gl::GUI::addGroupLine(window_group, line);
         unsigned quit_button = gl::GUI::addButton(quitButtonQuad);
         unsigned pull_button = gl::GUI::addButton(pullButtonQuad);
-	unsigned slider_button = gl::GUI::addButton(sliderButtonQuad);
+	unsigned slider_button = gl::GUI::addButton(sliderQuad);
 
         //Signals
 	using namespace Input;
@@ -113,13 +113,13 @@ void App::mainMenuLoop()
 	unsigned int rmb_release = create_signal(MouseKeyEvent(1, KeyCondition(0, 0)));
 	unsigned int lmb_press = create_signal(MouseKeyEvent(0, KeyCondition(1, 0)));
 	unsigned int lmb_release = create_signal(MouseKeyEvent(0, KeyCondition(0, 0)));
-	reserve_signals<MouseEvent>(2);
+	reserve_signals<MouseEvent>(3);
 	unsigned int quit_button_press = create_signal(MouseEvent(quit_button, MouseKeyEvent(0, KeyCondition(1, 0))));
 	unsigned int pull_button_press = create_signal(MouseEvent(pull_button, MouseKeyEvent(0, KeyCondition(1, 0))));
-
+	unsigned int slider_button_press = create_signal(MouseEvent(slider_button, MouseKeyEvent(0, KeyCondition(1, 0))));
 
 	Func<void, unsigned int> moveWindow = create_func(gl::GUI::moveQuadGroupByMouseDelta, window_group);
-
+	Func<void, unsigned int> moveSlider = create_func(gl::GUI::moveQuadByMouseDelta, sliderQuad);
 	Func<void> quitFunc = create_func(quit);
 	quitFunc.listen({ esc_press, quit_button_press });
 	Func<void> trackMouseFunc = create_func(toggleTrackMouse);
@@ -136,6 +136,11 @@ void App::mainMenuLoop()
 	startMoveWindowFunc.listen({ pull_button_press });
 	Func<void, Func<void, unsigned int>> stopMoveWindowFunc = create_func(func_stop_rule<void, unsigned int>, moveWindow);
 	stopMoveWindowFunc.listen({ lmb_release });
+
+	Func<void, Func<void, unsigned int>> startMoveSliderFunc = create_func(func_start_rule<void, unsigned int>, moveSlider);
+	startMoveSliderFunc.listen({ slider_button_press });
+	Func<void, Func<void, unsigned int>> stopMoveSliderFunc = create_func(func_stop_rule<void, unsigned int>, moveSlider);
+	stopMoveSliderFunc.listen({ lmb_release });
 
 	Func<void, Func<void>> startForwardFunc = create_func(func_start_rule<void>, forwardFunc);
 	startForwardFunc.listen({ w_press });
