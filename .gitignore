@@ -6,7 +6,6 @@ Debug/*
 *.log
 *.vcxproj
 *.tlog
-*.tlog/
 *.vcxproj.filters
 *.idb
 *.pdb
