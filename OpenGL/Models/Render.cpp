@@ -1,19 +1,13 @@
 #include "..\Global\stdafx.h"
+#include "stdafx.h"
 #include "Render.h"
 #include "..\BaseGL\VAO.h"
-#include "..\BaseGL\Shader.h"
+#include "../BaseGL/Shader/Shader.h"
 #include "Models.h"
 #include <App/World/EntityRegistry.h>
 #include "../Global/glDebug.h"
 #include "../BaseGL/Framebuffer.h"
-unsigned int gl::Models::meshShaderProgram = 0;
-unsigned int gl::Models::normalShaderProgram = 0;
-unsigned int gl::Models::meshVAO = 0;
-unsigned int gl::Models::meshVBO = 0;
-unsigned int gl::Models::meshIBO = 0;
-unsigned int gl::Models::materialUBO = 0;
-unsigned int gl::Models::entityTransformBuffer;
-unsigned int gl::Models::transformIndexBuffer;
+
 
 void gl::Models::initMeshVAO()
 {

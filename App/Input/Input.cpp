@@ -7,7 +7,7 @@
 #include <functional>
 #include "Keys.h"
 #include "Mouse.h"
-#include <OpenGL\GUI\Buttons.h>
+#include <OpenGL\GUI\/UI/Buttons.h>
 #include <algorithm>
 
 

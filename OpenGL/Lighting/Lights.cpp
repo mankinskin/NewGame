@@ -1,20 +1,22 @@
 #include "../Global/stdafx.h"
+#include "stdafx.h"
 #include "Lights.h"
 #include "../BaseGL/VAO.h"
-#include "../BaseGL/Shader.h"
+#include "../BaseGL/Shader/Shader.h"
 #include "../Global/gl.h"
 #include "../BaseGL/Framebuffer.h"
 #include "../Global/glDebug.h"
 #include "../Models/Render.h"
 #include "../BaseGL/Texture.h"
-std::vector<glm::vec4> allLightData;
-std::vector<gl::Lighting::LightIndexRange> allLightIndexRanges;
-unsigned int lightVAO = 0;
-unsigned int lightIndexVBO = 0;
 
+std::vector<glm::vec4> gl::Lighting::allLightData;
+std::vector<gl::Lighting::LightIndexRange> gl::Lighting::allLightIndexRanges;
+unsigned int gl::Lighting::lightVAO = 0;
+unsigned int gl::Lighting::lightIndexVBO = 0;
 unsigned int gl::Lighting::lightDataUBO = 0;
 unsigned int gl::Lighting::lightShaderProgram = 0;
 unsigned int gl::Lighting::MAX_LIGHT_COUNT = 100;
+
 void gl::Lighting::initLightVAO(){
         
         lightIndexVBO = VAO::createStorage(MAX_LIGHT_COUNT*sizeof(LightIndexRange), 0, VAO::STREAM_FLAGS | GL_MAP_WRITE_BIT);
@@ -109,6 +111,12 @@ void gl::Lighting::renderLights()
         
         Debug::getGLError("renderLights()4");
 }
+void gl::Lighting::setupLightShader()
+{
+	Shader::bindUniformBufferToShader(lightShaderProgram, lightDataUBO, "LightDataBuffer");
+	Shader::bindUniformBufferToShader(lightShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
+}
+
 void gl::Lighting::setLightPos(unsigned int pLightIndex, glm::vec3& pPos){
 	std::memcpy(&allLightData[allLightIndexRanges[pLightIndex].offset], &pPos, sizeof(float)*3);
 }

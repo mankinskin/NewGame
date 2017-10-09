@@ -3,24 +3,13 @@
 #include <glm\glm.hpp>
 namespace gl{ 
 	namespace Lighting{ 
-
-		struct LightIndexRange{ 
-			LightIndexRange(unsigned int pOffset, unsigned int pCount)
-				:offset(pOffset), count(pCount) {}
-			unsigned int offset;
-			unsigned int count;
-		};
-
-		extern unsigned int lightDataUBO;
-		extern unsigned int lightShaderProgram;
-		extern unsigned int MAX_LIGHT_COUNT;
-
 		void initLightVAO();
 		void initLightDataBuffer();
 		void updateLightDataBuffer();
 		void updateLightIndexRangeBuffer();
 		void initLightShader();
 		void renderLights();
+		void setupLightShader();
 		unsigned int createLight(glm::vec4& pPos, glm::vec4& pColor);
 		unsigned int createLight(glm::vec4& pPos, glm::vec4& pColor, glm::vec4& pFrustum);
 		void setLightPos(unsigned int pLightIndex, glm::vec3& pPos);

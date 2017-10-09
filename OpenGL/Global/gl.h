@@ -9,35 +9,7 @@ namespace gl {
         using std::string;
         using std::vector;
 
-        struct Vertex {
-                Vertex() {}
-                Vertex(float pPosX, float pPosY, float pPosZ, float pNormX, float pNormY, float pNormZ, float pUVCoordS, float pUVCoordT)
-                        :pos(glm::vec3(pPosX, pPosY, pPosZ)), normal(glm::vec3(pNormX, pNormY, pNormZ)), uv(glm::vec2(pUVCoordS, pUVCoordT)) {}
-                Vertex(glm::vec3 pPos, glm::vec3 pNormal, glm::vec2 pUV)
-                        :pos(pPos), normal(pNormal), uv(pUV) {}
-                glm::vec3 pos;
-                glm::vec3 normal;
-                glm::vec2 uv;
-        };
-
-        struct LineVertex {
-                LineVertex() {
-                        position = glm::vec4();
-                        color = glm::vec4();
-                }
-                LineVertex(float pX, float pY, float pZ, float pW, float pR, float pG, float pB, float pA) {
-                        position = glm::vec4(pX, pY, pZ, pW);
-                        color = glm::vec4(pR, pG, pB, pA);
-                }
-                LineVertex(glm::vec4 pPos, glm::vec4 pColor) {
-                        position = pPos;
-                        color = pColor;
-                }
-                glm::vec4 position;
-                glm::vec4 color;
-        };
-
-
+        
         extern int MAX_WORK_GROUP_COUNT;
         extern int MAX_TEXTURE_UNIT_COUNT;
         extern glm::ivec3 MAX_WORK_GROUP_SIZE;

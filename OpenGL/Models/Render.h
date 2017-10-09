@@ -12,13 +12,5 @@ namespace gl {
                 void initNormalShader();
                 void renderNormals();
 		void updateBuffers();
-		extern unsigned int meshShaderProgram;
-                extern unsigned int normalShaderProgram;
-		extern unsigned int meshVAO;
-		extern unsigned int meshVBO;
-		extern unsigned int meshIBO;
-		extern unsigned int materialUBO;
-		extern unsigned int entityTransformBuffer;
-		extern unsigned int transformIndexBuffer;
 	}
 }

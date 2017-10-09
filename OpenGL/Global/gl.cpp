@@ -4,23 +4,23 @@
 #include <conio.h>
 #include <App\Global\App.h>
 #include <array>
-#include "..\BaseGL\Shader_Loader.h"
+#include "../BaseGL/Shader/Shader_Loader.h"
+#include "../BaseGL/Shader/Shader.h"
 #include "..\Camera.h"
 #include "glDebug.h"
 #include <glm\gtc\type_ptr.hpp>
-#include "..\BaseGL\Shader.h"
 #include "..\BaseGL\Texture.h"
-#include "..\GUI\Font_Loader.h"
-#include "..\GUI\GUI.h"
+#include "..\GUI\Text\Font_Loader.h"
+#include "..\GUI\UI\GUI.h"
 #include "../Models/Render.h"
 #include "../Models/Models.h"
 #include "../Models/Model_Loader.h"
-#include "../GUI/Text.h"
+#include "../GUI/Text/Text.h"
 #include "../BaseGL/Framebuffer.h"
 #include "../Lighting/Lights.h"
-#include "../GUI/Colored_Quads.h"
-#include "../GUI/Buttons.h"
-#include "../GUI/Line.h"
+#include "../GUI/UI/Colored_Quads.h"
+#include "../GUI/UI/Buttons.h"
+#include "../GUI/UI/Line.h"
 #include <App/World/EntityRegistry.h>
 
 int gl::MAX_WORK_GROUP_COUNT = 0;
@@ -73,9 +73,9 @@ void gl::init()
         }
         
         EntityRegistry::updateMatrices();
-        gl::Models::allModels[0].addInstances({ spheres });
-        gl::Models::Model::revalidateMeshOffsets();
-        gl::Models::Model::revalidateEntityOffsets();
+        gl::Models::getModel(0).addInstances({ spheres });
+        gl::Models::revalidateModelMeshOffsets();
+        gl::Models::revalidateModelEntityOffsets();
         //----------
 
 	Debug::getGLError("gl::init()4");
@@ -167,24 +167,15 @@ void gl::bindUniformBufferLocations()
 {
         //bind uniform buffers to shaders
 	
-        Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, Lighting::lightDataUBO, "LightDataBuffer");
-
-        Shader::bindUniformBufferToShader(Lighting::lightShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
+	Lighting::setupLightShader();
+	Models::setupMeshShader();
+	GUI::setupButtonIndexShader();
+	GUI::setupLineShader();
+	GUI::setupColoredQuadShader();
         App::Debug::printErrors();
-        Shader::bindUniformBufferToShader(GUI::Text::glyphShapeProgram, generalUniformBuffer, "GeneralUniformBuffer");
 
+        
         Shader::bindUniformBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
-
-        Shader::bindUniformBufferToShader(Models::meshShaderProgram, generalUniformBuffer, "GeneralUniformBuffer");
-        Shader::bindUniformBufferToShader(Models::meshShaderProgram, Models::entityTransformBuffer, "EntityTransformBuffer");
-        Shader::bindUniformBufferToShader(Models::meshShaderProgram, Models::transformIndexBuffer, "TransformIndexBuffer");
-        App::Debug::printErrors();
-
-        Shader::bindUniformBufferToShader(GUI::buttonIndexShader, gl::GUI::quadBuffer, "QuadBuffer");
-	
-	Shader::bindUniformBufferToShader(GUI::guiLineShader, GUI::colorBuffer, "ColorBuffer");
-        Shader::bindUniformBufferToShader(GUI::coloredQuadShader, GUI::colorBuffer, "ColorBuffer");
-        Shader::bindUniformBufferToShader(GUI::coloredQuadShader, GUI::quadBuffer, "QuadBuffer");
 }
 
 void gl::setViewport(App::ContextWindow::Window& pViewport) {

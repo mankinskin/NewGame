@@ -2,7 +2,7 @@
 #include "Mouse.h"
 #include "..\Global\App.h"
 #include "..\ContextWindow.h"
-#include <OpenGL\GUI\Buttons.h>
+#include <OpenGL\GUI\UI\Buttons.h>
 #include <algorithm>
 #include "Signal.h"
 glm::vec2 App::Input::relativeCursorPosition;
@@ -36,8 +36,7 @@ void App::Input::toggleTrackMouse()
 void App::Input::checkMouseEvents()
 {
 	using namespace SignalInternal;
-	unsigned int cursor_pos = App::mainWindow.width * (App::Input::absoluteCursorPosition.y) + (App::Input::absoluteCursorPosition.x);
-        unsigned int now_hovered_button = gl::GUI::buttonIndexMap[cursor_pos];
+	unsigned int now_hovered_button = gl::GUI::readButtonIndexMap(absoluteCursorPosition.x, absoluteCursorPosition.y);
 
 	for (MouseKeyEvent& kev : mouseKeyEventBuffer){
 		for (unsigned int ks = 0; ks < EventSlot<MouseKeyEvent>::instance_count(); ++ks) {

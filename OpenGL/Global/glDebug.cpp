@@ -1,14 +1,14 @@
 #include "stdafx.h"
 #include "glDebug.h"
 #include <App\Global\Debug.h>
-#include "..\BaseGL\Shader.h"
+#include "../BaseGL/Shader/Shader.h"
 #include "..\Camera.h"
 #include "../BaseGL/VAO.h"
 #include "../BaseGL/Framebuffer.h"
 
 unsigned int gl::Debug::vertexBuffer;
 unsigned int gl::Debug::indexBuffer;
-std::vector<gl::LineVertex> gl::Debug::vertices;
+std::vector<gl::Debug::LineVertex> gl::Debug::vertices;
 std::vector<unsigned int> gl::Debug::indices;
 unsigned int gl::Debug::VAO = 0;
 unsigned int gl::Debug::lineShaderID = 0;
@@ -126,7 +126,7 @@ void gl::Debug::initDebugVAOs()
 {
 	glCreateVertexArrays(1, &VAO);
 	glVertexArrayVertexBuffer(VAO, 0, vertexBuffer + 1, 0, sizeof(LineVertex));
-	VAO::setVertexAttrib(VAO, 0, 0, 4, GL_FLOAT, offsetof(LineVertex, position));
+	VAO::setVertexAttrib(VAO, 0, 0, 4, GL_FLOAT, offsetof(LineVertex, pos));
 	VAO::setVertexAttrib(VAO, 0, 1, 4, GL_FLOAT, offsetof(LineVertex, color));
 	glVertexArrayElementBuffer(VAO, indexBuffer + 1);
 

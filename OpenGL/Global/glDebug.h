@@ -12,6 +12,15 @@ namespace gl {
 			glm::vec3 position = glm::vec3();
 		};
 
+		struct LineVertex {
+			LineVertex()
+				:pos(glm::vec4()), color(glm::vec4()) {}
+			LineVertex(float pPosX, float pPosY, float pPosZ, float pPosW, float pR, float pG, float pB, float pA)
+				:pos(glm::vec4(pPosX, pPosY, pPosZ, pPosW)), color(glm::vec4(pR, pG, pB, pA)) {}
+			glm::vec4 pos;
+			glm::vec4 color;
+		};
+
 		extern unsigned int vertexBuffer;
 		extern unsigned int indexBuffer;
 		extern unsigned int VAO;
