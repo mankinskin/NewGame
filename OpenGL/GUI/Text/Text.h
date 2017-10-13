@@ -11,39 +11,39 @@
 #define TEXT_LAYOUT_FREE_LINES 00010000
 
 namespace gl {
-	namespace GUI {
-		namespace Text {
-			struct Font;
-			struct String;
-			struct TextStyle;
-			void setStringColor(unsigned int pStringIndex, unsigned int pColorIndex);
-			void setStringStyle(unsigned int pStringIndex, unsigned int pStyleIndex);
-			//Interface
-			void reserveTextboxSpace(unsigned int pCount);
-			unsigned int createTextbox(unsigned int pQuadIndex, unsigned int pMetrics, int pFlags, float pMarging = 0.0f);
-			unsigned int createTextbox(unsigned int pPosIndex, unsigned int pSizeIndex, unsigned int pMetrics, int pFlags, float pMarging = 0.0f);
-                        unsigned int createTextbox(glm::vec4 pQuad, unsigned int pMetrics, int pFlags, float pMarging);
-			unsigned int createTextbox(glm::vec2 pTopLeft, glm::vec2 pSize, unsigned int pMetrics, int pFlags, float pMarging = 0.0f);
-			unsigned int createTextboxMetrics(unsigned int pFont, float pGlyphScaleX, float pGlyphScaleY, float pAdvanceScale, float pLineGapScale);
-			void setTextboxString(unsigned int pTextbox, std::string pString);
+    namespace GUI {
+	namespace Text {
+	    struct Font;
+	    struct String;
+	    struct TextStyle;
+	    void setStringColor(size_t pStringIndex, size_t pColorIndex);
+	    void setStringStyle(size_t pStringIndex, size_t pStyleIndex);
+	    //Interface
+	    void reserveTextboxSpace(size_t pCount);
+	    size_t createTextbox(size_t pQuadIndex, size_t pMetrics, int pFlags, float pMarging = 0.0f);
+	    size_t createTextbox(size_t pPosIndex, size_t pSizeIndex, size_t pMetrics, int pFlags, float pMarging = 0.0f);
+	    size_t createTextbox(glm::vec4 pQuad, size_t pMetrics, int pFlags, float pMarging);
+	    size_t createTextbox(glm::vec2 pTopLeft, glm::vec2 pSize, size_t pMetrics, int pFlags, float pMarging = 0.0f);
+	    size_t createTextboxMetrics(size_t pFont, float pGlyphScaleX, float pGlyphScaleY, float pAdvanceScale, float pLineGapScale);
+	    void setTextboxString(size_t pTextbox, std::string pString);
 
-			void setTextboxString(unsigned int pTextbox, String pString);
-			
-			void loadTextboxes();
-			void renderGlyphs();
-			void revalidateTextboxCharIndices();
-			
-			void insertFontString(Font & pFont, String pString);
-			void setupGlyphShader();
-			
-			unsigned int createTextStyle(TextStyle& pInstructions);
-			unsigned int createTextStyle(float pThickness, float pHardness);
-			unsigned int createTextColor(glm::vec4 pColor);
-			void initStyleBuffer();
-			//extern std::vector<std::string> allTextColorNames;//only an idea. like white, grey, blue, pink, magenta
-			
-			
-		}
+	    void setTextboxString(size_t pTextbox, String pString);
+
+	    void loadTextboxes();
+	    void renderGlyphs();
+	    void revalidateTextboxCharIndices();
+
+	    void insertFontString(Font & pFont, String pString);
+	    void setupGlyphShader();
+
+	    size_t createTextStyle(TextStyle& pInstructions);
+	    size_t createTextStyle(float pThickness, float pHardness);
+	    size_t createTextColor(glm::vec4 pColor);
+	    void initStyleBuffer();
+	    //extern std::vector<std::string> allTextColorNames;//only an idea. like white, grey, blue, pink, magenta
+
+
 	}
-	
+    }
+
 }

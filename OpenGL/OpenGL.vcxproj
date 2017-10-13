@@ -138,10 +138,14 @@
     <ClInclude Include="Global\gl.h" />
     <ClInclude Include="Global\glDebug.h" />
     <ClInclude Include="Global\stdafx.h" />
+    <ClInclude Include="GUI\UI\Boundary.h" />
     <ClInclude Include="GUI\UI\Buttons.h" />
     <ClInclude Include="GUI\UI\Colored_Quads.h" />
+    <ClInclude Include="GUI\UI\Delta.h" />
+    <ClInclude Include="GUI\UI\Element.h" />
     <ClInclude Include="GUI\UI\Line.h" />
     <ClInclude Include="GUI\Text\stdafx.h" />
+    <ClInclude Include="GUI\UI\Quad.h" />
     <ClInclude Include="GUI\UI\stdafx.h" />
     <ClInclude Include="Lighting\Lights.h" />
     <ClInclude Include="Lighting\stdafx.h" />
@@ -172,6 +176,7 @@
     <ClCompile Include="GUI\UI\Buttons.cpp" />
     <ClCompile Include="GUI\UI\Colored_Quads.cpp" />
     <ClCompile Include="GUI\UI\Line.cpp" />
+    <ClCompile Include="GUI\UI\Quad.cpp" />
     <ClCompile Include="Lighting\Lights.cpp" />
     <ClCompile Include="Models\Models.cpp" />
     <ClCompile Include="Models\Model_Loader.cpp" />

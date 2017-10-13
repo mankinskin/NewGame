@@ -1,30 +1,24 @@
- #include "../../Global/stdafx.h"
+#include "../../Global/stdafx.h"
 #include "stdafx.h"
 #include "Line.h"
 #include "../../BaseGL/VAO.h"
 #include "../../BaseGL/Shader/Shader.h"
+
 std::vector<glm::vec4> allLines;
-std::vector<unsigned int> allLineColorIndices;
-unsigned int guiLineVAO = 0;
-unsigned int guiLineVBO = 0;
-unsigned int guiLineColorIndexVBO = 0;
-unsigned int guiLineShader = 0;
-unsigned int MAX_GUI_LINES = 1000;
-std::vector<unsigned int> allLineParents;
+std::vector<size_t> allLineColorIndices;
+size_t guiLineVAO = 0;
+size_t guiLineVBO = 0;
+size_t guiLineColorIndexVBO = 0;
+size_t guiLineShader = 0;
+size_t MAX_GUI_LINES = 1000;
 
+//size_t gl::GUI::createLine(glm::vec2 pV1, glm::vec2 pV2, size_t pColorIndex) {
+//	allLines.push_back(glm::vec4(pV1, pV2));
+//	allLineColorIndices.push_back(pColorIndex);
+//	return allLines.size() - 1;
+//}
 
-
-
-unsigned int gl::GUI::createLine(glm::vec2 pV1, glm::vec2 pV2, unsigned int pColorIndex) {
-	allLines.push_back(glm::vec4(pV1, pV2));
-	allLineColorIndices.push_back(pColorIndex);
-	return allLines.size() - 1;
-}
-void gl::GUI::setLineVertex(unsigned int pLineIndex, unsigned int pVertexOffset, glm::vec2 pVertex)
-{
-	std::memcpy(&allLines[pLineIndex][pVertexOffset * 2], &pVertex[0], sizeof(float) * 2);
-}
-void gl::GUI::setLineColor(unsigned int pLineIndex, unsigned int pColorIndex)
+void gl::GUI::setLineColor(size_t pLineIndex, size_t pColorIndex)
 {
 	allLineColorIndices[pLineIndex] = pColorIndex;
 }
@@ -35,12 +29,12 @@ void gl::GUI::initLineVAO()
 
 	guiLineVBO = VAO::createStorage(sizeof(glm::vec4) * MAX_GUI_LINES, nullptr, VAO::STREAM_FLAGS | GL_MAP_WRITE_BIT);
 	VAO::createStream(guiLineVBO, GL_MAP_WRITE_BIT);
-	
-	guiLineColorIndexVBO = VAO::createStorage(sizeof(unsigned int) * MAX_GUI_LINES, nullptr, VAO::STREAM_FLAGS | GL_MAP_WRITE_BIT);
+
+	guiLineColorIndexVBO = VAO::createStorage(sizeof(size_t) * MAX_GUI_LINES, nullptr, VAO::STREAM_FLAGS | GL_MAP_WRITE_BIT);
 	VAO::createStream(guiLineColorIndexVBO, GL_MAP_WRITE_BIT);
-	
+
 	VAO::setVertexArrayVertexStorage(guiLineVAO, 0, guiLineVBO, sizeof(glm::vec4));
-	VAO::setVertexArrayVertexStorage(guiLineVAO, 1, guiLineColorIndexVBO, sizeof(unsigned int));
+	VAO::setVertexArrayVertexStorage(guiLineVAO, 1, guiLineColorIndexVBO, sizeof(size_t));
 	VAO::setVertexAttrib(guiLineVAO, 0, 0, 4, GL_FLOAT, 0);
 	VAO::setVertexAttrib(guiLineVAO, 1, 1, 1, GL_UNSIGNED_INT, 0);
 	glVertexArrayBindingDivisor(guiLineVAO, 0, 1);
@@ -50,18 +44,13 @@ void gl::GUI::initLineVAO()
 void gl::GUI::updateLines() {
 	if (allLines.size()) {
 		VAO::streamStorage(guiLineVBO, sizeof(glm::vec4) * allLines.size(), &allLines[0]);
-		VAO::streamStorage(guiLineColorIndexVBO, sizeof(unsigned int) * allLineColorIndices.size(), &allLineColorIndices[0]);
+		VAO::streamStorage(guiLineColorIndexVBO, sizeof(size_t) * allLineColorIndices.size(), &allLineColorIndices[0]);
 	}
 }
 
 void gl::GUI::setupLineShader()
 {
 	Shader::bindUniformBufferToShader(guiLineShader, GUI::colorBuffer, "ColorBuffer");
-}
-
-void gl::GUI::bindLineParent(unsigned int pParentQuad, unsigned int pChildLine)
-{
-	allLineParents[pChildLine] = pParentQuad + 1;
 }
 
 void gl::GUI::renderLines()

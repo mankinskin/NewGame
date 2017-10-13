@@ -1,5 +1,6 @@
 c:\users\linus\source\repos\newgame\opengl\debug\opengl.pdb
 c:\users\linus\source\repos\newgame\opengl\debug\opengl.idb
+c:\users\linus\source\repos\newgame\opengl\debug\framebuffer.obj
 c:\users\linus\source\repos\newgame\opengl\debug\shader.obj
 c:\users\linus\source\repos\newgame\opengl\debug\vao.obj
 c:\users\linus\source\repos\newgame\opengl\debug\shader_loader.obj
@@ -15,8 +16,15 @@ c:\users\linus\source\repos\newgame\opengl\debug\font_loader.obj
 c:\users\linus\source\repos\newgame\opengl\debug\gui.obj
 c:\users\linus\source\repos\newgame\opengl\debug\text.obj
 c:\users\linus\source\repos\newgame\opengl\debug\dt.obj
-c:\users\linus\source\repos\newgame\opengl\debug\framebuffer.obj
+c:\users\linus\source\repos\newgame\opengl\debug\lights.obj
+c:\users\linus\source\repos\newgame\opengl\debug\colored_quads.obj
+c:\users\linus\source\repos\newgame\opengl\debug\buttons.obj
+c:\users\linus\source\repos\newgame\opengl\debug\window.obj
+c:\users\linus\source\repos\newgame\opengl\debug\line.obj
+c:\users\linus\source\repos\newgame\opengl\debug\group.obj
+c:\users\linus\source\repos\newgame\opengl\debug\quad.obj
 c:\users\linus\source\repos\newgame\debug\opengl.lib
+c:\users\linus\source\repos\newgame\opengl\debug\buttons.obj.enc
 c:\users\linus\source\repos\newgame\debug\opengl.pdb
 c:\users\linus\source\repos\newgame\opengl\debug\opengl.tlog\cl.command.1.tlog
 c:\users\linus\source\repos\newgame\opengl\debug\opengl.tlog\cl.read.1.tlog

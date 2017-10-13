@@ -3,13 +3,14 @@
 #include <unordered_map>
 namespace gl {
 	namespace GUI {
+		struct Quad;
+		//Colors
 		extern std::vector<glm::vec4> allColors;
-		extern std::vector<glm::vec4> allQuads;
-		extern std::vector<glm::vec2> allQuadDeltas;
-		extern std::vector<int> allQuadFlags;
-		extern unsigned int MAX_QUAD_COUNT;
-		extern unsigned int quadBuffer;
-		extern unsigned int colorBuffer;
-		extern std::unordered_map<std::string, unsigned int> colorLookup;
+		extern size_t colorBuffer;
+		extern std::unordered_map<std::string, size_t> colorLookup;
+
+		extern std::vector<Quad> allQuads;
+		extern size_t MAX_QUAD_COUNT;
+		extern size_t quadBuffer;
 	}
 }

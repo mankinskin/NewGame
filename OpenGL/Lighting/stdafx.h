@@ -2,20 +2,20 @@
 #include <vector>
 #include <glm/glm.hpp>
 namespace gl {
-	namespace Lighting {
-		struct LightIndexRange {
-			LightIndexRange(unsigned int pOffset, unsigned int pCount)
-				:offset(pOffset), count(pCount) {}
-			unsigned int offset;
-			unsigned int count;
-		};
+    namespace Lighting {
+	struct LightIndexRange {
+	    LightIndexRange(size_t pOffset, size_t pCount)
+		:offset(pOffset), count(pCount) {}
+	    size_t offset;
+	    size_t count;
+	};
 
-		extern std::vector<glm::vec4> allLightData;
-		extern std::vector<LightIndexRange> allLightIndexRanges;
-		extern unsigned int lightVAO;
-		extern unsigned int lightIndexVBO;
-		extern unsigned int lightDataUBO;
-		extern unsigned int lightShaderProgram;
-		extern unsigned int MAX_LIGHT_COUNT;
-	}
+	extern std::vector<glm::vec4> allLightData;
+	extern std::vector<LightIndexRange> allLightIndexRanges;
+	extern size_t lightVAO;
+	extern size_t lightIndexVBO;
+	extern size_t lightDataUBO;
+	extern size_t lightShaderProgram;
+	extern size_t MAX_LIGHT_COUNT;
+    }
 }

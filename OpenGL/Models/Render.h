@@ -3,14 +3,14 @@
 #include <vector>
 
 namespace gl {
-	namespace Models {
-		void initMeshVAO();
-		void initMeshShader();
-		void fillMeshVAO();
-		void storeMaterials();
-		void render();
-                void initNormalShader();
-                void renderNormals();
-		void updateBuffers();
-	}
+    namespace Models {
+	void initMeshVAO();
+	void initMeshShader();
+	void fillMeshVAO();
+	void storeMaterials();
+	void render();
+	void initNormalShader();
+	void renderNormals();
+	void updateBuffers();
+    }
 }
