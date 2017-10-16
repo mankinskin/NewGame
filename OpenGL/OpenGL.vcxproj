@@ -84,7 +84,9 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;glu32.lib;glew32.lib;glew32s.lib;glfw3.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -138,10 +140,8 @@
     <ClInclude Include="Global\gl.h" />
     <ClInclude Include="Global\glDebug.h" />
     <ClInclude Include="Global\stdafx.h" />
-    <ClInclude Include="GUI\UI\Boundary.h" />
     <ClInclude Include="GUI\UI\Buttons.h" />
     <ClInclude Include="GUI\UI\Colored_Quads.h" />
-    <ClInclude Include="GUI\UI\Delta.h" />
     <ClInclude Include="GUI\UI\Element.h" />
     <ClInclude Include="GUI\UI\Line.h" />
     <ClInclude Include="GUI\Text\stdafx.h" />

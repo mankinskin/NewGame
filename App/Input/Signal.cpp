@@ -2,16 +2,16 @@
 #include "Signal.h"
 #include <algorithm>
 std::vector<App::Input::SignalInternal::SignalSlot> App::Input::SignalInternal::allSignals;
-
+std::vector<void(*)()> App::Input::SignalInternal::functorInvokers = std::vector<void(*)()>();
 
 
 bool App::Input::is_on(size_t pSignalIndex)
 {
-    return SignalInternal::allSignals[pSignalIndex].signaled;
+	return SignalInternal::allSignals[pSignalIndex].signaled;
 }
 
 void App::Input::clearSignals() {
-    SignalInternal::allSignals.clear();
+	SignalInternal::allSignals.clear();
 }
 
 //void App::Input::checkSignals() {
@@ -31,39 +31,14 @@ void App::Input::clearSignals() {
 
 void App::Input::callFunctions()
 {
-    using namespace SignalInternal;
-    for (FuncSlot<void>& inst : FuncSlot<void>::instances) {
-
-	if (std::any_of(inst.signalBindings.begin(), inst.signalBindings.end(), is_on) || inst.rule) {
-	    inst.invoke();
+	using namespace SignalInternal;
+	for (void(*invoker)() : functorInvokers) {
+		invoker();
 	}
-    }
-    for (FuncSlot<void, size_t>& inst : FuncSlot<void, size_t>::instances) {
 
-	if (std::any_of(inst.signalBindings.begin(), inst.signalBindings.end(), is_on) || inst.rule) {
-	    inst.invoke();
+	//any other FuncSlot templates here
+
+	for (SignalSlot& signal : allSignals) {
+		signal.signaled *= signal.remain;
 	}
-    }
-
-    for (FuncSlot<void, Func<void>>& inst : FuncSlot<void, Func<void>>::instances) {
-
-	if (std::any_of(inst.signalBindings.begin(), inst.signalBindings.end(), is_on) || inst.rule) {
-	    inst.invoke();
-	}
-    }
-    for (FuncSlot<void, Func<void, size_t>>& inst : FuncSlot<void, Func<void, size_t>>::instances) {
-
-	if (std::any_of(inst.signalBindings.begin(), inst.signalBindings.end(), is_on) || inst.rule) {
-	    inst.invoke();
-	}
-    }
-
-    //any other FuncSlot templates here
-
-    for (SignalSlot& signal : allSignals) {
-	signal.signaled *= signal.remain;
-    }
 }
-
-
-

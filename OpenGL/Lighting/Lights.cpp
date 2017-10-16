@@ -57,14 +57,14 @@ void gl::Lighting::initLightShader() {
 }
 
 size_t gl::Lighting::createLight(glm::vec4& pPos, glm::vec4& pColor) {
-    allLightIndexRanges.push_back(LightIndexRange(allLightData.size(), 2));
+    allLightIndexRanges.emplace_back(allLightData.size(), 2);
     allLightData.push_back(pPos);
     allLightData.push_back(pColor);
     return allLightIndexRanges.size() - 1;
 }
 
 size_t gl::Lighting::createLight(glm::vec4& pPos, glm::vec4& pColor, glm::vec4& pFrustum) {
-    allLightIndexRanges.push_back(LightIndexRange(allLightData.size(), 3));
+    allLightIndexRanges.emplace_back(allLightData.size(), 3);
     allLightData.push_back(pPos);
     allLightData.push_back(pColor);
     allLightData.push_back(pFrustum);

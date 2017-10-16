@@ -10,7 +10,7 @@ std::vector<App::Debug::Error> App::Debug::errorBuffer;
 
 void App::Debug::pushError(std::string pMessage, Error::Severity errorSeverity)
 {
-    errorBuffer.push_back(Error(pMessage, errorSeverity));
+    errorBuffer.emplace_back(pMessage, errorSeverity);
 }
 
 void App::Debug::printErrors()

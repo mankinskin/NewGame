@@ -86,6 +86,8 @@
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;glu32.lib;glew32d.lib;glew32sd.lib;glfw3.lib;assimp-vc140-mt.lib;freetyped.lib;OpenGL.lib;SOIL.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -129,7 +131,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ContextWindow.cpp" />
-    <ClCompile Include="edid-parse.c" />
     <ClCompile Include="Global\Debug.cpp" />
     <ClCompile Include="Input\Signal.cpp" />
     <ClCompile Include="Input\Input.cpp" />
@@ -141,7 +142,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ContextWindow.h" />
-    <ClInclude Include="edid.h" />
     <ClInclude Include="Input\Keys.h" />
     <ClInclude Include="Input\Mouse.h" />
     <ClInclude Include="Input\stdafx.h" />

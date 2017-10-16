@@ -2,7 +2,6 @@
 #include "ContextWindow.h"
 #include "Global\Debug.h"
 #include <App\Global\App.h>
-#include "edid.h"
 int App::ContextWindow::monitorCount = 0;
 GLFWmonitor** App::ContextWindow::allMonitors = nullptr;
 App::ContextWindow::Monitor App::ContextWindow::primaryMonitor;

@@ -12,20 +12,19 @@ size_t gl::GUI::MAX_QUAD_COUNT = 10000;
 size_t gl::GUI::quadBuffer;
 
 
-size_t gl::GUI::createQuad(glm::vec4 pQuad)
+size_t gl::GUI::createQuad(Quad pQuad)
 {
-	return createQuad(Quad(pQuad));
+	return createQuad(glm::vec4(pQuad.pos, pQuad.size));
 }
 size_t gl::GUI::createQuad(glm::vec2 pPos, glm::vec2 pSize)
 {
 
-	allQuads.push_back(Quad(pPos, pSize));
+	allQuads.emplace_back(pPos, pSize);
 	return allQuads.size() - 1;
 
 }
-size_t gl::GUI::createQuad(Quad& pQuad)
+size_t gl::GUI::createQuad(glm::vec4 pQuad)
 {
-	
 	allQuads.push_back(pQuad);
 	return allQuads.size() - 1;
 
@@ -34,6 +33,8 @@ size_t gl::GUI::createQuad(float pPosX, float pPosY, float pWidth, float pHeight
 {
 	return createQuad(glm::vec4(pPosX, pPosY, pWidth, pHeight));
 }
+
+
 void gl::GUI::updateQuadBuffer()
 {
 	if (allQuads.size()) {
@@ -56,6 +57,12 @@ void gl::GUI::initQuadBuffer()
 void gl::GUI::clearBuffers()
 {
 	allQuads.clear();
+}
+
+glm::vec4 gl::GUI::getQuadData(size_t pID)
+{	
+	Quad& qd = allQuads[pID];
+	return glm::vec4(qd.pos, qd.size);
 }
 gl::GUI::Quad& gl::GUI::getQuad(size_t pID)
 {

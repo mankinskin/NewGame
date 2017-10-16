@@ -33,150 +33,286 @@ They are assigned a set of signalIDs and call their function once they find one 
 	set_up_lock to set up both locking and unlocking signals at once.
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 */
+
+//Function policies
+
+
+
+
 namespace App {
-    namespace Input {
-	namespace SignalInternal {
+	namespace Input {
+		namespace SignalInternal {
 
-	    struct SignalSlot {
-		SignalSlot() :signaled(0), remain(0) {}
-		int signaled = 0;
-		int remain = 0;
-	    };
-	    extern std::vector<SignalSlot> allSignals;
+			
 
 
-	    template<class EventType>
-	    class EventSlot {
-	    public:
-		EventSlot(EventType pEvent, size_t pSignalIndex) :signalIndex(allSignals.size()), evnt(pEvent) {}
+			struct SignalSlot {
+				SignalSlot() :signaled(0), remain(0) {}
+				int signaled = 0;
+				int remain = 0;
+			};
+			extern std::vector<SignalSlot> allSignals;
 
-		static void reserve_slots(size_t pCount) {
-		    allSignals.reserve(allSignals.size() + pCount);
-		    instances.reserve(instances.size() + pCount);
+
+			template<class EventType>
+			class EventSlot {
+			public:
+				EventSlot(EventType pEvent, size_t pSignalIndex) :signalIndex(allSignals.size()), evnt(pEvent) {}
+
+				static void reserve_slots(size_t pCount) {
+					allSignals.reserve(allSignals.size() + pCount);
+					instances.reserve(instances.size() + pCount);
+				}
+				static size_t instance_count() {
+					return instances.size();
+				}
+				static EventSlot<EventType> get_instance(size_t index) {
+					return instances[index];
+				}
+				static void clear() {
+					instances.clear();
+				}
+
+				EventType evnt;
+				size_t signalIndex;//this event´s signal slot
+				static std::vector<EventSlot<EventType>> instances;
+
+			};
+
+
+			template<class EventType>
+			std::vector<EventSlot<EventType>> EventSlot<EventType>::instances = std::vector<EventSlot<EventType>>();
+
+
+			template<typename R, typename... Args>
+			class Functor {
+			private:
+				std::function<R(Args...)> func;
+				std::tuple<Args...> args;
+
+			public:
+				static std::vector<Functor<R, Args...>> instances;
+				std::vector<size_t> signalBindings;
+
+				bool rule;//always call
+				Functor() : func(), args(std::tuple<Args...>()), rule(false)
+				{}
+				Functor(std::function<R(Args...)> pF, Args... pArgs)
+					:func(pF), args(std::forward_as_tuple(pArgs...)), signalBindings(), rule(false)
+				{}
+
+
+				static void clear() {
+					instances.clear();
+				}
+				static void reserve_slots(size_t pCount) {
+					instances.reserve(pCount);
+				}
+
+				static void listen(Functor<R, Args...>& pSlot, std::initializer_list<size_t>& pSignals)
+				{
+					pSlot.signalBindings.insert(pSlot.signalBindings.end(), pSignals.begin(), pSignals.end());
+				}
+				R invoke() const {
+					return std::apply(func, args);
+				}
+			};
+
+			template<typename R, typename... Args>
+			std::vector<Functor<R, Args...>> Functor<R, Args...>::instances = std::vector<Functor<R, Args...>>();
+
+			template<typename R, typename... Args>
+			void callFunctors()//calls all the functors of a template(if any of their signals are on)
+			{
+				for (SignalInternal::Functor<R, Args...>& inst : SignalInternal::Functor<R, Args...>::instances) {
+					if (std::any_of(inst.signalBindings.begin(), inst.signalBindings.end(), is_on) || inst.rule) {
+						inst.invoke();
+					}
+				}
+			}
+
+			extern std::vector<void(*)()> functorInvokers;//invokes all functor templates
+		}//end Internal
+		template<typename T>
+		struct Min {
+			Min(T& LHS, T& RHS)
+				:lhs(LHS), rhs(RHS) {}
+
+			T& lhs;
+			T& rhs;
+			inline T& operator()() {
+				return lhs < rhs ? lhs : rhs;
+			}
+			template<typename L, typename R>
+			static L func(L&& pLhs, R&& pRhs) {
+				return pLhs < pRhs ? pLhs : pRhs;
+			}
+
+		};
+		template<typename T>
+		struct Max {
+			Max(T& LHS, T& RHS)
+				:lhs(LHS), rhs(RHS) {}
+
+
+			T& lhs;
+			T& rhs;
+			inline T& operator()() {
+				return lhs > rhs ? lhs : rhs;
+			}
+			template<typename L, typename R>
+			static L func(L&& pLhs, R&& pRhs) {
+				return pLhs > pRhs ? pLhs : pRhs;
+			}
+		};
+		template<typename T>
+		struct Add {
+			Add(T& LHS, T& RHS)
+				:lhs(LHS), rhs(RHS) {}
+
+			T& lhs;
+			T& rhs;
+			inline T operator()() {
+				return lhs + rhs;
+			}
+			template<typename L, typename R>
+			static L func(L&& pLhs, R&& pRhs) {
+				return pLhs + pRhs;
+			}
+		};
+		template<typename T>
+		struct Substract {
+			Substract(T& LHS, T& RHS)
+				:lhs(LHS), rhs(RHS) {}
+
+			T& lhs;
+			T& rhs;
+			inline T operator()() {
+				return lhs - rhs;
+			}
+			template<typename L, typename R>
+			static L func(L&& pLhs, R&& pRhs) {
+				return pLhs - pRhs;
+			}
+		};
+		template<typename T>
+		struct Pass {
+
+			Pass(T& VAL)
+				:lhs(VAL) {}
+
+			T& lhs;
+			inline T& operator()() {
+				return lhs;
+			}
+			template<typename L, typename R>
+			static L func(L&& pLhs, R&& pDummy) {
+				return pLhs;
+			}
+		};
+		template<typename T>
+		struct Set {
+			Set(T& LHS, T& RHS)
+				:lhs(LHS), rhs(RHS) {}
+
+			T& lhs;
+			T& rhs;
+			inline T& operator()() {
+				lhs = rhs;
+				return lhs;
+			}
+			template<typename L, typename R>
+			static L func(L&& pTarget, R&& pSource) {
+				pTarget = pSource;
+				return pTarget;
+			}
+		};
+		template<typename T, template<typename> class FuncPolicy, class LhsSource, class RhsSource>
+		struct Operation {
+			Operation(LhsSource pLhsSource, RhsSource pRhsSource)
+				:lhs(pLhsSource), rhs(pRhsSource) {
+			}
+			T operator()() {
+				return FuncPolicy<T>::func(lhs(), rhs());
+			}
+			LhsSource lhs;
+			RhsSource rhs;
+		};
+
+
+		template<typename R, typename... Args>
+		struct Func {
+			
+			Func(std::function<R(Args...)> pF, Args... pArgs)
+				:slotIndex(SignalInternal::Functor<R, Args...>::instances.size())
+			{
+				if (SignalInternal::Functor<R, Args...>::instances.size() == 0) {
+					SignalInternal::functorInvokers.push_back(SignalInternal::callFunctors<R, Args...>);
+				}
+				SignalInternal::Functor<R, Args...>::instances.emplace_back(pF, pArgs...);
+			}
+			Func(R(*pF)(Args...), Args... pArgs)
+				:slotIndex(SignalInternal::Functor<R, Args...>::instances.size())
+			{
+				if (!slotIndex) {//if this is the first slot of this template
+					SignalInternal::functorInvokers.push_back(SignalInternal::callFunctors<R, Args...>);
+				}
+				SignalInternal::Functor<R, Args...>::instances.emplace_back(pF, pArgs...);
+			}
+
+			size_t slotIndex;
+			void listen(std::initializer_list<size_t> pSignals) {
+				SignalInternal::Functor<R, Args...>::listen(SignalInternal::Functor<R, Args...>::instances[slotIndex], pSignals);
+			}
+		};
+
+		bool is_on(size_t pSignalIndex);
+		void clearSignals();
+		void callFunctions();
+
+		template<typename R, typename... Args>
+		void reserve_funcs(size_t pCount) {
+			SignalInternal::Functor<R, Args...>::reserve_slots(pCount);
 		}
-		static size_t instance_count() {
-		    return instances.size();
-		}
-		static EventSlot<EventType> get_instance(size_t index) {
-		    return instances[index];
-		}
-		static void clear() {
-		    instances.clear();
-		}
 
-		EventType evnt;
-		size_t signalIndex;//this event´s signal slot
-		static std::vector<EventSlot<EventType>> instances;
-
-	    };
-	    template<class EventType>
-	    std::vector<EventSlot<EventType>> EventSlot<EventType>::instances = std::vector<EventSlot<EventType>>();
-
-
-	    //funcs
-
-	    //TO-DO: CHECK IF RETURN ARGUMENT REALLY IS NEEDED ... (why not? .. might come in use later)
-	    template<typename R, typename... Args>
-	    class FuncSlot {
-	    private:
-		std::function<R(Args...)> fun;
-		std::tuple<Args...> args;
-
-	    public:
-		static std::vector<FuncSlot<R, Args...>> instances;
-		std::vector<size_t> signalBindings;
-
-		bool rule = 0;//always call
-		FuncSlot() : fun(), args(std::tuple<Args...>())
-		{}
-
-		FuncSlot(std::function<R(Args...)> pF, Args... pArgs)
-		    :fun(pF), args(std::forward_as_tuple(pArgs)...), signalBindings() {}
-		static void clear() {
-		    instances.clear();
-		}
-		static void reserve_slots(size_t pCount) {
-		    instances.reserve(pCount);
-		}
-
-		static void listen(FuncSlot<R, Args...>& pSlot, std::initializer_list<size_t>& pSignals)
+		template<typename R, typename... Args>
+		void func_start_rule(Func<R, Args...> pFunc)
 		{
-		    pSlot.signalBindings.insert(pSlot.signalBindings.end(), pSignals.begin(), pSignals.end());
+			SignalInternal::Functor<R, Args...>::instances[pFunc.slotIndex].rule = 1;
 		}
-		R invoke() const {
-		    return std::apply(fun, args);
+		template<typename R, typename... Args>
+		void func_stop_rule(Func<R, Args...> pFunc)
+		{
+			SignalInternal::Functor<R, Args...>::instances[pFunc.slotIndex].rule = 0;
 		}
-	    };
-	    template<typename R, typename... Args>
-	    std::vector<FuncSlot<R, Args...>> FuncSlot<R, Args...>::instances = std::vector<FuncSlot<R, Args...>>();
+		template<typename R, typename... Args>
+		void func_block(Func<R, Args...> pFunc, size_t pBlockSignal)
+		{
+			SignalInternal::Functor<R, Args...>::instances[pFunc.slotIndex].blockSignals.push_back(pBlockSignal);
+		}
+		template<typename R, typename... Args>
+		void func_unblock(Func<R, Args...> pFunc, size_t pUnblockSignal)
+		{
+			SignalInternal::Functor<R, Args...>::instances[pFunc.slotIndex].unblockSignals.push_back(pUnblockSignal);
+		}
+		template<typename R, typename... Args>
+		void set_up_func_block(Func<R, Args...> pFunc, size_t pBlockSignal, size_t pUnblockSignal)
+		{
+			func_block(pFunc, pBlockSignal);
+			func_unblock(pFunc, pUnblockSignal);
+		}
+		//Signals
 
-
-	}//end Internal
-
-	bool is_on(size_t pSignalIndex);
-
-	void clearSignals();
-	//void checkSignals();
-	void callFunctions();
-	//FuncSlots
-	template<typename R, typename... Args>
-	struct Func {//interface object
-	    Func(size_t pSlotIndex) :slotIndex(pSlotIndex) {}
-	    size_t slotIndex;
-	    void listen(std::initializer_list<size_t> pSignals) {
-		SignalInternal::FuncSlot<R, Args...>::listen(SignalInternal::FuncSlot<R, Args...>::instances[slotIndex], pSignals);
-	    }
-	};
-	template<typename R, typename... Args>
-	void reserve_funcs(size_t pCount) {
-	    SignalInternal::FuncSlot<R, Args...>::reserve_slots(pCount);
-	}
-	template<typename R, typename... Args>
-	Func<R, Args...> create_func(R(*pF)(Args...), Args... pArgs) {
-	    using namespace SignalInternal;
-	    FuncSlot<R, Args...>::instances.push_back(FuncSlot<R, Args...>(pF, pArgs...));
-	    return Func<R, Args...>(FuncSlot<R, Args...>::instances.size() - 1);
-	}
-
-	template<typename R, typename... Args>
-	void func_start_rule(Func<R, Args...> pFunc)
-	{
-	    SignalInternal::FuncSlot<R, Args...>::instances[pFunc.slotIndex].rule = 1;
-	}
-	template<typename R, typename... Args>
-	void func_stop_rule(Func<R, Args...> pFunc)
-	{
-	    SignalInternal::FuncSlot<R, Args...>::instances[pFunc.slotIndex].rule = 0;
-	}
-	template<typename R, typename... Args>
-	void func_block(Func<R, Args...> pFunc, size_t pBlockSignal)
-	{
-	    SignalInternal::FuncSlot<R, Args...>::instances[pFunc.slotIndex].blockSignals.push_back(pBlockSignal);
-	}
-	template<typename R, typename... Args>
-	void func_unblock(Func<R, Args...> pFunc, size_t pUnblockSignal)
-	{
-	    SignalInternal::FuncSlot<R, Args...>::instances[pFunc.slotIndex].unblockSignals.push_back(pUnblockSignal);
-	}
-	template<typename R, typename... Args>
-	void set_up_func_block(Func<R, Args...> pFunc, size_t pBlockSignal, size_t pUnblockSignal)
-	{
-	    func_block(pFunc, pBlockSignal);
-	    func_unblock(pFunc, pUnblockSignal);
-	}
-
-	//Signals
-
-	template<typename EventType>
-	void reserve_signals(size_t pCount) {
-	    SignalInternal::EventSlot<EventType>::reserve_slots(pCount);
-	}
-	template<typename EventType>
-	size_t create_signal(EventType pEvent) {
-	    using namespace SignalInternal;
-	    EventSlot<EventType>::instances.push_back(EventSlot<EventType>(pEvent, allSignals.size()));
-	    allSignals.push_back(SignalSlot());
-	    return allSignals.size() - 1;
-	};
-    }//end Input
+		template<typename EventType>
+		void reserve_signals(size_t pCount) {
+			SignalInternal::EventSlot<EventType>::reserve_slots(pCount);
+		}
+		template<typename EventType>
+		size_t create_signal(EventType pEvent) {
+			using namespace SignalInternal;
+			EventSlot<EventType>::instances.emplace_back(pEvent, allSignals.size());
+			allSignals.emplace_back();
+			return allSignals.size() - 1;
+		};
+	}//end Input
 }//end internal

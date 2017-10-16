@@ -17,5 +17,5 @@ out vec4 vertex_color;
 void main(){
 	vec4 quad = quadBuffer[colored_quad.x + 1];
 	vertex_color = colorBuffer[colored_quad.y];
-	gl_Position = vec4(quad.x + quad.z * corner_pos.x, quad.y - quad.w * (1.0 - corner_pos.y), 0.0, 1.0);
+	gl_Position = vec4(quad.x + quad.z*corner_pos.x, quad.y - quad.w * (1.0 - corner_pos.y), 0.0, 1.0);
 };

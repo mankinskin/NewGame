@@ -56,8 +56,6 @@
     <ClInclude Include="BaseGL\Shader\Shader.h" />
     <ClInclude Include="BaseGL\Shader\stdafx.h" />
     <ClInclude Include="GUI\UI\Quad.h" />
-    <ClInclude Include="GUI\UI\Delta.h" />
-    <ClInclude Include="GUI\UI\Boundary.h" />
     <ClInclude Include="GUI\UI\Element.h" />
   </ItemGroup>
   <ItemGroup>

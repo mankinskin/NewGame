@@ -14,7 +14,7 @@ size_t SCREEN_QUAD = 0;
 
 void gl::GUI::init()
 {
-	SCREEN_QUAD = createQuad(glm::vec4(-1.0f, 1.0f, 2.0f, 2.0f));
+	SCREEN_QUAD = createQuad(-1.0f, 1.0f, 2.0f, 2.0f);
 }
 size_t gl::GUI::createColor(glm::vec4 pColor, std::string pColorName)
 {

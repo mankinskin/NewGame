@@ -68,7 +68,7 @@ void App::Input::end()
 
 void App::Input::key_Callback(GLFWwindow * window, int pKey, int pScancode, int pAction, int pMods)
 {
-    keyEventBuffer.push_back(KeyEvent(pKey, pAction, pMods));
+    keyEventBuffer.emplace_back(pKey, pAction, pMods);
 }
 
 void App::Input::char_Callback(GLFWwindow * window, size_t pCodepoint)
@@ -88,7 +88,7 @@ void App::Input::cursorEnter_Callback(GLFWwindow* window, int pEntered)
 
 void App::Input::mouseKey_Callback(GLFWwindow * window, int pKey, int pAction, int pMods)
 {
-    mouseKeyEventBuffer.push_back(MouseKeyEvent(pKey, pAction, pMods));
+    mouseKeyEventBuffer.emplace_back(pKey, pAction, pMods);
 }
 
 void App::Input::scroll_Callback(GLFWwindow * window, double pX, double pY)

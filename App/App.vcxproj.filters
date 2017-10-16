@@ -27,9 +27,6 @@
     <ClCompile Include="ContextWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="edid-parse.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="World\EntityRegistry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -57,9 +54,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ContextWindow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="edid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="World\EntityRegistry.h">

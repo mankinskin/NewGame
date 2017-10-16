@@ -52,7 +52,7 @@ void gl::Models::Loader::loadMeshes(const aiScene* pScene) {
 	    aiVector3D pos = mesh->mVertices[v];
 	    aiVector3D normal = mesh->mNormals[v];
 	    aiVector3D uv = mesh->mTextureCoords[0][v];
-	    allVertices.push_back(Vertex(pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, uv.x, uv.y));
+	    allVertices.emplace_back(pos.x, pos.y, pos.z, normal.x, normal.y, normal.z, uv.x, uv.y);
 	}
 	for (size_t f = 0; f < mesh->mNumFaces; ++f) {
 	    aiFace face = mesh->mFaces[f];
@@ -61,7 +61,7 @@ void gl::Models::Loader::loadMeshes(const aiScene* pScene) {
 	    }
 
 	}
-	allMeshes.push_back(Mesh(vertexCount, mesh->mNumVertices, faceCount * 3, mesh->mNumFaces * 3, 0, 0));// allMaterials.size() + mesh->mMaterialIndex));
+	allMeshes.emplace_back(vertexCount, mesh->mNumVertices, faceCount * 3, mesh->mNumFaces * 3, 0, 0);// allMaterials.size() + mesh->mMaterialIndex));
 	vertexCount += mesh->mNumVertices;
 	faceCount += mesh->mNumFaces;
     }

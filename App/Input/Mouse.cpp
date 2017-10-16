@@ -29,8 +29,8 @@ void App::Input::updateCursor() {
 	ax = std::clamp(ax, 0.0, (double)mainWindow.width - 1.0);
 	ay = std::clamp(ay, 0.0, (double)mainWindow.height - 1.0);
 	if (!disableCursor) {
-		rx = ax;//clamp relative positions too if cursor is not disabled
-		ry = ay;
+		rx = (float)ax;//clamp relative positions too if cursor is not disabled
+		ry = (float)ay;
 	}
 	absoluteCursorPosition = glm::uvec2((unsigned int)ax, mainWindow.height - (unsigned int)ay - 1);
 

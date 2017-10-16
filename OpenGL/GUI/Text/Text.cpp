@@ -101,8 +101,8 @@ size_t gl::GUI::Text::createTextbox(size_t pQuad, size_t pMetrics, int pFlags, f
 
 size_t gl::GUI::Text::createTextbox(glm::vec4 pQuad, size_t pMetrics, int pFlags, float pMarging)
 {
-    allTextboxPositions.push_back(glm::vec2(pQuad.x, pQuad.y));
-    allTextboxSizes.push_back(glm::vec2(pQuad.z, pQuad.w));
+    allTextboxPositions.emplace_back(pQuad.x, pQuad.y);
+    allTextboxSizes.emplace_back(pQuad.z, pQuad.w);
     return createTextbox(allTextboxPositions.size() - 1, allTextboxSizes.size() - 1, pMetrics, pFlags, pMarging);
 }
 
@@ -134,7 +134,7 @@ void gl::GUI::Text::revalidateTextboxCharIndices()
 
 size_t gl::GUI::Text::createTextboxMetrics(size_t pFont, float pGlyphScaleX, float pGlyphScaleY, float pAdvanceScale, float pLineGapScale)
 {
-    allTextboxMetrics.push_back(TextboxMetrics(pFont, glm::vec2(pGlyphScaleX, pGlyphScaleY), pAdvanceScale, pLineGapScale));
+    allTextboxMetrics.emplace_back(pFont, glm::vec2(pGlyphScaleX, pGlyphScaleY), pAdvanceScale, pLineGapScale);
     return allTextboxMetrics.size() - 1;
 }
 

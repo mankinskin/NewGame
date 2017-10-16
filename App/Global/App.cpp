@@ -22,8 +22,8 @@
 #include <OpenGL/BaseGL/Framebuffer.h>
 #include <OpenGL\GUI\UI\Quad.h>
 #include <OpenGL\GUI\UI\Line.h>
-#include <OpenGL\GUI\UI\Delta.h>
-#include <OpenGL\GUI\UI\Boundary.h>
+#include <functional>
+#include <algorithm>
 App::State App::state = App::State::Init;
 App::ContextWindow::Window App::mainWindow = App::ContextWindow::Window();
 double App::timeFactor = 1.0;
@@ -66,6 +66,7 @@ void App::initGLFW()
 void App::mainMenuLoop()
 {
 	using namespace Input;
+	using namespace gl::GUI;
 	//Buttons
 
 	size_t quitButtonQuad = gl::GUI::createQuad(-1.0f, -0.9f, 0.2f, 0.07f);
@@ -73,7 +74,7 @@ void App::mainMenuLoop()
 	
 	size_t windowQuad = gl::GUI::createQuad(-0.5f, 0.2f, 0.2f, 0.2f);
 	size_t pullQuad = gl::GUI::createQuad(-0.5f, 0.2f, 0.2f, 0.04f);
-	size_t boundaryQuad = gl::GUI::createQuad(-0.8, 0.8, 0.6, 0.6);
+	size_t boundaryQuad = gl::GUI::createQuad(-0.8f, 0.8f, 0.6f, 0.6f);
 	//GUI Lines
 	//size_t line = gl::GUI::createLine(glm::vec2(-0.495f, 0.075f), glm::vec2(-0.205f, 0.075f), 8);
 	
@@ -86,14 +87,7 @@ void App::mainMenuLoop()
 	size_t quit_button = gl::GUI::addButtonQuad(quitButtonQuad);
 	size_t pull_button = gl::GUI::addButtonQuad(pullQuad);
 	//deltas
-
-	size_t cursorDeltaSource = gl::GUI::createSource(App::Input::cursorFrameDelta);
-	size_t pullDeltaTarget = gl::GUI::createTarget<glm::vec2>(gl::GUI::getQuad(pullQuad).pos, cursorDeltaSource);
-	size_t windowDeltaTarget = gl::GUI::createTarget<glm::vec2>(gl::GUI::getQuad(windowQuad).pos, cursorDeltaSource);
-	gl::GUI::createBoundary(gl::GUI::getQuad(pullQuad).pos.x, gl::GUI::getQuad(boundaryQuad).pos.x);
-	gl::GUI::createBoundary(gl::GUI::getQuad(windowQuad).pos.x, gl::GUI::getQuad(boundaryQuad).pos.x);
-	gl::GUI::createBoundary<float, gl::GUI::MinPolicy>(gl::GUI::getQuad(pullQuad).pos.y, gl::GUI::getQuad(boundaryQuad).pos.y);
-	gl::GUI::createBoundary<float, gl::GUI::MinPolicy>(gl::GUI::getQuad(windowQuad).pos.y, gl::GUI::getQuad(boundaryQuad).pos.y);
+	
 	//Signals
 
 	reserve_signals<KeyEvent>(9);
@@ -129,57 +123,135 @@ void App::mainMenuLoop()
 	size_t pull_button_release = create_signal(MouseEvent(pull_button, MouseKeyEvent(0, KeyCondition(0, 0))));
 	size_t pull_button_leave = create_signal(CursorEvent(pull_button, 0));
 	size_t pull_button_enter = create_signal(CursorEvent(pull_button, 1));
-	Func<void, size_t> pullFollowFunc = create_func(gl::GUI::activateTarget<glm::vec2>, pullDeltaTarget);
-	pullFollowFunc.listen({ pull_button_press });
-	Func<void, size_t> pullStopFollowFunc = create_func(gl::GUI::deactivateTarget<glm::vec2>, pullDeltaTarget);
-	pullStopFollowFunc.listen({ pull_button_release, pull_button_leave });
-	Func<void, size_t> windowFollowFunc = create_func(gl::GUI::activateTarget<glm::vec2>, windowDeltaTarget);
-	windowFollowFunc.listen({ pull_button_press});
-	Func<void, size_t> windowStopFollowFunc = create_func(gl::GUI::deactivateTarget<glm::vec2>, windowDeltaTarget);
-	windowStopFollowFunc.listen({ pull_button_release, pull_button_leave });
 
-	Func<void> quitFunc = create_func(quit);
+	//move quad
+	using OffsetQuadOperation = Operation<glm::vec2, Set, Pass<glm::vec2>, Add<glm::vec2>>;
+	OffsetQuadOperation offsetPullQuad(getQuad(boundaryQuad).size, Add<glm::vec2>(getQuad(boundaryQuad).size, cursorFrameDelta));
+	OffsetQuadOperation offsetWindowQuad(getQuad(boundaryQuad).size, Add<glm::vec2>(getQuad(boundaryQuad).size, cursorFrameDelta));
+
+	Func<void> movePullQuadFunc(offsetPullQuad);
+	Func<void> moveWindowQuadFunc(offsetWindowQuad);
+
+	Func<void, Func<void>> startMovePullQuad(func_start_rule<void>, movePullQuadFunc);
+	startMovePullQuad.listen({ pull_button_press });
+
+	Func<void, Func<void>> stopMovePullQuad(func_stop_rule<void>, movePullQuadFunc);
+	stopMovePullQuad.listen({ pull_button_release, lmb_release });
+
+	Func<void, Func<void>> startMoveWindowQuad(func_start_rule<void>, moveWindowQuadFunc);
+	startMoveWindowQuad.listen({ pull_button_press });
+
+	Func<void, Func<void>> stopMoveWindowQuad(func_stop_rule<void>, moveWindowQuadFunc);
+	stopMoveWindowQuad.listen({ pull_button_release, lmb_release });
+
+
+	//quad bounds
+	using AddFloatOperation = Operation<float, Add, Pass<float>, Pass<float>>;
+	using SubstractFloatOperation = Operation<float, Substract, Pass<float>, Pass<float>>;
+	using MaxFloatOperation = Operation<float, Max, Pass<float>, Pass<float>>;
+	using MinFloatOperation = Operation<float, Min, Pass<float>, Pass<float>>;
+	using BoundFloatMaxOperation = Operation<float, Max, Pass<float>, Operation<float, Add, Substract<float>, Pass<float>>>;
+	using BoundFloatMinOperation = Operation<float, Min, Pass<float>, Operation<float, Substract, Add<float>, Pass<float>>>;
+	Operation<float, Set, Pass<float>, MaxFloatOperation> boundPullQuadMinX(getQuad(pullQuad).pos.x, MaxFloatOperation(getQuad(pullQuad).pos.x, getQuad(boundaryQuad).pos.x));
+	Operation<float, Set, Pass<float>, MaxFloatOperation> boundWindowQuadMinX(getQuad(windowQuad).pos.x, MaxFloatOperation(getQuad(windowQuad).pos.x, getQuad(boundaryQuad).pos.x));
+
+	Func<void> pullMaxBoundXMinFunc(boundPullQuadMinX);
+	func_start_rule(pullMaxBoundXMinFunc);
+	Func<void> pullMinBoundXMinFunc(boundPullQuadMinX);
+	func_start_rule(pullMinBoundXMinFunc);
+	Func<void> windowMaxBoundXMinFunc(boundWindowQuadMinX);
+	func_start_rule(windowMaxBoundXMinFunc);
+	Func<void> windowMinBoundXMinFunc(boundWindowQuadMinX);
+	func_start_rule(windowMinBoundXMinFunc);
+
+	Operation<float, Set, Pass<float>, BoundFloatMinOperation> 
+		boundPullQuadMaxX(getQuad(pullQuad).pos.x, BoundFloatMinOperation(getQuad(pullQuad).pos.x, Operation<float, Substract, Add<float>, Pass<float>>(Add<float>(getQuad(boundaryQuad).pos.x, getQuad(boundaryQuad).size.x), getQuad(pullQuad).size.x)));
+	Operation<float, Set, Pass<float>, BoundFloatMinOperation>
+		boundWindowQuadMaxX(getQuad(windowQuad).pos.x, BoundFloatMinOperation(getQuad(windowQuad).pos.x, Operation<float, Substract, Add<float>, Pass<float>>(Add<float>(getQuad(boundaryQuad).pos.x, getQuad(boundaryQuad).size.x), getQuad(windowQuad).size.x)));
+
+	Func<void> pullMaxBoundXMaxFunc(boundPullQuadMaxX);
+	func_start_rule(pullMaxBoundXMaxFunc);
+	Func<void> pullMinBoundXMaxFunc(boundPullQuadMaxX);
+	func_start_rule(pullMinBoundXMaxFunc);
+	
+	Func<void> windowMaxBoundXMaxFunc(boundWindowQuadMaxX);
+	func_start_rule(windowMaxBoundXMaxFunc);
+	Func<void> windowMinBoundXMaxFunc(boundWindowQuadMaxX);
+	func_start_rule(windowMinBoundXMaxFunc);
+
+Operation<float, Set, Pass<float>, BoundFloatMaxOperation>
+		boundPullQuadMaxY(getQuad(pullQuad).pos.y, BoundFloatMaxOperation(getQuad(pullQuad).pos.y, Operation<float, Add, Substract<float>, Pass<float>>(Substract<float>(getQuad(boundaryQuad).pos.y, getQuad(boundaryQuad).size.y), getQuad(windowQuad).size.y)));
+	Operation<float, Set, Pass<float>, BoundFloatMaxOperation>
+		boundWindowQuadMaxY(getQuad(windowQuad).pos.y, BoundFloatMaxOperation(getQuad(windowQuad).pos.y, Operation<float, Add, Substract<float>, Pass<float>>(Substract<float>(getQuad(boundaryQuad).pos.y, getQuad(boundaryQuad).size.y), getQuad(windowQuad).size.y)));
+	
+	Func<void> pullMaxBoundYMaxFunc(boundPullQuadMaxY);
+	func_start_rule(pullMaxBoundYMaxFunc);
+	Func<void> pullMinBoundYMaxFunc(boundPullQuadMaxY);
+	func_start_rule(pullMinBoundYMaxFunc);
+	
+	Func<void> windowMaxBoundYMaxFunc(boundWindowQuadMaxY);
+	func_start_rule(windowMaxBoundYMaxFunc);
+	Func<void> windowMinBoundYMaxFunc(boundWindowQuadMaxY);
+	func_start_rule(windowMinBoundYMaxFunc);
+
+	Operation<float, Set, Pass<float>, MinFloatOperation> boundPullQuadMinY(getQuad(pullQuad).pos.y, MinFloatOperation(getQuad(pullQuad).pos.y, getQuad(boundaryQuad).pos.y));
+	Operation<float, Set, Pass<float>, MinFloatOperation> boundWindowQuadMinY(getQuad(windowQuad).pos.y, MinFloatOperation(getQuad(windowQuad).pos.y, getQuad(boundaryQuad).pos.y));
+
+	Func<void> pullMaxBoundYMinFunc(boundPullQuadMinY);
+	func_start_rule(pullMaxBoundYMinFunc);
+	Func<void> pullMinBoundYMinFunc(boundPullQuadMinY);
+	func_start_rule(pullMinBoundYMinFunc);
+	Func<void> windowMaxBoundYMinFunc(boundWindowQuadMinY);
+	func_start_rule(windowMaxBoundYMinFunc);
+	Func<void> windowMinBoundYMinFunc(boundWindowQuadMinY);
+	func_start_rule(windowMinBoundYMinFunc);
+
+	
+
+
+	//general functions
+	Func<void> quitFunc(quit);
 	quitFunc.listen({ esc_press, quit_button_press });
-	Func<void> hideCursorFunc = create_func(App::Input::toggleCursor);
+	Func<void> hideCursorFunc(App::Input::toggleCursor);
 	hideCursorFunc.listen({ c_press, rmb_press, rmb_release });
-	Func<void> trackMouseFunc = create_func(gl::Camera::toggleLook);
+	Func<void> trackMouseFunc(gl::Camera::toggleLook);
 	trackMouseFunc.listen({ c_press, rmb_press, rmb_release });
 
-	Func<void> forwardFunc = create_func(gl::Camera::forward);
-	Func<void> backFunc = create_func(gl::Camera::back);
-	Func<void> leftFunc = create_func(gl::Camera::left);
-	Func<void> rightFunc = create_func(gl::Camera::right);
-	Func<void> upFunc = create_func(gl::Camera::up);
-	Func<void> downFunc = create_func(gl::Camera::down);
+	Func<void> forwardFunc(gl::Camera::forward);
+	Func<void> backFunc(gl::Camera::back);
+	Func<void> leftFunc(gl::Camera::left);
+	Func<void> rightFunc(gl::Camera::right);
+	Func<void> upFunc(gl::Camera::up);
+	Func<void> downFunc(gl::Camera::down);
 
-	Func<void, Func<void>> startForwardFunc = create_func(func_start_rule<void>, forwardFunc);
+	Func<void, Func<void>> startForwardFunc(func_start_rule<void>, forwardFunc);
 	startForwardFunc.listen({ w_press });
-	Func<void, Func<void>> stopForwardFunc = create_func(func_stop_rule<void>, forwardFunc);
+	Func<void, Func<void>> stopForwardFunc(func_stop_rule<void>, forwardFunc);
 	stopForwardFunc.listen({ w_release });
 
-	Func<void, Func<void>> startBackFunc = create_func(func_start_rule<void>, backFunc);
+	Func<void, Func<void>> startBackFunc(func_start_rule<void>, backFunc);
 	startBackFunc.listen({ s_press });
-	Func<void, Func<void>> stopBackFunc = create_func(func_stop_rule<void>, backFunc);
+	Func<void, Func<void>> stopBackFunc(func_stop_rule<void>, backFunc);
 	stopBackFunc.listen({ s_release });
 
-	Func<void, Func<void>> startLeftFunc = create_func(func_start_rule<void>, leftFunc);
+	Func<void, Func<void>> startLeftFunc(func_start_rule<void>, leftFunc);
 	startLeftFunc.listen({ a_press });
-	Func<void, Func<void>> stopLeftFunc = create_func(func_stop_rule<void>, leftFunc);
+	Func<void, Func<void>> stopLeftFunc(func_stop_rule<void>, leftFunc);
 	stopLeftFunc.listen({ a_release });
 
-	Func<void, Func<void>> startRightFunc = create_func(func_start_rule<void>, rightFunc);
+	Func<void, Func<void>> startRightFunc(func_start_rule<void>, rightFunc);
 	startRightFunc.listen({ d_press });
-	Func<void, Func<void>> stopRightFunc = create_func(func_stop_rule<void>, rightFunc);
+	Func<void, Func<void>> stopRightFunc(func_stop_rule<void>, rightFunc);
 	stopRightFunc.listen({ d_release });
 
-	Func<void, Func<void>> startUpFunc = create_func(func_start_rule<void>, upFunc);
+	Func<void, Func<void>> startUpFunc(func_start_rule<void>, upFunc);
 	startUpFunc.listen({ space_press });
-	Func<void, Func<void>> stopUpFunc = create_func(func_stop_rule<void>, upFunc);
+	Func<void, Func<void>> stopUpFunc(func_stop_rule<void>, upFunc);
 	stopUpFunc.listen({ space_release });
 
-	Func<void, Func<void>> startDownFunc = create_func(func_start_rule<void>, downFunc);
+	Func<void, Func<void>> startDownFunc(func_start_rule<void>, downFunc);
 	startDownFunc.listen({ z_press });
-	Func<void, Func<void>> stopDownFunc = create_func(func_stop_rule<void>, downFunc);
+	Func<void, Func<void>> stopDownFunc(func_stop_rule<void>, downFunc);
 	stopDownFunc.listen({ z_release });
 
 	//Text
@@ -202,9 +274,6 @@ void App::mainMenuLoop()
 		gl::Lighting::setLightPos(1, light_pos);
 		
 		gl::Camera::update();
-		gl::GUI::updateDeltas<glm::vec2>();
-		gl::GUI::updateBoundaries<float>();
-		gl::GUI::updateBoundaries<float, gl::GUI::MinPolicy>();
 		gl::GUI::updateLines();
 
 		gl::updateGeneralUniformBuffer();

@@ -49,14 +49,14 @@ void gl::Models::setupMeshShader()
 
 size_t gl::Models::createMesh(size_t pIndexOffset, size_t pIndexCount, size_t pTextureID, size_t pMaterialIndex)
 {
-    allMeshes.push_back(Mesh(pIndexOffset, pIndexCount, pTextureID, pMaterialIndex));
+    allMeshes.emplace_back(pIndexOffset, pIndexCount, pTextureID, pMaterialIndex);
     return allMeshes.size() - 1;
 }
 
 
 size_t gl::Models::createModel(size_t pMeshOffset, size_t pMeshCount)
 {
-    allModels.push_back(Model(pMeshOffset, pMeshCount));
+    allModels.emplace_back(pMeshOffset, pMeshCount);
     return allModels.size() - 1;
 }
 
