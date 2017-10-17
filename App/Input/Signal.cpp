@@ -14,20 +14,6 @@ void App::Input::clearSignals() {
 	SignalInternal::allSignals.clear();
 }
 
-//void App::Input::checkSignals() {
-//	using namespace intrnl;
-//
-//	//at this point all signals occurred this frame are buffered in signalBuffer
-//	for (size_t& sig : signalBuffer) {
-//		if (!allSignalSlots[sig].blocked) {
-//			allSignalSlots[sig].on = 1;//set signal if not blocked
-//		}
-//		else {//if blocked, check next frame again
-//			rejected.push_back(sig);
-//		}
-//	}
-//	signalBuffer.clear();
-//}
 
 void App::Input::callFunctions()
 {

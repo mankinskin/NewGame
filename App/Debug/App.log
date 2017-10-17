@@ -1,3 +1,10 @@
-﻿  App.cpp
+﻿  Signal.cpp
+  Generating Code...
+  Compiling...
+  Mouse.cpp
+  Keys.cpp
+  Input.cpp
+  App.cpp
 c:\users\linus\source\repos\newgame\app\global\app.cpp(288): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+  Generating Code...
   App.vcxproj -> C:\Users\Linus\source\repos\NewGame\Debug\NewGame.exe

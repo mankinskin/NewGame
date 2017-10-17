@@ -51,7 +51,7 @@ namespace App {
 				int signaled = 0;
 				int remain = 0;
 			};
-			extern std::vector<SignalSlot> allSignals;
+			
 
 
 			template<class EventType>
@@ -80,8 +80,7 @@ namespace App {
 			};
 
 
-			template<class EventType>
-			std::vector<EventSlot<EventType>> EventSlot<EventType>::instances = std::vector<EventSlot<EventType>>();
+			
 
 
 			template<typename R, typename... Args>
@@ -117,12 +116,8 @@ namespace App {
 					return std::apply(func, args);
 				}
 			};
-
 			template<typename R, typename... Args>
-			std::vector<Functor<R, Args...>> Functor<R, Args...>::instances = std::vector<Functor<R, Args...>>();
-
-			template<typename R, typename... Args>
-			void callFunctors()//calls all the functors of a template(if any of their signals are on)
+			void callFunctors()//call each functor of a template if any of its signals is set
 			{
 				for (SignalInternal::Functor<R, Args...>& inst : SignalInternal::Functor<R, Args...>::instances) {
 					if (std::any_of(inst.signalBindings.begin(), inst.signalBindings.end(), is_on) || inst.rule) {
@@ -131,6 +126,13 @@ namespace App {
 				}
 			}
 
+			template<class EventType>
+			std::vector<EventSlot<EventType>> EventSlot<EventType>::instances = std::vector<EventSlot<EventType>>();
+			
+			template<typename R, typename... Args>
+			std::vector<Functor<R, Args...>> Functor<R, Args...>::instances = std::vector<Functor<R, Args...>>();
+
+			extern std::vector<SignalSlot> allSignals;
 			extern std::vector<void(*)()> functorInvokers;//invokes all functor templates
 		}//end Internal
 		template<typename T>
@@ -285,23 +287,7 @@ namespace App {
 		{
 			SignalInternal::Functor<R, Args...>::instances[pFunc.slotIndex].rule = 0;
 		}
-		template<typename R, typename... Args>
-		void func_block(Func<R, Args...> pFunc, size_t pBlockSignal)
-		{
-			SignalInternal::Functor<R, Args...>::instances[pFunc.slotIndex].blockSignals.push_back(pBlockSignal);
-		}
-		template<typename R, typename... Args>
-		void func_unblock(Func<R, Args...> pFunc, size_t pUnblockSignal)
-		{
-			SignalInternal::Functor<R, Args...>::instances[pFunc.slotIndex].unblockSignals.push_back(pUnblockSignal);
-		}
-		template<typename R, typename... Args>
-		void set_up_func_block(Func<R, Args...> pFunc, size_t pBlockSignal, size_t pUnblockSignal)
-		{
-			func_block(pFunc, pBlockSignal);
-			func_unblock(pFunc, pUnblockSignal);
-		}
-		//Signals
+		
 
 		template<typename EventType>
 		void reserve_signals(size_t pCount) {
