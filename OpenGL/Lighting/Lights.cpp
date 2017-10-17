@@ -129,3 +129,7 @@ void gl::Lighting::setLightColor(size_t pLightIndex, glm::vec3& pColor) {
 void gl::Lighting::setLightColor(size_t pLightIndex, glm::vec4& pColor) {
     std::memcpy(&allLightData[allLightIndexRanges[pLightIndex].offset + 1], &pColor, sizeof(float) * 4);
 }
+
+glm::vec4& gl::Lighting::getLightColor(size_t pLightIndex) {
+	return allLightData[allLightIndexRanges[pLightIndex].offset + 1];
+}
