@@ -10,7 +10,7 @@
 #include "Mouse.h"
 #include <OpenGL\GUI\/UI/Buttons.h>
 #include <algorithm>
-
+#include "Event.h"
 
 /*
 button-pipeline
@@ -45,18 +45,9 @@ void App::Input::init()
 void App::Input::fetchGLFWEvents()
 {
     //updates the states of the mouse buttons, mouse wheel and all tracked keys
-
     glfwPollEvents();
-
 }
 
-void App::Input::checkEvents() {
-
-    checkKeyEvents();
-    checkMouseEvents();
-
-    //checkSignals();
-}
 
 void App::Input::end()
 {
@@ -65,36 +56,3 @@ void App::Input::end()
 		App::state = App::State::Exit;
     }
 }
-
-void App::Input::key_Callback(GLFWwindow * window, int pKey, int pScancode, int pAction, int pMods)
-{
-    keyEventBuffer.emplace_back(pKey, pAction, pMods);
-}
-
-void App::Input::char_Callback(GLFWwindow * window, size_t pCodepoint)
-{
-    //printf("char callBack! Char: %c \n", pCodepoint);
-}
-
-void App::Input::cursorPosition_Callback(GLFWwindow * window, double pX, double pY)
-{
-
-}
-
-void App::Input::cursorEnter_Callback(GLFWwindow* window, int pEntered)
-{
-    //Entered = 1 if entered, on exit = 0
-}
-
-void App::Input::mouseKey_Callback(GLFWwindow * window, int pKey, int pAction, int pMods)
-{
-    mouseKeyEventBuffer.emplace_back(pKey, pAction, pMods);
-}
-
-void App::Input::scroll_Callback(GLFWwindow * window, double pX, double pY)
-{
-
-}
-
-
-

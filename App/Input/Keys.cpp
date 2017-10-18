@@ -1,21 +1,26 @@
 #include "../Global/stdafx.h"
 #include "stdafx.h"
 #include "Keys.h"
-#include "Signal.h"
-#include "Input.h"
-std::vector<App::Input::KeyEvent> App::Input::keyEventBuffer;
+#include "Event.h"
 
-void App::Input::checkKeyEvents()
+App::Input::KeySignal::KeySignal(int pKey)
 {
-    using namespace SignalInternal;
-    for (KeyEvent& kev : keyEventBuffer) {
-	for (size_t ks = 0; ks < EventSlot<KeyEvent>::instance_count(); ++ks) {
-	    EventSlot<KeyEvent>& slot = EventSlot<KeyEvent>::get_instance(ks);
-	    if (slot.evnt == kev) {
-		allSignals[slot.signalIndex].signaled = true;
-		break;
-	    }
-	}
-    }
-    keyEventBuffer.clear();
+	press = EventSignal<KeyEvent>(KeyEvent(pKey, KeyCondition(1, 0))).index();
+	release = EventSignal<KeyEvent>(KeyEvent(pKey, KeyCondition(0, 0))).index();
+}
+
+void App::Input::reserveKeySignals(size_t pCount)
+{
+	EventSignal<KeyEvent>::reserve(pCount * 2);
+}
+
+
+void App::Input::key_Callback(GLFWwindow * window, int pKey, int pScancode, int pAction, int pMods)
+{
+	pushEvent(KeyEvent(pKey, pAction, pMods));
+}
+
+void App::Input::char_Callback(GLFWwindow * window, size_t pCodepoint)
+{
+	//printf("char callBack! Char: %c \n", pCodepoint);
 }

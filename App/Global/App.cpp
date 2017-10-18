@@ -2,8 +2,10 @@
 #include "App.h"
 #include "Debug.h"
 #include "..\Input\Input.h"
-#include "..\Input\Signal.h"
+#include "..\Input\Keys.h"
+#include "..\Input\Functor.h"
 #include "..\Input\Mouse.h"
+#include "..\Input\Event.h"
 #include <conio.h>
 #include <thread>
 #include <chrono>
@@ -24,6 +26,7 @@
 #include <OpenGL\GUI\UI\Line.h>
 #include <functional>
 #include <algorithm>
+
 App::State App::state = App::State::Init;
 App::ContextWindow::Window App::mainWindow = App::ContextWindow::Window();
 double App::timeFactor = 1.0;
@@ -102,61 +105,61 @@ void App::mainMenuLoop()
 	size_t slider_button = addButtonQuad(sliderBoundQuad);
 	
 	//Signals
-	reserve_signals<KeyEvent>(17);
-	size_t esc_press = create_signal(KeyEvent(GLFW_KEY_ESCAPE, KeyCondition(1, 0)));
-	size_t c_press = create_signal(KeyEvent(GLFW_KEY_C, KeyCondition(1, 0)));
-	size_t g_press = create_signal(KeyEvent(GLFW_KEY_G, KeyCondition(1, 0)));
-	size_t h_press = create_signal(KeyEvent(GLFW_KEY_H, KeyCondition(1, 0)));
-	size_t i_press = create_signal(KeyEvent(GLFW_KEY_I, KeyCondition(1, 0)));
-	size_t w_press = create_signal(KeyEvent(GLFW_KEY_W, KeyCondition(1, 0)));
-	size_t w_release = create_signal(KeyEvent(GLFW_KEY_W, KeyCondition(0, 0)));
-	size_t s_press = create_signal(KeyEvent(GLFW_KEY_S, KeyCondition(1, 0)));
-	size_t s_release = create_signal(KeyEvent(GLFW_KEY_S, KeyCondition(0, 0)));
-	size_t a_press = create_signal(KeyEvent(GLFW_KEY_A, KeyCondition(1, 0)));
-	size_t a_release = create_signal(KeyEvent(GLFW_KEY_A, KeyCondition(0, 0)));
-	size_t d_press = create_signal(KeyEvent(GLFW_KEY_D, KeyCondition(1, 0)));
-	size_t d_release = create_signal(KeyEvent(GLFW_KEY_D, KeyCondition(0, 0)));
-	size_t space_press = create_signal(KeyEvent(GLFW_KEY_SPACE, KeyCondition(1, 0)));
-	size_t space_release = create_signal(KeyEvent(GLFW_KEY_SPACE, KeyCondition(0, 0)));
-	size_t z_press = create_signal(KeyEvent(GLFW_KEY_Z, KeyCondition(1, 0)));
-	size_t z_release = create_signal(KeyEvent(GLFW_KEY_Z, KeyCondition(0, 0)));
+	reserveKeySignals(11);
+	KeySignal key_esc(GLFW_KEY_ESCAPE);
+	KeySignal key_c(GLFW_KEY_C);
+	KeySignal key_g(GLFW_KEY_G);
+	KeySignal key_h(GLFW_KEY_H);
+	KeySignal key_i(GLFW_KEY_I);
+	KeySignal key_w(GLFW_KEY_W);
+	KeySignal key_s(GLFW_KEY_S);
+	KeySignal key_a(GLFW_KEY_A);
+	KeySignal key_d(GLFW_KEY_D);
+	KeySignal key_space(GLFW_KEY_SPACE);
+	KeySignal key_z(GLFW_KEY_Z);
 
-	reserve_signals<MouseKeyEvent>(4);
-	size_t rmb_press = create_signal(MouseKeyEvent(1, KeyCondition(1, 0)));
-	size_t rmb_release = create_signal(MouseKeyEvent(1, KeyCondition(0, 0)));
-	size_t lmb_press = create_signal(MouseKeyEvent(0, KeyCondition(1, 0)));
-	size_t lmb_release = create_signal(MouseKeyEvent(0, KeyCondition(0, 0)));
-
-	reserve_signals<MouseEvent>(6);
-	size_t quit_button_press = create_signal(MouseEvent(quit_button, MouseKeyEvent(0, KeyCondition(1, 0))));
-	size_t pull_button_press = create_signal(MouseEvent(head_button, MouseKeyEvent(0, KeyCondition(1, 0))));
-	size_t pull_button_release = create_signal(MouseEvent(head_button, MouseKeyEvent(0, KeyCondition(0, 0))));
-	size_t slider_button_press = create_signal(MouseEvent(slider_button, MouseKeyEvent(0, KeyCondition(1, 0))));
-	size_t slider_button_release = create_signal(MouseEvent(slider_button, MouseKeyEvent(0, KeyCondition(0, 0))));
 	
-	reserve_signals<CursorEvent>(2);
-	size_t pull_button_leave = create_signal(CursorEvent(head_button, 0));
-	size_t pull_button_enter = create_signal(CursorEvent(head_button, 1));
+
+	EventSignal<MouseKeyEvent>::reserve(4);
+	size_t rmb_press = EventSignal<MouseKeyEvent>(MouseKeyEvent(1, KeyCondition(1, 0))).index();
+	size_t rmb_release = EventSignal<MouseKeyEvent>(MouseKeyEvent(1, KeyCondition(0, 0))).index();
+	size_t lmb_press = EventSignal<MouseKeyEvent>(MouseKeyEvent(0, KeyCondition(1, 0))).index();
+	size_t lmb_release = EventSignal<MouseKeyEvent>(MouseKeyEvent(0, KeyCondition(0, 0))).index();
+
+	EventSignal<MouseEvent>::reserve(6);
+	size_t quit_button_press = EventSignal<MouseEvent>(MouseEvent(quit_button, MouseKeyEvent(0, KeyCondition(1, 0)))).index();
+	size_t pull_button_press = EventSignal<MouseEvent>(MouseEvent(head_button, MouseKeyEvent(0, KeyCondition(1, 0)))).index();
+	size_t pull_button_release = EventSignal<MouseEvent>(MouseEvent(head_button, MouseKeyEvent(0, KeyCondition(0, 0)))).index();
+	size_t slider_button_press = EventSignal<MouseEvent>(MouseEvent(slider_button, MouseKeyEvent(0, KeyCondition(1, 0)))).index();
+	size_t slider_button_release = EventSignal<MouseEvent>(MouseEvent(slider_button, MouseKeyEvent(0, KeyCondition(0, 0)))).index();
+	
+	EventSignal<CursorEvent>::reserve(2);
+	size_t pull_button_leave = EventSignal<CursorEvent>(CursorEvent(head_button, 0)).index();
+	size_t pull_button_enter = EventSignal<CursorEvent>(CursorEvent(head_button, 1)).index();
 	
 	void(*offsetFloat)(float&, float&) = [](float& pVal, float& pDelta) { pVal += pDelta; };
 	void(*setFloatToScale)(float&, float&, float&) = [](float& pVal, float& pRange, float& pPos) { pVal = (pPos)/ pRange * 100.0f; };
 	void(*moveQuad)(glm::vec2&, glm::vec2&) = [](glm::vec2& pQuadPos, glm::vec2& pDelta) { pQuadPos += pDelta; };
-	Functor<void, glm::vec2&, glm::vec2&> movePullQuadFunc(moveQuad, getQuad(headQuad).pos, cursorFrameDelta);
-	setup_functor_rule<void, glm::vec2&, glm::vec2&>(movePullQuadFunc, { pull_button_press }, { lmb_release });
+	
+	size_t moveWindowSignal = EventSignal<MouseEvent>(MouseEvent(head_button, MouseKeyEvent(0, KeyCondition(1, 0))), Signal(1).index()).index();
+	EventSignal<MouseKeyEvent>(MouseKeyEvent(0, KeyCondition(0, 0)), moveWindowSignal, 0);
+	
+	Functor<AnySignalGate, void, glm::vec2&, glm::vec2&> movePullQuadFunc(moveQuad, getQuad(headQuad).pos, cursorFrameDelta, { moveWindowSignal });
 
-	Functor<void, glm::vec2&, glm::vec2&> moveWindowQuadFunc(moveQuad, getQuad(windowQuad).pos, cursorFrameDelta);
-	setup_functor_rule<void, glm::vec2&, glm::vec2&>(moveWindowQuadFunc, { pull_button_press }, { lmb_release });
+	Functor<AnySignalGate, void, glm::vec2&, glm::vec2&> moveWindowQuadFunc(moveQuad, getQuad(windowQuad).pos, cursorFrameDelta, { moveWindowSignal });
 
 
-	Functor<void, glm::vec2&, glm::vec2&> moveSliderBoundQuadFunc(moveQuad, getQuad(sliderBoundQuad).pos, cursorFrameDelta);
-	setup_functor_rule<void, glm::vec2&, glm::vec2&>(moveSliderBoundQuadFunc, { pull_button_press }, { lmb_release });
+	Functor<AnySignalGate, void, glm::vec2&, glm::vec2&> moveSliderBoundQuadFunc(moveQuad, getQuad(sliderBoundQuad).pos, cursorFrameDelta, { moveWindowSignal });
 
-	Functor<void, glm::vec2&, glm::vec2&> moveSliderQuadFunc(moveQuad, getQuad(sliderSlideQuad).pos, cursorFrameDelta);
-	setup_functor_rule<void, glm::vec2&, glm::vec2&>(moveSliderQuadFunc, { pull_button_press }, { lmb_release });
+	Functor<AnySignalGate, void, glm::vec2&, glm::vec2&> moveSliderQuadFunc(moveQuad, getQuad(sliderSlideQuad).pos, cursorFrameDelta, { moveWindowSignal });
+	
 	void(*setNewSlidePos)(float&, float&, float&) = [](float& pVal, float& pNew, float& pNewSub) { pVal = pNew - pNewSub; };
-	Functor<void, float&, float&, float&> setSlideQuadFunc(setNewSlidePos, getQuad(sliderSlideQuad).size.x, relativeCursorPosition.x, getQuad(sliderBoundQuad).pos.x, { slider_button_press });
-	Functor<void, float&, float&> moveSlideQuadFunc(offsetFloat, getQuad(sliderSlideQuad).size.x, cursorFrameDelta.x);
-	setup_functor_rule<void, float&, float&>(moveSlideQuadFunc, { slider_button_press }, { lmb_release });
+	Functor<AnySignalGate, void, float&, float&, float&> setSlideQuadFunc(setNewSlidePos, getQuad(sliderSlideQuad).size.x, relativeCursorPosition.x, getQuad(sliderBoundQuad).pos.x, { slider_button_press });
+	
+	size_t moveSlideSignal = EventSignal<MouseEvent>(MouseEvent(slider_button, MouseKeyEvent(0, KeyCondition(1, 0))), Signal(1).index()).index();
+	EventSignal<MouseKeyEvent>(MouseKeyEvent(0, KeyCondition(0, 0)), moveSlideSignal, 0);
+
+	Functor<AnySignalGate, void, float&, float&> moveSlideQuadFunc(offsetFloat, getQuad(sliderSlideQuad).size.x, cursorFrameDelta.x, { moveSlideSignal });
 
 	//Lights
 	gl::Lighting::createLight(glm::vec4(1.0f, 1.0f, 1.0f, 0.0f), glm::vec4(1.0f, 0.95f, 0.1f, 10.0f));
@@ -172,31 +175,36 @@ void App::mainMenuLoop()
 	void(*minFloatBound)(float&, float&, float&, float&) = 
 		[](float& pTarget, float& pTargetAdd, float& pSource, float& pSourceAdd) { pTarget = pTarget < ((pSource + pSourceAdd)-pTargetAdd) ? pTarget : ((pSource + pSourceAdd) - pTargetAdd); };
 	
-	make_default_rule_functor(Functor<void, float&, float&>(minFloat, getQuad(sliderSlideQuad).size.x, getQuad(sliderBoundQuad).size.x));
-	make_default_rule_functor(Functor<void, float&, float>(maxFloat_noref, getQuad(sliderSlideQuad).size.x, 0.0f));
-	make_default_rule_functor(Functor<void, float&, float&, float&>(setFloatToScale, gl::Lighting::getLightColor(1).w, getQuad(sliderBoundQuad).size.x, getQuad(sliderSlideQuad).size.x));
+	Functor<AnySignalGate, void, float&, float&> bindSliderSlideMax(minFloat, getQuad(sliderSlideQuad).size.x, getQuad(sliderBoundQuad).size.x, { Signal(1, 1).index()});
+	Functor<AnySignalGate, void, float&, float> bindSliderSlideMin(maxFloat_noref, getQuad(sliderSlideQuad).size.x, 0.0f, { Signal(1, 1).index() });
+	Functor<AnySignalGate, void, float&, float&, float&> controlLightBrightness(setFloatToScale, gl::Lighting::getLightColor(1).w, getQuad(sliderBoundQuad).size.x, getQuad(sliderSlideQuad).size.x, { Signal(1, 1).index() });
 
 	//general functions
-	Functor<void> quitFunc(quit, { esc_press, quit_button_press });
-	Functor<void> hideCursorFunc(App::Input::toggleCursor, { c_press, rmb_press, rmb_release });
-	Functor<void> trackMouseFunc(gl::Camera::toggleLook, { c_press, rmb_press, rmb_release });
-	Functor<void> (gl::Debug::toggleGrid, { g_press });
-	Functor<void> (gl::Debug::toggleCoord, { h_press });
+	Functor<AnySignalGate, void> quitFunc(quit, { key_esc.press, quit_button_press });
+	Functor<AnySignalGate, void> hideCursorFunc(App::Input::toggleCursor, { key_c.press, rmb_press, rmb_release });
+	Functor<AnySignalGate, void> trackMouseFunc(gl::Camera::toggleLook, { key_c.press, rmb_press, rmb_release });
+	Functor<AnySignalGate, void> (gl::Debug::toggleGrid, { key_g.press, key_h.press });
+	Functor<AnySignalGate, void> (gl::Debug::toggleCoord, { key_h.press });
 
-	Functor<void> forwardFunc(gl::Camera::forward);
+	size_t forward_signal = EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_W, KeyCondition(1, 0)), Signal(1).index()).index();
+	EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_W, KeyCondition(0, 0)), forward_signal, 0);
+	size_t back_signal = EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_S, KeyCondition(1, 0)), Signal(1).index()).index();
+	EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_S, KeyCondition(0, 0)), back_signal, 0);
+	size_t left_signal = EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_A, KeyCondition(1, 0)), Signal(1).index()).index();
+	EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_A, KeyCondition(0, 0)), left_signal, 0);
+	size_t right_signal = EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_D, KeyCondition(1, 0)), Signal(1).index()).index();
+	EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_D, KeyCondition(0, 0)), right_signal, 0);
+	size_t up_signal = EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_SPACE, KeyCondition(1, 0)), Signal(1).index()).index();
+	EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_SPACE, KeyCondition(0, 0)), up_signal, 0);
+	size_t down_signal = EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_Z, KeyCondition(1, 0)), Signal(1).index()).index();
+	EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_Z, KeyCondition(0, 0)), down_signal, 0);
 
-
-	setup_functor_rule(forwardFunc, { w_press }, { w_release });
-	Functor<void> backFunc(gl::Camera::back);
-	setup_functor_rule(backFunc, { s_press }, { s_release });
-	Functor<void> leftFunc(gl::Camera::left);
-	setup_functor_rule(leftFunc, { a_press }, { a_release });
-	Functor<void> rightFunc(gl::Camera::right);
-	setup_functor_rule(rightFunc, { d_press }, { d_release });
-	Functor<void> upFunc(gl::Camera::up);
-	setup_functor_rule(upFunc, { space_press }, { space_release });
-	Functor<void> downFunc(gl::Camera::down);
-	setup_functor_rule(downFunc, { z_press }, { z_release });
+	Functor<AnySignalGate, void> forwardFunc(gl::Camera::forward, { forward_signal });
+	Functor<AnySignalGate, void> backFunc(gl::Camera::back, { back_signal });
+	Functor<AnySignalGate, void> leftFunc(gl::Camera::left, { left_signal });
+	Functor<AnySignalGate, void> rightFunc(gl::Camera::right, { right_signal });
+	Functor<AnySignalGate, void> upFunc(gl::Camera::up, { up_signal });
+	Functor<AnySignalGate, void> downFunc(gl::Camera::down, { down_signal });
 
 
 	//Text
@@ -207,9 +215,6 @@ void App::mainMenuLoop()
 	gl::GUI::Text::setTextboxString(qu_tb, "QUIT");
 	gl::GUI::Text::setTextboxString(pl_tb, "Play");
 	gl::GUI::Text::loadTextboxes();
-
-	
-
 
 	while (state == App::MainMenu) {
 
@@ -263,13 +268,15 @@ void App::mainMenuLoop()
 
 void App::fetchInput()
 {
-	
 	gl::GUI::updateButtonBuffer();
 	gl::GUI::rasterButtons();
-	Input::fetchGLFWEvents();
 	gl::GUI::fetchButtonMap();
+	Input::updateCursor();
+	Input::getCursorEvents();
+	Input::fetchGLFWEvents();
 	Input::checkEvents();
 	Input::callFunctors();
+	Input::resetSignals();
 	Input::end();
 	gl::Camera::look(Input::cursorFrameDelta);
 }

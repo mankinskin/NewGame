@@ -86,7 +86,7 @@ void gl::GUI::updateButtonBuffer()
 size_t gl::GUI::addButtonQuad(size_t pQuadID)
 {
     allButtonQuads.push_back(pQuadID);
-    return allButtonQuads.size();
+    return allButtonQuads.size() - 1;
 }
 size_t gl::GUI::addButtonLine(size_t pLineID)
 {

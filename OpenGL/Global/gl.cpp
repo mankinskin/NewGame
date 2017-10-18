@@ -148,7 +148,7 @@ void gl::initGUI()
 	*/
 	GUI::Text::Initializer::initFreeType();
 	GUI::Text::initFontVAO();
-	GUI::Text::Initializer::includeFont("Hack-Regular.ttf", 14, 30, 200, 0, 1);
+	GUI::Text::Initializer::includeFont("Generic.ttf", 12, 30, 200, 0, 1);
 	GUI::Text::Initializer::loadFonts();
 }
 
