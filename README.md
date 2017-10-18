@@ -6,7 +6,7 @@ I dont expect to get this game "done"(well playable) before 2020 and i dont know
 
 -----------------------------------------------------------------------------------------------------------------------------------
 TO-DO:
-	
+-	
 GUI
 	- Elements: groups of primitives(Quads, Lines, ...) associated as one element
 		- member primitives should be initialized at element initialization -> makes things easier and safer
@@ -58,5 +58,5 @@ Physics
 AI
 	- 
 
-
+-
 ---------------------------------------------------------------------------------------------------------------------------------------
