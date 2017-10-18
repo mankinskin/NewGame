@@ -21,20 +21,20 @@ TO-DO:
   - [ ] give elements a depth order:  
   	    - elements should be rendered on top of each other in a more easily customizable order(primitives also)  
   - [ ] Masking  
-  	    - masking is needed in various places:  
+  	    * masking is needed in various places:  
   		      1. button masking: button indices should only be rendered if the button is imidiately visible (easy)  
   		      2. some elements should only be visible at all at specified areas of the screen (to enable scrolling in windows/widgets)  
   - [ ] quad textures  
   	    - quads should be able to use textures  
   	    - one special way of displaying a texture is needed to display fancier widget borders.  
-  		      x---x--------x---x  
-  		      |cor| border |cor|  
-  		      x---x--------x---x  
-  		      |bor| window |bor|  
-  		      |der| window |der|  
-  		      x---x--------x---x  
-  		      |cor| border |cor|  
-  		      x---x--------x---x  
+  		      x-----x--------x-----x  
+  		      | cor | border | cor |  
+  		      x-----x--------x-----x  
+  		      | bor | window | bor |  
+  		      | der | window | der |  
+  		      x-----x--------x-----x  
+  		      | cor | border | cor |  
+  		      x-----x--------x-----x  
   		      - the quad is split up into/actually starts out as 9 quads.  
   		      - the UV coordinates into the textures are used to map the texture for the borders & corners onto the quads  
 
