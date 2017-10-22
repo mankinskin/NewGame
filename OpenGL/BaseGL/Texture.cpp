@@ -17,7 +17,8 @@ gl::Texture::Texture2D::Texture2D(size_t pWidth, size_t pHeight, GLenum pInterna
 void gl::Texture::loadTextureBuffer(TextureBuffer & pBuffer, std::string pFilename, int pForceChannels)
 {
     pBuffer.data = SOIL_load_image((TEXTURE_DIR + pFilename).c_str(), &pBuffer.width, &pBuffer.height, &pBuffer.channels, pForceChannels);
-    if (!pBuffer.data) {
+	
+	if (!pBuffer.data) {
 	App::Debug::pushError("Texture not found: \"" + (TEXTURE_DIR + pFilename) + "\" !!!");
     }
 }
@@ -33,18 +34,20 @@ size_t gl::Texture::createTexture2D(size_t pWidth, size_t pHeight, GLenum pInter
     glTexImage2D(GL_TEXTURE_2D, 0, texture.internalFormat, texture.width, texture.height, 0, texture.format, texture.type, pData);
     glTextureParameteri(texture.ID, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
     glTextureParameteri(texture.ID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTextureParameteri(texture.ID, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTextureParameteri(texture.ID, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glGenerateMipmap(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     all2DTextures.push_back(texture);
     Debug::getGLError("create2DTexture():");
-    return texture.ID;
+    return all2DTextures.size() - 1;
 }
 
-size_t gl::Texture::createTexture2D(std::string& pFilename)
+size_t gl::Texture::createTexture2D(std::string pFilename)
 {
     TextureBuffer buffer;
-    loadTextureBuffer(buffer, pFilename);
+    loadTextureBuffer(buffer, pFilename, SOIL_LOAD_AUTO);
     return createTexture2D(buffer);
 }
 size_t gl::Texture::createTexture2D(TextureBuffer pBuffer)
@@ -85,6 +88,11 @@ void gl::Texture::setTextureFilter(size_t pTextureIndex, size_t pMagFilter, size
 {
     glTextureParameteri(all2DTextures[pTextureIndex].ID, GL_TEXTURE_MIN_FILTER, pMinFilter);
     glTextureParameteri(all2DTextures[pTextureIndex].ID, GL_TEXTURE_MAG_FILTER, pMagFilter);
+}
+
+size_t gl::Texture::get2DTextureID(size_t pTextureIndex)
+{
+	return all2DTextures[pTextureIndex].ID;
 }
 
 void gl::Texture::setTextureDirectory(std::string& pDirectory)

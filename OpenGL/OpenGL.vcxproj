@@ -175,6 +175,7 @@
     <ClCompile Include="Global\glDebug.cpp" />
     <ClCompile Include="GUI\UI\Buttons.cpp" />
     <ClCompile Include="GUI\UI\Colored_Quads.cpp" />
+    <ClCompile Include="GUI\UI\Element.cpp" />
     <ClCompile Include="GUI\UI\Line.cpp" />
     <ClCompile Include="GUI\UI\Quad.cpp" />
     <ClCompile Include="Lighting\Lights.cpp" />

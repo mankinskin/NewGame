@@ -2,6 +2,8 @@
 #include <glm/glm.hpp>
 namespace gl {
 	namespace GUI {
+
+
 		struct Quad {
 			Quad(glm::vec4 pQuad)
 				:pos(glm::vec2(pQuad.x, pQuad.y)), size(glm::vec2(pQuad.z, pQuad.w)) {}

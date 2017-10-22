@@ -22,6 +22,7 @@
     <ClCompile Include="BaseGL\Shader\Shader_Loader.cpp" />
     <ClCompile Include="BaseGL\Shader\Shader.cpp" />
     <ClCompile Include="GUI\UI\Quad.cpp" />
+    <ClCompile Include="GUI\UI\Element.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />

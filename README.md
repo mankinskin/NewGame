@@ -37,6 +37,13 @@ TO-DO:
   		      x-----x--------x-----x  
   		      - the quad is split up into/actually starts out as 9 quads.  
   		      - the UV coordinates into the textures are used to map the texture for the borders & corners onto the quads  
+	- [ ] Text(improvements) 
+		  - flexible formatting
+			- insert newlines before at last space character
+		  - Text Style
+		    - Color
+			- Italic, bold
+			- underlines
 
 * Lighting  
 	- [ ] Shadow Volumes  

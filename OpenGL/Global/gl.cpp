@@ -97,7 +97,7 @@ void gl::initShaders()
 	Models::initMeshShader();
 	Lighting::initLightShader();
 	GUI::initButtonIndexShader();
-	GUI::initColoredQuadShader();
+	GUI::initColorQuadShaders();
 	GUI::Text::initFontShader();
 	GUI::initLineShader();
 	Shader::Loader::buildShaderPrograms();
@@ -123,7 +123,7 @@ void gl::initGUI()
 	gl::GUI::createColor(glm::vec4(0.7, 0.7, 0.7, 1.0), "light_grey");
 	GUI::storeGUIColors();
 	GUI::initQuadBuffer();
-	GUI::initColoredQuadVAO();
+	GUI::initColorQuadVAOs();
 	GUI::initButtonBuffer();
 	GUI::initLineVAO();
 	/*FONTS
@@ -173,11 +173,10 @@ void gl::bindUniformBufferLocations()
 	Models::setupMeshShader();
 	GUI::setupButtonIndexShader();
 	GUI::setupLineShader();
-	GUI::setupColoredQuadShader();
+	GUI::setupColorQuadShaders();
+
+	//Shader::bindUniformBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
 	App::Debug::printErrors();
-
-
-	Shader::bindUniformBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");
 }
 
 void gl::setViewport(App::ContextWindow::Window& pViewport) {

@@ -23,11 +23,11 @@ void gl::Texture::initGBuffer()
     glCreateFramebuffers(1, &gBuffer);
     glCreateRenderbuffers(1, &gDepthRenderbuffer);
 
-    gAmbientTexture = createTexture2D(screenWidth * resolution, screenHeight * resolution, GL_RGBA16F, GL_RGBA, GL_FLOAT, 0);
-    gDiffuseTexture = createTexture2D(screenWidth * resolution, screenHeight * resolution, GL_RGBA16F, GL_RGBA, GL_FLOAT, 0);
-    gSpecularTexture = createTexture2D(screenWidth * resolution, screenHeight * resolution, GL_RGBA16F, GL_RGBA, GL_FLOAT, 0);
-    gPosTexture = createTexture2D(screenWidth * resolution, screenHeight * resolution, GL_RGB32F, GL_RGB, GL_FLOAT, 0);
-    gNormalTexture = createTexture2D(screenWidth * resolution, screenHeight * resolution, GL_RGB32F, GL_RGB, GL_FLOAT, 0);
+    gAmbientTexture = get2DTextureID(createTexture2D(screenWidth * resolution, screenHeight * resolution, GL_RGBA16F, GL_RGBA, GL_FLOAT, 0));
+    gDiffuseTexture = get2DTextureID(createTexture2D(screenWidth * resolution, screenHeight * resolution, GL_RGBA16F, GL_RGBA, GL_FLOAT, 0));
+    gSpecularTexture = get2DTextureID(createTexture2D(screenWidth * resolution, screenHeight * resolution, GL_RGBA16F, GL_RGBA, GL_FLOAT, 0));
+    gPosTexture = get2DTextureID(createTexture2D(screenWidth * resolution, screenHeight * resolution, GL_RGB32F, GL_RGB, GL_FLOAT, 0));
+    gNormalTexture = get2DTextureID(createTexture2D(screenWidth * resolution, screenHeight * resolution, GL_RGB32F, GL_RGB, GL_FLOAT, 0));
 
     glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gAmbientTexture, 0);
@@ -55,8 +55,8 @@ void gl::Texture::initGBuffer()
 void gl::Texture::initGUIFBO() {
     glCreateFramebuffers(1, &guiFBO);
     glCreateRenderbuffers(1, &guiDepthRenderbuffer);
-    buttonIndexTexture = createTexture2D(screenWidth, screenHeight, GL_R16UI, GL_RED_INTEGER, GL_UNSIGNED_INT, 0);
-    fontColorTexture = createTexture2D(screenWidth, screenHeight, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    buttonIndexTexture = get2DTextureID(createTexture2D(screenWidth, screenHeight, GL_R16UI, GL_RED_INTEGER, GL_UNSIGNED_INT, 0));
+    fontColorTexture = get2DTextureID(createTexture2D(screenWidth, screenHeight, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, 0));
     glBindFramebuffer(GL_FRAMEBUFFER, guiFBO);
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, buttonIndexTexture, 0);

@@ -31,11 +31,11 @@ namespace gl {
 
 	void loadTextureBuffer(TextureBuffer& pBuffer, std::string pFilename, int pForceChannels = 0);
 	size_t createTexture2D(size_t pWidth, size_t pHeight, GLenum pInternalFormat, GLenum pFormat, GLenum pType, const void* pData);
-	size_t createTexture2D(std::string& pFilename);
+	size_t createTexture2D(std::string pFilename);
 	size_t createTexture2D(TextureBuffer pBuffer);
 	void setTextureWrapping(size_t pTextureIndex, size_t pWrapS, size_t pWrapT);
 	void setTextureFilter(size_t pTextureIndex, size_t pMagFilter, size_t pMinFilter);
-
+	size_t get2DTextureID(size_t pTextureIndex);
 	void setTextureDirectory(std::string& pDirectory);
 	void resetTextureDirectory();
 	extern std::string TEXTURE_DIR;
