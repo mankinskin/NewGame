@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="BaseGL\Texture.cpp" />
+    <ClCompile Include="Global\gl.cpp" />
+    <ClCompile Include="Global\glDebug.cpp" />
+    <ClCompile Include="Utility\dt\dt.cpp" />
+    <ClCompile Include="BaseGL\VAO.cpp" />
+    <ClCompile Include="BaseGL\Framebuffer.cpp" />
+    <ClCompile Include="Lighting\Lights.cpp" />
+    <ClCompile Include="Models\Model_Loader.cpp" />
+    <ClCompile Include="Models\Models.cpp" />
+    <ClCompile Include="Models\Render.cpp" />
+    <ClCompile Include="GUI\Text\Text.cpp" />
+    <ClCompile Include="GUI\Text\Font_Loader.cpp" />
+    <ClCompile Include="GUI\Text\Font.cpp" />
+    <ClCompile Include="GUI\UI\Buttons.cpp" />
+    <ClCompile Include="GUI\UI\Colored_Quads.cpp" />
+    <ClCompile Include="GUI\UI\GUI.cpp" />
+    <ClCompile Include="GUI\UI\Line.cpp" />
+    <ClCompile Include="BaseGL\Shader\Shader_Loader.cpp" />
+    <ClCompile Include="BaseGL\Shader\Shader.cpp" />
+    <ClCompile Include="GUI\UI\Quad.cpp" />
+    <ClCompile Include="GUI\UI\Element.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="BaseGL\Texture.h" />
+    <ClInclude Include="Global\gl.h" />
+    <ClInclude Include="Global\glDebug.h" />
+    <ClInclude Include="Global\stdafx.h" />
+    <ClInclude Include="Utility\dt\dt.h" />
+    <ClInclude Include="Utility\dt\image.h" />
+    <ClInclude Include="Utility\dt\imconv.h" />
+    <ClInclude Include="Utility\dt\imutil.h" />
+    <ClInclude Include="Utility\dt\misc.h" />
+    <ClInclude Include="Utility\dt\pnmfile.h" />
+    <ClInclude Include="BaseGL\VAO.h" />
+    <ClInclude Include="BaseGL\Framebuffer.h" />
+    <ClInclude Include="Lighting\Lights.h" />
+    <ClInclude Include="Models\Model_Loader.h" />
+    <ClInclude Include="Models\Models.h" />
+    <ClInclude Include="Models\Render.h" />
+    <ClInclude Include="GUI\Text\Text.h" />
+    <ClInclude Include="GUI\Text\Font_Loader.h" />
+    <ClInclude Include="GUI\Text\Font.h" />
+    <ClInclude Include="Models\stdafx.h" />
+    <ClInclude Include="Lighting\stdafx.h" />
+    <ClInclude Include="GUI\Text\stdafx.h" />
+    <ClInclude Include="GUI\UI\stdafx.h" />
+    <ClInclude Include="GUI\UI\Buttons.h" />
+    <ClInclude Include="GUI\UI\Colored_Quads.h" />
+    <ClInclude Include="GUI\UI\GUI.h" />
+    <ClInclude Include="GUI\UI\Line.h" />
+    <ClInclude Include="BaseGL\Shader\Shader_Loader.h" />
+    <ClInclude Include="BaseGL\Shader\Shader.h" />
+    <ClInclude Include="BaseGL\Shader\stdafx.h" />
+    <ClInclude Include="GUI\UI\Quad.h" />
+    <ClInclude Include="GUI\UI\Element.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Text">
+      <UniqueIdentifier>{267a4f4b-f519-40b2-ada1-c02c29fcc851}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Global">
+      <UniqueIdentifier>{6e115d43-cffc-4363-8e0a-4fff55c68aac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Misc OpenGL">
+      <UniqueIdentifier>{ec00c46d-619c-471a-a2af-b28204c79b56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{96272726-b0cc-4a1d-a400-1498ce3cd873}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
