@@ -1,5 +1,8 @@
 *.dll
 *.obj
+*.exe
 assets/
 deps/
-*.exe
+.vs
+/x64
+/Debug
