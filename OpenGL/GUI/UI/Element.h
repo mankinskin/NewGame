@@ -42,12 +42,102 @@ namespace gl {
 			size_t bound_color;
 			size_t slide_color;
 		};
-		template<typename Target, class ColorPolicy>
+		template<typename T>
+		void setToDiff(T pTarg, T pOffMax, T pOffMin) {
+			pTarg = pOffMax - pOffMin;
+		}
+		template<typename T, typename U>
+		void max(T pTar, U pSrc) {
+			pTar = pTar > pSrc ? pTar : pSrc;
+		}
+		template<typename T>
+		void min(T pTar, T pSrc) {
+			pTar = pTar < pSrc ? pTar : pSrc;
+		}
+		template<typename T>
+		void setToScale(T pTar, T pPos, T pRange) {
+			pTar = pPos / pRange;
+		}
+		template<typename T>
+		void offset(T pTar, T pOff) {
+			pTar += pOff;
+		}
+		template<typename T>
+		void clampAboveZero(T pTar) {
+			pTar = pTar > 0 ? pTar : 0;
+		}
+		struct BarSlideType {
+			static float& passSlidePos(size_t pQuadIndex){
+				return getQuad(pQuadIndex).size.x;
+			}
+			static void setupBoundFuncs(size_t pSlideQuad, size_t pBoundQuad) {
+				using namespace App::Input;
+				Functor<AnySignalGate, void, float&, float&> bindSlideMax(min,
+					getQuad(pSlideQuad).size.x, getQuad(pBoundQuad).size.x, { Signal(1, 1).index() });
+				Functor<AnySignalGate, void, float&> bindSlideMin(clampAboveZero,
+					getQuad(pSlideQuad).size.x, { Signal(1, 1).index() });
+			}
+			static void setupSetSlidePosFunc(size_t pSlideQuad, size_t pBoundQuad, size_t pSignal) {
+				using namespace App::Input;
+				Functor<AnySignalGate, void, float&, float&, float&> setSlideQuadFunc(setToDiff,
+					passSlidePos(pSlideQuad), relativeCursorPosition.x, getQuad(pBoundQuad).pos.x, { pSignal });
+			}
+			static void controlTarget(size_t pSlideQuad, size_t pBoundQuad, float& pTarget) {
+				using namespace App::Input;
+				Functor<AnySignalGate, void, float&, float&, float&> controlTarget(setToScale,
+					pTarget, passSlidePos(pSlideQuad), getQuad(pBoundQuad).size.x, { Signal(1, 1).index() });
+			}
+			static float getAmt(size_t pSlideQuad, size_t pBoundQuad) {
+				return getQuad(pSlideQuad).size.x / getQuad(pBoundQuad).size.x;
+			}
+		};
+
+		struct PinSlideType {
+			
+			static float& passSlidePos(size_t pQuadIndex) {
+				return getQuad(pQuadIndex).pos.x;
+			}
+			static void setupBoundFuncs(size_t pSlideQuad, size_t pBoundQuad) {
+				using namespace App::Input;
+				Functor<AnySignalGate, void, float&, float&, float&, float&> bindSlideMax([](float& pPos, float& pSize, float& pBoundPos, float& pBoundSize) { pPos = pPos < pBoundPos + pBoundSize - pSize ? pPos : pBoundPos + pBoundSize - pSize; },
+					getQuad(pSlideQuad).pos.x, getQuad(pSlideQuad).size.x, getQuad(pBoundQuad).pos.x, getQuad(pBoundQuad).size.x, { Signal(1, 1).index() });
+				Functor<AnySignalGate, void, float&, float&> bindSlideMin(max,
+					getQuad(pSlideQuad).pos.x, getQuad(pBoundQuad).pos.x, { Signal(1, 1).index() });
+			}
+			static void setupSetSlidePosFunc(size_t pSlideQuad, size_t pBoundQuad, size_t pSignal) {
+				using namespace App::Input;
+				
+				Functor<AnySignalGate, void, float&, float&> setSlideQuadFunc([](float& pPos, float& pGlobalPos) {pPos = pGlobalPos; },
+					passSlidePos(pSlideQuad), relativeCursorPosition.x, { pSignal });
+			}
+			static float getAmt(size_t pSlideQuad, size_t pBoundQuad) {
+				return std::abs((getQuad(pSlideQuad).pos.x - getQuad(pBoundQuad).pos.x)) / (getQuad(pBoundQuad).size.x - getQuad(pSlideQuad).size.x);
+			}
+		};
+		template<class SliderType>
+		void calcTarget(float& pMin, float& pMax, float& pTarget, size_t& pSlideQuad, size_t& pBoundQuad) {
+				pTarget = pMin + (pMax - pMin)*SliderType::getAmt(pSlideQuad, pBoundQuad);
+		}
+		struct SliderControl {
+			SliderControl(float pMin, float pMax, float& pTarget)
+				:min(pMin), max(pMax), target(pTarget) {}
+			float min;
+			float max;
+			float& target;
+			
+			template<class SliderType>
+			void setup(size_t& pSlideQuad, size_t& pBoundQuad) {
+				using namespace App::Input;
+				Functor<AnySignalGate, void, float&, float&, float&, size_t&, size_t&> controlTarget(calcTarget<SliderType>,
+					min, max, target, pSlideQuad, pBoundQuad, { Signal(1, 1).index() });
+			}
+		};
+		template<typename Target, class ColorPolicy, class SliderType>
 		struct Slider {
-			Slider(SliderQuads pQuads, SliderColors<ColorPolicy> pColors, Target& pTargetVal);
+			Slider(SliderQuads pQuads, SliderColors<ColorPolicy> pColors, SliderControl pControl);
 			SliderQuads quads;
 			SliderColors<ColorPolicy> colors;
-			Target& target;
+			SliderControl control;
 		};
 		
 		template<class ColorPolicy>
@@ -55,37 +145,29 @@ namespace gl {
 			:bound_color(pBoundColor), slide_color(pSlideColor)	{}
 
 		
-		template<typename Target, class ColorPolicy>
-		Slider<Target, ColorPolicy>::Slider(SliderQuads pQuads, SliderColors<ColorPolicy> pColors, Target & pTargetVal)
-			: quads(pQuads), colors(pColors), target(pTargetVal)
+
+		template<typename Target, class ColorPolicy, class SliderType>
+		Slider<Target, ColorPolicy, SliderType>::Slider(SliderQuads pQuads, SliderColors<ColorPolicy> pColors, SliderControl pControl)
+			: quads(pQuads), colors(pColors), control(pControl)
 		{
-			//CLEAN UP YOUR SHIT
 			using namespace App::Input;
-			void(*setNewSlidePos)(float&, float&, float&) = [](float& pVal, float& pNew, float& pNewSub) { pVal = pNew - pNewSub; };
-			void(*maxFloat_noref)(float&, float) = [](float& pTarget, float pSource) { pTarget = pTarget > pSource ? pTarget : pSource; };
-			void(*maxFloat)(float&, float&) = [](float& pTarget, float& pSource) { pTarget = pTarget > pSource ? pTarget : pSource; };
-			void(*minFloat)(float&, float&) = [](float& pTarget, float& pSource) { pTarget = pTarget < pSource ? pTarget : pSource; };
-			void(*setFloatToScale)(float&, float&, float&) = [](float& pVal, float& pRange, float& pPos) { pVal = (pPos) / pRange; };
-			void(*offsetFloat)(float&, float&) = [](float& pVal, float& pDelta) { pVal += pDelta; };
-	
-	
 			colorQuad<ColorPolicy>(quads.bound_quad, ColorPolicy(colors.bound_color));
 			colorQuad<ColorPolicy>(quads.slide_quad, ColorPolicy(colors.slide_color));
 			size_t button = addButtonQuad(quads.bound_quad);
 			size_t button_press = EventSignal<MouseEvent>(MouseEvent(button, MouseKeyEvent(0, KeyCondition(1, 0)))).index();
 			size_t button_release = EventSignal<MouseEvent>(MouseEvent(button, MouseKeyEvent(0, KeyCondition(0, 0)))).index();
 
-			Functor<AnySignalGate, void, float&, float&, float&> setSlideQuadFunc
-			(*setNewSlidePos, getQuad(quads.slide_quad).size.x, relativeCursorPosition.x, getQuad(quads.bound_quad).pos.x, { button_press });
+			SliderType::setupSetSlidePosFunc(quads.slide_quad, quads.bound_quad, button_press);
 
 			size_t moveSlideSignal = EventSignal<MouseEvent>(MouseEvent(button, MouseKeyEvent(0, KeyCondition(1, 0))), Signal(1).index()).index();
 			EventSignal<MouseKeyEvent>(MouseKeyEvent(0, KeyCondition(0, 0)), moveSlideSignal, 0);
-			Functor<AnySignalGate, void, float&, float&> moveSlideQuadFunc(*offsetFloat, getQuad(quads.slide_quad).size.x, cursorFrameDelta.x, { moveSlideSignal });
+			Functor<AnySignalGate, void, float&, float&> moveSlideQuadFunc(offset, 
+				SliderType::passSlidePos(quads.slide_quad), cursorFrameDelta.x, { moveSlideSignal });
 
+			SliderType::setupBoundFuncs(quads.slide_quad, quads.bound_quad);
 
-			Functor<AnySignalGate, void, float&, float&> bindSlideMax(*minFloat, getQuad(quads.slide_quad).size.x, getQuad(quads.bound_quad).size.x, { Signal(1, 1).index() });
-			Functor<AnySignalGate, void, float&, float> bindSlideMin(*maxFloat_noref, getQuad(quads.slide_quad).size.x, 0.0f, { Signal(1, 1).index() });
-			Functor<AnySignalGate, void, float&, float&, float&> controlTarget(*setFloatToScale, target, getQuad(quads.bound_quad).size.x, getQuad(quads.slide_quad).size.x, { Signal(1, 1).index() });
+			control.setup<SliderType>(quads.slide_quad, quads.bound_quad);
+			
 		}
 	}
 }

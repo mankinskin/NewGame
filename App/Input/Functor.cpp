@@ -18,7 +18,7 @@ void App::Input::clearFunctors() {
 }
 void App::Input::callFunctors()
 {
-	for (void(*&invoker)() : FunctorInternal::functorInvokers) {
+	for (void(*invoker)() : FunctorInternal::functorInvokers) {
 		invoker();
 	}
 }

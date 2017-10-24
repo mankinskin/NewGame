@@ -2,6 +2,7 @@
 #include "..//..//Global/stdafx.h"
 #include "Element.h"
 
+
 gl::GUI::SliderQuads::SliderQuads(float pPosX, float pPosY, float pWidth, float pHeight, float pSlideWidth)
 	:bound_quad(createQuad(pPosX, pPosY, pWidth, pHeight)), slide_quad(createQuad(pPosX, pPosY, pSlideWidth, pHeight))
 {}

@@ -172,36 +172,26 @@ void gl::GUI::updateColorQuadTemplates()
 void gl::GUI::initColorQuadVAOs()
 {
 	initColorQuadTemplateVAO<PlainColor>();
-	initColorQuadTemplateVAO<MultiColor>();
-	initColorQuadTemplateVAO<TextureColor>();
 }
 
 void gl::GUI::initColorQuadShaders()
 {
 	initColorQuadTemplateShader<PlainColor>();
-	initColorQuadTemplateShader<MultiColor>();
-	initColorQuadTemplateShader<TextureColor>();
 }
 
 void gl::GUI::setupColorQuadShaders()
 {
 	setupColorQuadTemplateShader<PlainColor>();
-	setupColorQuadTemplateShader<MultiColor>();
-	setupColorQuadTemplateShader<TextureColor>();
 }
 
 void gl::GUI::updateColorQuads()
 {
 	updateColorQuadTemplates<PlainColor>();
-	updateColorQuadTemplates<MultiColor>();
-	updateColorQuadTemplates<TextureColor>();
 }
 
 void gl::GUI::renderColorQuads()
 {
-	renderColorQuadTemplates<PlainColor>();
-	renderColorQuadTemplates<MultiColor>();
-	renderColorQuadTemplates<TextureColor>();
+	renderColorQuadTemplates<PlainColor>();;
 }
 
 void gl::GUI::uploadUVBuffer()

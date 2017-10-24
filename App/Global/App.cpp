@@ -76,42 +76,43 @@ void App::mainMenuLoop()
 	size_t quitButtonQuad = createQuad(-1.0f, -0.9f, 0.2f, 0.07f);
 	size_t playButtonQuad = createQuad(-1.0f, -0.7f, 0.2f, 0.07f);
 
-	
+	void(*moveQuad)(glm::vec2&, glm::vec2&) = [](glm::vec2& pQuadPos, glm::vec2& pDelta) { pQuadPos += pDelta; };
 
 	
 	//-----------FANCY QUAD---------------------------------------------------------------------------------
-	float total_width = 0.5f;
-	float border_width = total_width * 0.02f;
-	float border_height = border_width * (1600.0f/850.0f);
-	
-	
-	void(*moveQuad)(glm::vec2&, glm::vec2&) = [](glm::vec2& pQuadPos, glm::vec2& pDelta) { pQuadPos += pDelta; };
-	
-	size_t quads[9] = { createQuad(0.0f, 0.0f, border_width, border_height),
-						createQuad(border_width, 0.0f, total_width - (border_width*2.0f), border_height),
-						createQuad(total_width - border_width, 0.0f, border_width, border_height),
-						
-						createQuad(0.0f, -border_height, border_width, total_width - (border_height*2.0f)),
-						createQuad(border_width, -border_height, total_width - (border_width*2.0f), total_width - (border_height*2.0f)),
-						createQuad(total_width - border_width, -border_height, border_width, total_width - (border_height*2.0f)),
-						
-						createQuad(0.0f, -total_width + border_height , border_width, border_height),
-						createQuad(border_width, -total_width + border_height, total_width - (border_width*2.0f), border_height),
-						createQuad(total_width - border_width, -total_width + border_height, border_width, border_height) };
-	QuadConstruct<BorderCornerQuads> fancyQuad(BorderCornerQuads(quads));
-	colorQuad(quads[0], TextureColor(createAtlasUVRange(glm::vec4(0.0f, 0.0f, 0.5f, 0.5f)), 1));
-	colorQuad(quads[1], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.0f, 0.5f, 0.5f)), 1));
-	colorQuad(quads[2], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.0f, 1.0f, 0.5f)), 1));
-	colorQuad(quads[3], TextureColor(createAtlasUVRange(glm::vec4(0.0f, 0.5f, 0.5f, 0.5f)), 1));
-	colorQuad(quads[4], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.5f, 0.5f, 0.5f)), 1));
-	colorQuad(quads[5], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.5f, 1.0f, 0.5f)), 1));
-	colorQuad(quads[6], TextureColor(createAtlasUVRange(glm::vec4(0.0f, 0.5f, 0.5f, 1.0f)), 1));
-	colorQuad(quads[7], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)), 1));
-	colorQuad(quads[8], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.5f, 1.0f, 1.0f)), 1));
+	///float total_width = 0.5f;
+	///float border_width = total_width * 0.02f;
+	///float border_height = border_width * (1600.0f/850.0f);
+	///
+	///
+	///
+	///
+	///size_t quads[9] = { createQuad(0.0f, 0.0f, border_width, border_height),
+	///					createQuad(border_width, 0.0f, total_width - (border_width*2.0f), border_height),
+	///					createQuad(total_width - border_width, 0.0f, border_width, border_height),
+	///					
+	///					createQuad(0.0f, -border_height, border_width, total_width - (border_height*2.0f)),
+	///					createQuad(border_width, -border_height, total_width - (border_width*2.0f), total_width - (border_height*2.0f)),
+	///					createQuad(total_width - border_width, -border_height, border_width, total_width - (border_height*2.0f)),
+	///					
+	///					createQuad(0.0f, -total_width + border_height , border_width, border_height),
+	///					createQuad(border_width, -total_width + border_height, total_width - (border_width*2.0f), border_height),
+	///					createQuad(total_width - border_width, -total_width + border_height, border_width, border_height) };
+	///QuadConstruct<BorderCornerQuads> fancyQuad(BorderCornerQuads(quads));
+	///colorQuad(quads[0], TextureColor(createAtlasUVRange(glm::vec4(0.0f, 0.0f, 0.5f, 0.5f)), 1));
+	///colorQuad(quads[1], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.0f, 0.5f, 0.5f)), 1));
+	///colorQuad(quads[2], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.0f, 1.0f, 0.5f)), 1));
+	///colorQuad(quads[3], TextureColor(createAtlasUVRange(glm::vec4(0.0f, 0.5f, 0.5f, 0.5f)), 1));
+	///colorQuad(quads[4], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.5f, 0.5f, 0.5f)), 1));
+	///colorQuad(quads[5], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.5f, 1.0f, 0.5f)), 1));
+	///colorQuad(quads[6], TextureColor(createAtlasUVRange(glm::vec4(0.0f, 0.5f, 0.5f, 1.0f)), 1));
+	///colorQuad(quads[7], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)), 1));
+	///colorQuad(quads[8], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.5f, 1.0f, 1.0f)), 1));
+	///uploadUVBuffer();
 	//--------------------------------------------------------------------------------------------------------
 	//GUI Lines
 	//size_t line = gl::GUI::createLine(glm::vec2(-0.495f, 0.075f), glm::vec2(-0.205f, 0.075f), 8);
-	uploadUVBuffer();
+	
 	colorQuad(quitButtonQuad, PlainColor(7));
 	colorQuad(playButtonQuad, PlainColor(7));
 	size_t quit_button = addButtonQuad(quitButtonQuad);
@@ -119,45 +120,42 @@ void App::mainMenuLoop()
 	float window_edge_marging = 0.005f;
 	float window_width = 0.2f;
 	float window_height = 0.2f;
-	size_t windowQuad = createQuad(-0.5f, 0.2f, window_width, window_height);
-	size_t headQuad = createQuad(-0.5f, 0.2f, 0.2f, 0.04f);
-	colorQuad(windowQuad, PlainColor(1));
-	colorQuad(headQuad, PlainColor(6));
-	size_t head_button = addButtonQuad(headQuad);
-	size_t pull_button_press = EventSignal<MouseEvent>(MouseEvent(head_button, MouseKeyEvent(0, KeyCondition(1, 0)))).index();
-	size_t pull_button_release = EventSignal<MouseEvent>(MouseEvent(head_button, MouseKeyEvent(0, KeyCondition(0, 0)))).index();
-	EventSignal<CursorEvent>::reserve(2);
-	size_t pull_button_leave = EventSignal<CursorEvent>(CursorEvent(head_button, 0)).index();
-	size_t pull_button_enter = EventSignal<CursorEvent>(CursorEvent(head_button, 1)).index();
-	
-	size_t moveWindowSignal = EventSignal<MouseEvent>(MouseEvent(head_button, MouseKeyEvent(0, KeyCondition(1, 0))), Signal(1).index()).index();
-	EventSignal<MouseKeyEvent>(MouseKeyEvent(0, KeyCondition(0, 0)), moveWindowSignal, 0);
-	
-	Functor<AnySignalGate, void, glm::vec2&, glm::vec2&> movePullQuadFunc(*moveQuad, getQuad(headQuad).pos, cursorFrameDelta, { moveWindowSignal });
-
-	Functor<AnySignalGate, void, glm::vec2&, glm::vec2&> moveWindowQuadFunc(*moveQuad, getQuad(windowQuad).pos, cursorFrameDelta, { moveWindowSignal });
+	///size_t windowQuad = createQuad(-0.5f, 0.2f, window_width, window_height);
+	///size_t headQuad = createQuad(-0.5f, 0.2f, 0.2f, 0.04f);
+	///colorQuad(windowQuad, PlainColor(1));
+	///colorQuad(headQuad, PlainColor(6));
+	///size_t head_button = addButtonQuad(headQuad);
+	///size_t pull_button_press = EventSignal<MouseEvent>(MouseEvent(head_button, MouseKeyEvent(0, KeyCondition(1, 0)))).index();
+	///size_t pull_button_release = EventSignal<MouseEvent>(MouseEvent(head_button, MouseKeyEvent(0, KeyCondition(0, 0)))).index();
+	///EventSignal<CursorEvent>::reserve(2);
+	///size_t pull_button_leave = EventSignal<CursorEvent>(CursorEvent(head_button, 0)).index();
+	///size_t pull_button_enter = EventSignal<CursorEvent>(CursorEvent(head_button, 1)).index();
+	///
+	///size_t moveWindowSignal = EventSignal<MouseEvent>(MouseEvent(head_button, MouseKeyEvent(0, KeyCondition(1, 0))), Signal(1).index()).index();
+	///EventSignal<MouseKeyEvent>(MouseKeyEvent(0, KeyCondition(0, 0)), moveWindowSignal, 0);
+	///
+	///Functor<AnySignalGate, void, glm::vec2&, glm::vec2&> movePullQuadFunc(*moveQuad, getQuad(headQuad).pos, cursorFrameDelta, { moveWindowSignal });
+	///
+	///Functor<AnySignalGate, void, glm::vec2&, glm::vec2&> moveWindowQuadFunc(*moveQuad, getQuad(windowQuad).pos, cursorFrameDelta, { moveWindowSignal });
 //Lights
 	gl::Lighting::createLight(glm::vec4(1.0f, 1.0f, 1.0f, 0.0f), glm::vec4(0.0f, 0.95f, 1.0f, 10.0f));
 	gl::Lighting::createLight(glm::vec4(3.0f, 5.0f, 3.0f, 1.0f), glm::vec4(0.3f, 1.0f, 0.2f, 10.0f));
 
 
 	//-----------SLIDER-----------------------------------------------------
-	//BUGGY..
+	
 	float slider_height = 0.05f;
 	float slider_width = window_width - window_edge_marging*2.0f;
 	float slider_slide_width = 0.01f;
-	SliderQuads sliderquads1(-0.9f, 0.4f, slider_width, slider_height, slider_slide_width);
 	SliderColors<PlainColor>slidercolors(0, 1);
-	Slider<float&, PlainColor>sliderx(sliderquads1, slidercolors, gl::Lighting::getLightColor(1).x);
-
+	SliderQuads sliderquads1(-0.9f, 0.4f, slider_width, slider_height, slider_slide_width);
 	SliderQuads sliderquads2(-0.9f, 0.3f, slider_width, slider_height, slider_slide_width);
-	Slider<float&, PlainColor>slidery(sliderquads2, slidercolors, gl::Lighting::getLightColor(1).y);
-	
 	SliderQuads sliderquads3(-0.9f, 0.2f, slider_width, slider_height, slider_slide_width);
-	Slider<float&, PlainColor>sliderz(sliderquads3, slidercolors, gl::Lighting::getLightColor(1).y);
-	//Functor<AnySignalGate, void, glm::vec2&, glm::vec2&> moveSliderBoundQuadFunc(*moveQuad, getQuad(sliderBoundQuad).pos, cursorFrameDelta, { moveWindowSignal });
-	//Functor<AnySignalGate, void, glm::vec2&, glm::vec2&> moveSliderQuadFunc(*moveQuad, getQuad(sliderSlideQuad).pos, cursorFrameDelta, { moveWindowSignal });
-	
+	SliderQuads sliderquads4(-0.9f, 0.1f, slider_width, slider_height, slider_slide_width);
+	Slider<float&, PlainColor, PinSlideType>sliderx(sliderquads1, slidercolors, SliderControl(0.0f, 1.0f, gl::Lighting::getLightColor(1).x));
+	Slider<float&, PlainColor, PinSlideType>slidery(sliderquads2, slidercolors, SliderControl(0.0f, 1.0f, gl::Lighting::getLightColor(1).y));
+	Slider<float&, PlainColor, PinSlideType>sliderz(sliderquads3, slidercolors, SliderControl(0.0f, 1.0f, gl::Lighting::getLightColor(1).z));
+	Slider<float&, PlainColor, BarSlideType>sliderw(sliderquads4, slidercolors, SliderControl(0.0f, 100.0f, gl::Lighting::getLightColor(1).w));
 	
 
 	

@@ -8,6 +8,8 @@ I dont expect to get this game "done"(well playable) before 2020 and i dont know
 TO-DO:
 -	
 * GUI  
+  - [ ] Functors
+        - Functors should be able to store any kind of values and any mix of references.(right now i can only store lvalue references
   - [ ] Elements: groups of primitives(Quads, Lines, ...) associated as one element  
 	    - member primitives should be initialized at element initialization -> makes things easier and safer  
 	    - find a way to distribute changes to the element to all its members  
@@ -24,7 +26,7 @@ TO-DO:
   	    * masking is needed in various places:  
   		      1. button masking: button indices should only be rendered if the button is imidiately visible (easy)  
   		      2. some elements should only be visible at all at specified areas of the screen (to enable scrolling in windows/widgets)  
-  - [ ] quad textures  
+  - [x] Fancy Quads  
   	    - quads should be able to use textures  
   	    - one special way of displaying a texture is needed to display fancier widget borders.  
   		      x-----x--------x-----x  
@@ -37,6 +39,8 @@ TO-DO:
   		      x-----x--------x-----x  
   		      - the quad is split up into/actually starts out as 9 quads.  
   		      - the UV coordinates into the textures are used to map the texture for the borders & corners onto the quads  
+	- [ ] GUI Texture Atlas
+	      - assemble one large, tightly packed texture for textures to be used in the GUI
 	- [ ] Text(improvements) 
 		  - flexible formatting
 			- insert newlines before at last space character
