@@ -1,6 +1,0 @@
-*.dll
-*.obj
-assets/
-deps/
-/Debug/
-*.exe
