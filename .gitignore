@@ -1,0 +1,5 @@
+*.dll
+*.obj
+assets/
+deps/
+*.exe
