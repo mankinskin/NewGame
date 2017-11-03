@@ -173,6 +173,7 @@ void gl::bindUniformBufferLocations()
 	Models::setupMeshShader();
 	GUI::setupButtonIndexShader();
 	GUI::setupLineShader();
+	App::Debug::printErrors();
 	GUI::setupColorQuadShaders();
 
 	//Shader::bindUniformBufferToShader(Debug::lineShaderID, generalUniformBuffer, "GeneralUniformBuffer");

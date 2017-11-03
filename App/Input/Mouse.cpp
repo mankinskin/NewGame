@@ -6,11 +6,12 @@
 #include <OpenGL\GUI\UI\Buttons.h>
 #include <algorithm>
 #include "Event.h"
+#include <array>
 glm::vec2 App::Input::relativeCursorPosition;
 glm::uvec2 App::Input::absoluteCursorPosition;
 glm::vec2 App::Input::cursorFrameDelta;
 
-App::Input::KeyCondition mouseKeys[3];
+std::array<App::Input::KeyCondition, 3> mouseKeys;
 int scroll = 0;
 int disableCursor = 0;
 size_t hovered_button = 0;
@@ -75,15 +76,28 @@ void App::Input::getCursorEvents()
 			pushEvent(CursorEvent(hovered_button - 1, 1));
 		}
 	}
+	static std::array<KeyCondition, 3> lastMouseKeys;
+
+	for (unsigned int c = 0; c < 3; ++c) {
+		MouseKeyEvent mkev(c, mouseKeys[c]);
+		if (mouseKeys[c] != lastMouseKeys[c]) {
+			pushEvent(mkev);
+			if (hovered_button) {
+				pushEvent(MouseEvent(hovered_button - 1, mkev));
+			}
+		}
+		if (last_hovered_button != hovered_button) {
+			pushEvent(MouseEvent(hovered_button - 1, mkev));
+		}
+	}
+	
+	lastMouseKeys = mouseKeys;
 }
 
 void App::Input::mouseKey_Callback(GLFWwindow * window, int pKey, int pAction, int pMods)
 {
-	MouseKeyEvent mkev(pKey, pAction, pMods);
-	pushEvent(mkev);
-	if (hovered_button) {
-		pushEvent(MouseEvent(hovered_button - 1, mkev));
-	}
+	mouseKeys[pKey] = KeyCondition(pAction, pMods);
+	
 }
 
 void App::Input::cursorPosition_Callback(GLFWwindow * window, double pX, double pY)

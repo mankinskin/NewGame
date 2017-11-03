@@ -1,0 +1,54 @@
+﻿  Functor.cpp
+  Mouse.cpp
+Input\Mouse.cpp(29): error C2039: 'clamp': is not a member of 'std'
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\include\array(16): note: see declaration of 'std'
+Input\Mouse.cpp(29): error C3861: 'clamp': identifier not found
+Input\Mouse.cpp(30): error C2039: 'clamp': is not a member of 'std'
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\include\array(16): note: see declaration of 'std'
+Input\Mouse.cpp(30): error C3861: 'clamp': identifier not found
+  App.cpp
+Global\App.cpp(248): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+c:\users\linus\source\repos\newgame\app\global\..\Input\Functor.h(134): error C2039: 'apply': is not a member of 'std'
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\include\thread(27): note: see declaration of 'std'
+  c:\users\linus\source\repos\newgame\app\global\..\Input\Functor.h(133): note: while compiling class template member function 'void App::Input::FunctorInternal::FunctorImpl<SignalGate,float &,float &>::invoke(void) const'
+          with
+          [
+              SignalGate=App::Input::AnySignalGate
+          ]
+  c:\users\linus\source\repos\newgame\app\global\..\Input\Functor.h(129): note: see reference to function template instantiation 'void App::Input::FunctorInternal::FunctorImpl<SignalGate,float &,float &>::invoke(void) const' being compiled
+          with
+          [
+              SignalGate=App::Input::AnySignalGate
+          ]
+  c:\users\linus\source\repos\newgame\app\global\..\Input\Functor.h(114): note: while compiling class template member function 'void App::Input::FunctorInternal::FunctorImpl<SignalGate,float &,float &>::clear(void)'
+          with
+          [
+              SignalGate=App::Input::AnySignalGate
+          ]
+  c:\users\linus\source\repos\newgame\app\global\..\Input\Functor.h(102): note: see reference to function template instantiation 'void App::Input::FunctorInternal::FunctorImpl<SignalGate,float &,float &>::clear(void)' being compiled
+          with
+          [
+              SignalGate=App::Input::AnySignalGate
+          ]
+  c:\users\linus\source\repos\newgame\app\global\..\Input\Functor.h(98): note: while compiling class template member function 'void App::Input::Functor<App::Input::AnySignalGate,float &,float &>::createFunctor(void (__cdecl *)(float &,float &),float &,float &,std::initializer_list<_Ty>)'
+          with
+          [
+              _Ty=::size_t
+          ]
+  c:\users\linus\source\repos\newgame\app\global\..\Input\Functor.h(93): note: see reference to function template instantiation 'void App::Input::Functor<App::Input::AnySignalGate,float &,float &>::createFunctor(void (__cdecl *)(float &,float &),float &,float &,std::initializer_list<_Ty>)' being compiled
+          with
+          [
+              _Ty=::size_t
+          ]
+  c:\users\linus\source\repos\newgame\app\global\..\Input\Functor.h(91): note: while compiling class template member function 'App::Input::Functor<App::Input::AnySignalGate,float &,float &>::Functor(void (__cdecl *)(float &,float &),float &,float &,std::initializer_list<_Ty>)'
+          with
+          [
+              _Ty=::size_t
+          ]
+  C:\Users\Linus\source\repos\NewGame\OpenGL\GUI\UI\Element.h(71): note: see reference to function template instantiation 'App::Input::Functor<App::Input::AnySignalGate,float &,float &>::Functor(void (__cdecl *)(float &,float &),float &,float &,std::initializer_list<_Ty>)' being compiled
+          with
+          [
+              _Ty=::size_t
+          ]
+  C:\Users\Linus\source\repos\NewGame\OpenGL\GUI\UI\Element.h(72): note: see reference to class template instantiation 'App::Input::Functor<App::Input::AnySignalGate,float &,float &>' being compiled
+c:\users\linus\source\repos\newgame\app\global\..\Input\Functor.h(134): error C3861: 'apply': identifier not found

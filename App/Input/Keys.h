@@ -19,6 +19,9 @@ namespace App {
 		inline bool operator==(KeyCondition const & l, KeyCondition const& r) {
 			return l.action == r.action && l.mods == r.mods;
 		}
+		inline bool operator!=(KeyCondition const & l, KeyCondition const& r) {
+			return l.action != r.action || l.mods != r.mods;
+		}
 
 		class KeyEvent {
 		public:

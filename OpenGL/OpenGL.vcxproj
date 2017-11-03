@@ -33,7 +33,7 @@
     <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -78,6 +78,11 @@
     <IncludePath>$(SolutionDir);$(SolutionDir)\deps\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <LibraryPath>$(SolutionDir)\Debug;$(SolutionDir)\deps\libs\x86;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LibraryPath>C:\Users\Linus\source\repos\NewGame\App;C:\Users\Linus\source\repos\NewGame\deps\lib\x86;$(LibraryPath)</LibraryPath>
+    <SourcePath>C:\Users\Linus\source\repos\NewGame;C:\Users\Linus\source\repos\NewGame\deps\include;$(SourcePath)</SourcePath>
+    <IncludePath>C:\Users\Linus\source\repos\NewGame\deps\include;C:\Users\Linus\source\repos\NewGame;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -106,7 +111,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -142,7 +147,7 @@
     <ClInclude Include="Global\stdafx.h" />
     <ClInclude Include="GUI\UI\Buttons.h" />
     <ClInclude Include="GUI\UI\Colored_Quads.h" />
-    <ClInclude Include="GUI\UI\Element.h" />
+    <ClInclude Include="GUI\UI\Slider.h" />
     <ClInclude Include="GUI\UI\Line.h" />
     <ClInclude Include="GUI\Text\stdafx.h" />
     <ClInclude Include="GUI\UI\Quad.h" />
@@ -175,7 +180,7 @@
     <ClCompile Include="Global\glDebug.cpp" />
     <ClCompile Include="GUI\UI\Buttons.cpp" />
     <ClCompile Include="GUI\UI\Colored_Quads.cpp" />
-    <ClCompile Include="GUI\UI\Element.cpp" />
+    <ClCompile Include="GUI\UI\Slider.cpp" />
     <ClCompile Include="GUI\UI\Line.cpp" />
     <ClCompile Include="GUI\UI\Quad.cpp" />
     <ClCompile Include="Lighting\Lights.cpp" />

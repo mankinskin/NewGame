@@ -1,0 +1,53 @@
+﻿  Framebuffer.cpp
+BaseGL\Framebuffer.cpp(26): warning C4244: 'argument': conversion from 'float' to '::size_t', possible loss of data
+BaseGL\Framebuffer.cpp(27): warning C4244: 'argument': conversion from 'float' to '::size_t', possible loss of data
+BaseGL\Framebuffer.cpp(28): warning C4244: 'argument': conversion from 'float' to '::size_t', possible loss of data
+BaseGL\Framebuffer.cpp(29): warning C4244: 'argument': conversion from 'float' to '::size_t', possible loss of data
+BaseGL\Framebuffer.cpp(30): warning C4244: 'argument': conversion from 'float' to '::size_t', possible loss of data
+BaseGL\Framebuffer.cpp(40): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+  Element.cpp
+C:\Users\Linus\source\repos\NewGame\App//Input//Functor.h(134): error C2039: 'apply': is not a member of 'std'
+  C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.11.25503\include\algorithm(14): note: see declaration of 'std'
+  C:\Users\Linus\source\repos\NewGame\App//Input//Functor.h(133): note: while compiling class template member function 'void App::Input::FunctorInternal::FunctorImpl<SignalGate,float &,float &>::invoke(void) const'
+          with
+          [
+              SignalGate=App::Input::AnySignalGate
+          ]
+  C:\Users\Linus\source\repos\NewGame\App//Input//Functor.h(129): note: see reference to function template instantiation 'void App::Input::FunctorInternal::FunctorImpl<SignalGate,float &,float &>::invoke(void) const' being compiled
+          with
+          [
+              SignalGate=App::Input::AnySignalGate
+          ]
+  C:\Users\Linus\source\repos\NewGame\App//Input//Functor.h(114): note: while compiling class template member function 'void App::Input::FunctorInternal::FunctorImpl<SignalGate,float &,float &>::clear(void)'
+          with
+          [
+              SignalGate=App::Input::AnySignalGate
+          ]
+  C:\Users\Linus\source\repos\NewGame\App//Input//Functor.h(102): note: see reference to function template instantiation 'void App::Input::FunctorInternal::FunctorImpl<SignalGate,float &,float &>::clear(void)' being compiled
+          with
+          [
+              SignalGate=App::Input::AnySignalGate
+          ]
+  C:\Users\Linus\source\repos\NewGame\App//Input//Functor.h(98): note: while compiling class template member function 'void App::Input::Functor<App::Input::AnySignalGate,float &,float &>::createFunctor(void (__cdecl *)(float &,float &),float &,float &,std::initializer_list<_Ty>)'
+          with
+          [
+              _Ty=::size_t
+          ]
+  C:\Users\Linus\source\repos\NewGame\App//Input//Functor.h(93): note: see reference to function template instantiation 'void App::Input::Functor<App::Input::AnySignalGate,float &,float &>::createFunctor(void (__cdecl *)(float &,float &),float &,float &,std::initializer_list<_Ty>)' being compiled
+          with
+          [
+              _Ty=::size_t
+          ]
+  C:\Users\Linus\source\repos\NewGame\App//Input//Functor.h(91): note: while compiling class template member function 'App::Input::Functor<App::Input::AnySignalGate,float &,float &>::Functor(void (__cdecl *)(float &,float &),float &,float &,std::initializer_list<_Ty>)'
+          with
+          [
+              _Ty=::size_t
+          ]
+  c:\users\linus\source\repos\newgame\opengl\gui\ui\Element.h(71): note: see reference to function template instantiation 'App::Input::Functor<App::Input::AnySignalGate,float &,float &>::Functor(void (__cdecl *)(float &,float &),float &,float &,std::initializer_list<_Ty>)' being compiled
+          with
+          [
+              _Ty=::size_t
+          ]
+  c:\users\linus\source\repos\newgame\opengl\gui\ui\Element.h(72): note: see reference to class template instantiation 'App::Input::Functor<App::Input::AnySignalGate,float &,float &>' being compiled
+C:\Users\Linus\source\repos\NewGame\App//Input//Functor.h(134): error C3861: 'apply': identifier not found
+  Line.cpp

@@ -3,8 +3,9 @@
 #include "Functor.h"
 #include "Event.h"
 
-std::vector<void(*)()> App::Input::FunctorInternal::functorInvokers = std::vector<void(*)()>();
+std::vector<void(*)(size_t)> App::Input::FunctorInternal::functorInvokers = std::vector<void(*)(size_t)>();
 std::vector<void(*)()> App::Input::FunctorInternal::functorDestructors = std::vector<void(*)()>();
+std::vector<std::pair<size_t, size_t>> App::Input::FunctorInternal::functorOrder = std::vector<std::pair<size_t, size_t>>();
 
 bool App::Input::FunctorInternal::is_on(size_t pSignalIndex)
 {
@@ -18,7 +19,7 @@ void App::Input::clearFunctors() {
 }
 void App::Input::callFunctors()
 {
-	for (void(*invoker)() : FunctorInternal::functorInvokers) {
-		invoker();
+	for (std::pair<size_t, size_t>& funi : FunctorInternal::functorOrder) {
+		FunctorInternal::functorInvokers[funi.first](funi.second);
 	}
 }

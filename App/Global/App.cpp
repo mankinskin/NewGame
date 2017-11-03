@@ -23,7 +23,7 @@
 #include <OpenGL/GUI/UI/Colored_Quads.h>
 #include <OpenGL/BaseGL/Framebuffer.h>
 #include <OpenGL\GUI\UI\Quad.h>
-#include <OpenGL\GUI\UI\Element.h>
+#include <OpenGL\GUI\UI\Slider.h>
 #include <functional>
 #include <algorithm>
 
@@ -72,95 +72,37 @@ void App::mainMenuLoop()
 	using namespace gl::GUI;
 
 	//Buttons
-	
-	size_t quitButtonQuad = createQuad(-1.0f, -0.9f, 0.2f, 0.07f);
 	size_t playButtonQuad = createQuad(-1.0f, -0.7f, 0.2f, 0.07f);
-
-	void(*moveQuad)(glm::vec2&, glm::vec2&) = [](glm::vec2& pQuadPos, glm::vec2& pDelta) { pQuadPos += pDelta; };
-
-	
-	//-----------FANCY QUAD---------------------------------------------------------------------------------
-	///float total_width = 0.5f;
-	///float border_width = total_width * 0.02f;
-	///float border_height = border_width * (1600.0f/850.0f);
-	///
-	///
-	///
-	///
-	///size_t quads[9] = { createQuad(0.0f, 0.0f, border_width, border_height),
-	///					createQuad(border_width, 0.0f, total_width - (border_width*2.0f), border_height),
-	///					createQuad(total_width - border_width, 0.0f, border_width, border_height),
-	///					
-	///					createQuad(0.0f, -border_height, border_width, total_width - (border_height*2.0f)),
-	///					createQuad(border_width, -border_height, total_width - (border_width*2.0f), total_width - (border_height*2.0f)),
-	///					createQuad(total_width - border_width, -border_height, border_width, total_width - (border_height*2.0f)),
-	///					
-	///					createQuad(0.0f, -total_width + border_height , border_width, border_height),
-	///					createQuad(border_width, -total_width + border_height, total_width - (border_width*2.0f), border_height),
-	///					createQuad(total_width - border_width, -total_width + border_height, border_width, border_height) };
-	///QuadConstruct<BorderCornerQuads> fancyQuad(BorderCornerQuads(quads));
-	///colorQuad(quads[0], TextureColor(createAtlasUVRange(glm::vec4(0.0f, 0.0f, 0.5f, 0.5f)), 1));
-	///colorQuad(quads[1], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.0f, 0.5f, 0.5f)), 1));
-	///colorQuad(quads[2], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.0f, 1.0f, 0.5f)), 1));
-	///colorQuad(quads[3], TextureColor(createAtlasUVRange(glm::vec4(0.0f, 0.5f, 0.5f, 0.5f)), 1));
-	///colorQuad(quads[4], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.5f, 0.5f, 0.5f)), 1));
-	///colorQuad(quads[5], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.5f, 1.0f, 0.5f)), 1));
-	///colorQuad(quads[6], TextureColor(createAtlasUVRange(glm::vec4(0.0f, 0.5f, 0.5f, 1.0f)), 1));
-	///colorQuad(quads[7], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)), 1));
-	///colorQuad(quads[8], TextureColor(createAtlasUVRange(glm::vec4(0.5f, 0.5f, 1.0f, 1.0f)), 1));
-	///uploadUVBuffer();
-	//--------------------------------------------------------------------------------------------------------
-	//GUI Lines
-	//size_t line = gl::GUI::createLine(glm::vec2(-0.495f, 0.075f), glm::vec2(-0.205f, 0.075f), 8);
-	
-	colorQuad(quitButtonQuad, PlainColor(7));
-	colorQuad(playButtonQuad, PlainColor(7));
-	size_t quit_button = addButtonQuad(quitButtonQuad);
-	//------------WINDOW-------------------------------------------------------------------
-	float window_edge_marging = 0.005f;
-	float window_width = 0.2f;
-	float window_height = 0.2f;
-	///size_t windowQuad = createQuad(-0.5f, 0.2f, window_width, window_height);
-	///size_t headQuad = createQuad(-0.5f, 0.2f, 0.2f, 0.04f);
-	///colorQuad(windowQuad, PlainColor(1));
-	///colorQuad(headQuad, PlainColor(6));
-	///size_t head_button = addButtonQuad(headQuad);
-	///size_t pull_button_press = EventSignal<MouseEvent>(MouseEvent(head_button, MouseKeyEvent(0, KeyCondition(1, 0)))).index();
-	///size_t pull_button_release = EventSignal<MouseEvent>(MouseEvent(head_button, MouseKeyEvent(0, KeyCondition(0, 0)))).index();
-	///EventSignal<CursorEvent>::reserve(2);
-	///size_t pull_button_leave = EventSignal<CursorEvent>(CursorEvent(head_button, 0)).index();
-	///size_t pull_button_enter = EventSignal<CursorEvent>(CursorEvent(head_button, 1)).index();
-	///
-	///size_t moveWindowSignal = EventSignal<MouseEvent>(MouseEvent(head_button, MouseKeyEvent(0, KeyCondition(1, 0))), Signal(1).index()).index();
-	///EventSignal<MouseKeyEvent>(MouseKeyEvent(0, KeyCondition(0, 0)), moveWindowSignal, 0);
-	///
-	///Functor<AnySignalGate, void, glm::vec2&, glm::vec2&> movePullQuadFunc(*moveQuad, getQuad(headQuad).pos, cursorFrameDelta, { moveWindowSignal });
-	///
-	///Functor<AnySignalGate, void, glm::vec2&, glm::vec2&> moveWindowQuadFunc(*moveQuad, getQuad(windowQuad).pos, cursorFrameDelta, { moveWindowSignal });
-//Lights
-	gl::Lighting::createLight(glm::vec4(1.0f, 1.0f, 1.0f, 0.0f), glm::vec4(0.0f, 0.95f, 1.0f, 10.0f));
-	gl::Lighting::createLight(glm::vec4(3.0f, 5.0f, 3.0f, 1.0f), glm::vec4(0.3f, 1.0f, 0.2f, 10.0f));
-
-
-	//-----------SLIDER-----------------------------------------------------
-	
-	float slider_height = 0.05f;
-	float slider_width = window_width - window_edge_marging*2.0f;
-	float slider_slide_width = 0.01f;
-	SliderColors<PlainColor>slidercolors(0, 1);
-	SliderQuads sliderquads1(-0.9f, 0.4f, slider_width, slider_height, slider_slide_width);
-	SliderQuads sliderquads2(-0.9f, 0.3f, slider_width, slider_height, slider_slide_width);
-	SliderQuads sliderquads3(-0.9f, 0.2f, slider_width, slider_height, slider_slide_width);
-	SliderQuads sliderquads4(-0.9f, 0.1f, slider_width, slider_height, slider_slide_width);
-	Slider<float&, PlainColor, PinSlideType>sliderx(sliderquads1, slidercolors, SliderControl(0.0f, 1.0f, gl::Lighting::getLightColor(1).x));
-	Slider<float&, PlainColor, PinSlideType>slidery(sliderquads2, slidercolors, SliderControl(0.0f, 1.0f, gl::Lighting::getLightColor(1).y));
-	Slider<float&, PlainColor, PinSlideType>sliderz(sliderquads3, slidercolors, SliderControl(0.0f, 1.0f, gl::Lighting::getLightColor(1).z));
-	Slider<float&, PlainColor, BarSlideType>sliderw(sliderquads4, slidercolors, SliderControl(0.0f, 100.0f, gl::Lighting::getLightColor(1).w));
-	
+	size_t quitButtonQuad = createQuad(-1.0f, -0.9f, 0.2f, 0.07f);
+	using Window = Widget<BorderCornerQuads, SingleQuad>;
+	BorderCornerQuads boco(0.0f, 0.0f, 1.0f, 1.0f, 0.005f);
+	SingleQuad sing(0.005f, -0.005f*(1600.0f/850.0f), 0.99f, 0.05f);
+	Window wig(boco, sing);
+	wig.create_quads();
+	colorQuad(wig.get(0, 0), ConstColor(1));
+	colorQuad(wig.get(0, 1), ConstColor(1));
+	colorQuad(wig.get(0, 2), ConstColor(1));
+	colorQuad(wig.get(0, 3), ConstColor(1));
+	colorQuad(wig.get(0, 4), ConstColor(7));
+	colorQuad(wig.get(0, 5), ConstColor(1));
+	colorQuad(wig.get(0, 6), ConstColor(1));
+	colorQuad(wig.get(0, 7), ConstColor(1));
+	colorQuad(wig.get(0, 8), ConstColor(1));
+	colorQuad(wig.get(1, 0), ConstColor(6));
+	size_t window_header_button = addButton(wig.get(1, 0));
 
 	
 
 	//Signals
+	colorQuad(playButtonQuad, ConstColor(7));
+	colorQuad(quitButtonQuad, ConstColor(7));
+	
+
+	gl::Lighting::createLight(glm::vec4(1.0f, 1.0f, 1.0f, 0.0f), glm::vec4(0.0f, 0.95f, 1.0f, 10.0f));
+	gl::Lighting::createLight(glm::vec4(3.0f, 5.0f, 3.0f, 1.0f), glm::vec4(0.3f, 1.0f, 0.2f, 10.0f));
+	
+	size_t quit_button = addButton(quitButtonQuad);
+
 	reserveKeySignals(11);
 	KeySignal key_esc(GLFW_KEY_ESCAPE);
 	KeySignal key_c(GLFW_KEY_C);
@@ -174,7 +116,6 @@ void App::mainMenuLoop()
 	KeySignal key_space(GLFW_KEY_SPACE);
 	KeySignal key_z(GLFW_KEY_Z);
 
-	
 
 	EventSignal<MouseKeyEvent>::reserve(4);
 	size_t rmb_press = EventSignal<MouseKeyEvent>(MouseKeyEvent(1, KeyCondition(1, 0))).index();
@@ -184,20 +125,18 @@ void App::mainMenuLoop()
 
 	EventSignal<MouseEvent>::reserve(6);
 	size_t quit_button_press = EventSignal<MouseEvent>(MouseEvent(quit_button, MouseKeyEvent(0, KeyCondition(1, 0)))).index();
-	
-	
-	
-	
-	
-	
+	size_t header_button_press = EventSignal<MouseEvent>(MouseEvent(window_header_button, MouseKeyEvent(0, KeyCondition(1, 0))),Signal(1).index()).index();
+	EventSignal<MouseEvent>(MouseEvent(window_header_button, MouseKeyEvent(0, KeyCondition(0, 0))), header_button_press, 0).index();
+	Functor<AnySignalGate, Window, glm::vec2&>(moveWidget<Window>,
+		wig, cursorFrameDelta, { header_button_press });
 
 	//general functions
-	Functor<AnySignalGate, void> quitFunc(quit, { key_esc.press, quit_button_press });
-	Functor<AnySignalGate, void> hideCursorFunc(App::Input::toggleCursor, { key_c.press, rmb_press, rmb_release });
-	Functor<AnySignalGate, void> trackMouseFunc(gl::Camera::toggleLook, { key_c.press, rmb_press, rmb_release });
-	Functor<AnySignalGate, void> (gl::Debug::toggleGrid, { key_g.press, key_h.press });
-	Functor<AnySignalGate, void> (gl::Debug::toggleCoord, { key_h.press });
-
+	Functor<AnySignalGate>(quit, { key_esc.press, quit_button_press });
+	Functor<AnySignalGate>(App::Input::toggleCursor, { key_c.press, rmb_press, rmb_release });
+	Functor<AnySignalGate>(gl::Camera::toggleLook, { key_c.press, rmb_press, rmb_release });
+	Functor<AnySignalGate>(gl::Debug::toggleGrid, { key_g.press });
+	Functor<AnySignalGate>(gl::Debug::toggleCoord, { key_h.press });
+	Functor<AnySignalGate>(App::Debug::togglePrintInfo, { key_i.press });
 	size_t forward_signal = EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_W, KeyCondition(1, 0)), Signal(1).index()).index();
 	EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_W, KeyCondition(0, 0)), forward_signal, 0);
 	size_t back_signal = EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_S, KeyCondition(1, 0)), Signal(1).index()).index();
@@ -211,12 +150,12 @@ void App::mainMenuLoop()
 	size_t down_signal = EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_Z, KeyCondition(1, 0)), Signal(1).index()).index();
 	EventSignal<KeyEvent>(KeyEvent(GLFW_KEY_Z, KeyCondition(0, 0)), down_signal, 0);
 
-	Functor<AnySignalGate, void> forwardFunc(gl::Camera::forward, { forward_signal });
-	Functor<AnySignalGate, void> backFunc(gl::Camera::back, { back_signal });
-	Functor<AnySignalGate, void> leftFunc(gl::Camera::left, { left_signal });
-	Functor<AnySignalGate, void> rightFunc(gl::Camera::right, { right_signal });
-	Functor<AnySignalGate, void> upFunc(gl::Camera::up, { up_signal });
-	Functor<AnySignalGate, void> downFunc(gl::Camera::down, { down_signal });
+	Functor<AnySignalGate> forwardFunc(gl::Camera::forward, { forward_signal });
+	Functor<AnySignalGate> backFunc(gl::Camera::back, { back_signal });
+	Functor<AnySignalGate> leftFunc(gl::Camera::left, { left_signal });
+	Functor<AnySignalGate> rightFunc(gl::Camera::right, { right_signal });
+	Functor<AnySignalGate> upFunc(gl::Camera::up, { up_signal });
+	Functor<AnySignalGate> downFunc(gl::Camera::down, { down_signal });
 
 
 	//Text
@@ -227,12 +166,12 @@ void App::mainMenuLoop()
 	gl::GUI::Text::setTextboxString(qu_tb, "QUIT");
 	gl::GUI::Text::setTextboxString(pl_tb, "Play");
 	gl::GUI::Text::loadTextboxes();
-	
+
 	while (state == App::MainMenu) {
 
 		light_pos += light_mov;
 		gl::Lighting::setLightPos(1, light_pos);
-		
+
 		gl::Camera::update();
 
 		gl::updateGeneralUniformBuffer();
@@ -257,9 +196,8 @@ void App::mainMenuLoop()
 		gl::GUI::renderColorQuads();
 		gl::GUI::Text::renderGlyphs();
 		glDepthFunc(GL_LESS);
-
-		glfwSwapBuffers(mainWindow.window);
 		fetchInput();
+		glfwSwapBuffers(mainWindow.window);
 
 		Debug::printErrors();
 		updateTime();
@@ -269,7 +207,7 @@ void App::mainMenuLoop()
 		Debug::printInfo();
 	}
 	gl::GUI::Text::clearCharStorage();
-	
+
 	gl::GUI::clearBuffers();
 	gl::GUI::clearButtons();
 	Input::clearFunctors();
@@ -282,8 +220,8 @@ void App::fetchInput()
 	gl::GUI::rasterButtons();
 	gl::GUI::fetchButtonMap();
 	Input::updateCursor();
-	Input::getCursorEvents();
 	Input::fetchGLFWEvents();
+	Input::getCursorEvents();
 	Input::checkEvents();
 	Input::callFunctors();
 	Input::resetSignals();

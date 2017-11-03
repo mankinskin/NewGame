@@ -1,27 +1,22 @@
 #pragma once
+#include "stdafx.h"
 #include <vector>
 #include <string>
 #include <glm/glm.hpp>
 namespace gl {
 	namespace GUI {
 		
-		struct PlainColor {
-			PlainColor(size_t pColorIndex)
+		struct ConstColor {
+			ConstColor(size_t pColorIndex)
 				:colorIndex(pColorIndex) {}
 			size_t colorIndex;
 		};
-		struct MultiColor {
-			MultiColor(size_t pColorIndices[4])
-				:colors{ pColorIndices[0], pColorIndices[1], pColorIndices[2], pColorIndices[3] } {}
-			size_t colors[4];
+		struct DynamicColor {
+			DynamicColor(glm::vec4 pColor);
+			DynamicColor(size_t pColorIndex)
+				:colorIndex(pColorIndex) {}
+			size_t colorIndex;
 		};
-		struct TextureColor {
-			TextureColor(size_t pUVIndex, size_t pColorIndex)
-				 :uv_index(pUVIndex), color_index(pColorIndex){}
-			size_t uv_index;
-			size_t color_index;
-		};
-
 
 		template<class ColorPolicy>
 		struct ColorQuad {
@@ -43,8 +38,10 @@ namespace gl {
 		void setupColorQuadShaders();
 		void updateColorQuads();
 		void renderColorQuads();
-		void uploadUVBuffer();
+		void uploadUVRanges();
 		size_t createAtlasUVRange(glm::vec4 pUVRange);
+		glm::vec4& getDynamicColor(size_t pIndex);
+		glm::vec4& getDynamicColor(DynamicColor pColor);
 
 		template<class ColorPolicy>
 		void colorQuad(size_t pQuad, ColorPolicy pColor);
@@ -67,5 +64,6 @@ namespace gl {
 }
 template<class ColorPolicy>
 void gl::GUI::colorQuad(size_t pQuad, ColorPolicy pColor) {
-	ColorQuadTemplate<ColorPolicy>::quads.emplace_back(pQuad - 1, pColor);
+
+	ColorQuadTemplate<ColorPolicy>::quads.push_back(gl::GUI::ColorQuad<ColorPolicy>(pQuad, pColor));
 }
