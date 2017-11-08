@@ -23,11 +23,13 @@ size_t gl::GUI::ColorQuadTemplate<ColorPolicy>::VAO;
 template<class ColorPolicy>
 size_t gl::GUI::ColorQuadTemplate<ColorPolicy>::shader;
 
-gl::GUI::DynamicColor::DynamicColor(glm::vec4 pColor)
-	:colorIndex(allDynamicColors.size())
-{
-	allDynamicColors.push_back(pColor);
-}
+gl::GUI::Color::Color(glm::vec4 pColor)
+	:color(pColor)
+{}
+
+gl::GUI::Color::Color(size_t pColorIndex)
+	: color(allDynamicColors[pColorIndex])
+{}
 
 template<class ColorPolicy>
 void gl::GUI::renderColorQuadTemplates() 
@@ -43,11 +45,11 @@ void gl::GUI::renderColorQuadTemplates<gl::GUI::ConstColor>() {
 	glBindVertexArray(0);
 }
 template<>
-void gl::GUI::renderColorQuadTemplates<gl::GUI::DynamicColor>() {
+void gl::GUI::renderColorQuadTemplates<gl::GUI::Color>() {
 	
-	glBindVertexArray(ColorQuadTemplate<DynamicColor>::VAO);
-	Shader::use(ColorQuadTemplate<DynamicColor>::shader);
-	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, ColorQuadTemplate<DynamicColor>::quads.size());
+	glBindVertexArray(ColorQuadTemplate<Color>::VAO);
+	Shader::use(ColorQuadTemplate<Color>::shader);
+	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, ColorQuadTemplate<Color>::quads.size());
 	glBindTexture(GL_TEXTURE_2D, 0);
 	Shader::unuse();
 	glBindVertexArray(0);
@@ -62,10 +64,10 @@ void gl::GUI::setupColorQuadTemplateShader<gl::GUI::ConstColor>() {
 	gl::Debug::getGLError("gl::setupColorQuadTemplateShader<PlainColor>()");
 }
 template<>
-void gl::GUI::setupColorQuadTemplateShader<gl::GUI::DynamicColor>() {
+void gl::GUI::setupColorQuadTemplateShader<gl::GUI::Color>() {
 	
-	Shader::bindUniformBufferToShader(ColorQuadTemplate<DynamicColor>::shader, GUI::quadBuffer, "QuadBuffer");
-	Shader::bindUniformBufferToShader(ColorQuadTemplate<DynamicColor>::shader, dynamicColorBuffer, "DynamicColorBuffer");
+	Shader::bindUniformBufferToShader(ColorQuadTemplate<Color>::shader, GUI::quadBuffer, "QuadBuffer");
+	Shader::bindUniformBufferToShader(ColorQuadTemplate<Color>::shader, dynamicColorBuffer, "DynamicColorBuffer");
 	gl::Debug::getGLError("gl::setupColorQuadTemplateShader<DynamicColor>()");
 }
 template<class ColorPolicy>
@@ -88,19 +90,19 @@ void gl::GUI::initColorQuadTemplateVAO<gl::GUI::ConstColor>() {
 }
 
 template<>
-void gl::GUI::initColorQuadTemplateVAO<gl::GUI::DynamicColor>() {
+void gl::GUI::initColorQuadTemplateVAO<gl::GUI::Color>() {
 
-	ColorQuadTemplate<DynamicColor>::elementBuffer = VAO::createStorage(sizeof(ColorQuad<DynamicColor>)*MAX_QUAD_COUNT, 0, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
-	VAO::createStream(ColorQuadTemplate<DynamicColor>::elementBuffer, GL_MAP_WRITE_BIT);
+	ColorQuadTemplate<Color>::elementBuffer = VAO::createStorage(sizeof(ColorQuad<Color>)*MAX_QUAD_COUNT, 0, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
+	VAO::createStream(ColorQuadTemplate<Color>::elementBuffer, GL_MAP_WRITE_BIT);
 
-	glCreateVertexArrays(1, &ColorQuadTemplate<DynamicColor>::VAO);
-	glVertexArrayElementBuffer(ColorQuadTemplate<DynamicColor>::VAO, quadEBO + 1);
-	glVertexArrayVertexBuffer(ColorQuadTemplate<DynamicColor>::VAO, 0, quadVBO + 1, 0, sizeof(glm::vec2));
-	VAO::setVertexAttrib(ColorQuadTemplate<DynamicColor>::VAO, 0, 0, 2, GL_FLOAT, 0);
+	glCreateVertexArrays(1, &ColorQuadTemplate<Color>::VAO);
+	glVertexArrayElementBuffer(ColorQuadTemplate<Color>::VAO, quadEBO + 1);
+	glVertexArrayVertexBuffer(ColorQuadTemplate<Color>::VAO, 0, quadVBO + 1, 0, sizeof(glm::vec2));
+	VAO::setVertexAttrib(ColorQuadTemplate<Color>::VAO, 0, 0, 2, GL_FLOAT, 0);
 
-	VAO::setVertexArrayVertexStorage(ColorQuadTemplate<DynamicColor>::VAO, 1, ColorQuadTemplate<DynamicColor>::elementBuffer, sizeof(glm::uvec2));
-	VAO::setVertexAttrib(ColorQuadTemplate<DynamicColor>::VAO, 1, 1, 2, GL_UNSIGNED_INT, 0);
-	glVertexArrayBindingDivisor(ColorQuadTemplate<DynamicColor>::VAO, 1, 1);
+	VAO::setVertexArrayVertexStorage(ColorQuadTemplate<Color>::VAO, 1, ColorQuadTemplate<Color>::elementBuffer, sizeof(glm::uvec2));
+	VAO::setVertexAttrib(ColorQuadTemplate<Color>::VAO, 1, 1, 2, GL_UNSIGNED_INT, 0);
+	glVertexArrayBindingDivisor(ColorQuadTemplate<Color>::VAO, 1, 1);
 	dynamicColorBuffer = VAO::createStorage(sizeof(glm::vec4)*MAX_DYNAMIC_COLOR_COUNT, 0, GL_MAP_WRITE_BIT | VAO::STREAM_FLAGS);
 	VAO::createStream(dynamicColorBuffer, GL_MAP_WRITE_BIT);
 	VAO::bindStorage(GL_UNIFORM_BUFFER, dynamicColorBuffer);
@@ -116,10 +118,10 @@ void gl::GUI::initColorQuadTemplateShader<gl::GUI::ConstColor>() {
 	gl::Debug::getGLError("gl::initColorQuadTemplateShader<PlainColor>()");
 }
 template<>
-void gl::GUI::initColorQuadTemplateShader<gl::GUI::DynamicColor>() {
-	ColorQuadTemplate<DynamicColor>::shader = Shader::newProgram("dynamicColorQuadShader", Shader::createModule("dynamicColorQuadShader.vert"), Shader::createModule("dynamicColorQuadShader.frag"));
-	Shader::addVertexAttribute(ColorQuadTemplate<DynamicColor>::shader, "corner_pos", 0);
-	Shader::addVertexAttribute(ColorQuadTemplate<DynamicColor>::shader, "colored_quad", 1);
+void gl::GUI::initColorQuadTemplateShader<gl::GUI::Color>() {
+	ColorQuadTemplate<Color>::shader = Shader::newProgram("dynamicColorQuadShader", Shader::createModule("dynamicColorQuadShader.vert"), Shader::createModule("dynamicColorQuadShader.frag"));
+	Shader::addVertexAttribute(ColorQuadTemplate<Color>::shader, "corner_pos", 0);
+	Shader::addVertexAttribute(ColorQuadTemplate<Color>::shader, "colored_quad", 1);
 	gl::Debug::getGLError("gl::initColorQuadTemplateShader<DynamicColor>()");
 }
 template<class ColorPolicy>
@@ -130,10 +132,10 @@ void gl::GUI::updateColorQuadTemplates()
 	}
 }
 template<>
-void gl::GUI::updateColorQuadTemplates<gl::GUI::DynamicColor>()
+void gl::GUI::updateColorQuadTemplates<gl::GUI::Color>()
 {
-	if (ColorQuadTemplate<DynamicColor>::quads.size()) {
-		VAO::streamStorage(ColorQuadTemplate<DynamicColor>::elementBuffer, sizeof(ColorQuad<DynamicColor>)*ColorQuadTemplate<DynamicColor>::quads.size(), &ColorQuadTemplate<DynamicColor>::quads[0]);
+	if (ColorQuadTemplate<Color>::quads.size()) {
+		VAO::streamStorage(ColorQuadTemplate<Color>::elementBuffer, sizeof(ColorQuad<Color>)*ColorQuadTemplate<Color>::quads.size(), &ColorQuadTemplate<Color>::quads[0]);
 		VAO::streamStorage(dynamicColorBuffer, sizeof(glm::vec4)*allDynamicColors.size(), &allDynamicColors[0]);
 	}
 }
@@ -141,31 +143,31 @@ void gl::GUI::updateColorQuadTemplates<gl::GUI::DynamicColor>()
 void gl::GUI::initColorQuadVAOs()
 {
 	initColorQuadTemplateVAO<ConstColor>();
-	initColorQuadTemplateVAO<DynamicColor>();
+	initColorQuadTemplateVAO<Color>();
 }
 
 void gl::GUI::initColorQuadShaders()
 {
 	initColorQuadTemplateShader<ConstColor>();
-	initColorQuadTemplateShader<DynamicColor>();
+	initColorQuadTemplateShader<Color>();
 }
 
 void gl::GUI::setupColorQuadShaders()
 {
 	setupColorQuadTemplateShader<ConstColor>();
-	setupColorQuadTemplateShader<DynamicColor>();
+	setupColorQuadTemplateShader<Color>();
 }
 
 void gl::GUI::updateColorQuads()
 {
 	updateColorQuadTemplates<ConstColor>();
-	updateColorQuadTemplates<DynamicColor>();
+	updateColorQuadTemplates<Color>();
 }
 
 void gl::GUI::renderColorQuads()
 {
 	renderColorQuadTemplates<ConstColor>();
-	renderColorQuadTemplates<DynamicColor>();
+	renderColorQuadTemplates<Color>();
 }
 
 void gl::GUI::uploadUVRanges()
@@ -185,7 +187,3 @@ glm::vec4 & gl::GUI::getDynamicColor(size_t pIndex)
 	return allDynamicColors[pIndex];
 }
 
-glm::vec4 & gl::GUI::getDynamicColor(DynamicColor pColor)
-{
-	return allDynamicColors[pColor.colorIndex];
-}

@@ -23,7 +23,8 @@
 #include <OpenGL/GUI/UI/Colored_Quads.h>
 #include <OpenGL/BaseGL/Framebuffer.h>
 #include <OpenGL\GUI\UI\Quad.h>
-#include <OpenGL\GUI\UI\Slider.h>
+#include <OpenGL\GUI\UI\Element.h>
+#include <OpenGL\GUI\UI\Widget.h>
 #include <functional>
 #include <algorithm>
 
@@ -74,24 +75,41 @@ void App::mainMenuLoop()
 	//Buttons
 	size_t playButtonQuad = createQuad(-1.0f, -0.7f, 0.2f, 0.07f);
 	size_t quitButtonQuad = createQuad(-1.0f, -0.9f, 0.2f, 0.07f);
-	using Window = Widget<BorderCornerQuads, SingleQuad>;
-	BorderCornerQuads boco(0.0f, 0.0f, 1.0f, 1.0f, 0.005f);
-	SingleQuad sing(0.005f, -0.005f*(1600.0f/850.0f), 0.99f, 0.05f);
-	Window wig(boco, sing);
-	wig.create_quads();
-	colorQuad(wig.get(0, 0), ConstColor(1));
-	colorQuad(wig.get(0, 1), ConstColor(1));
-	colorQuad(wig.get(0, 2), ConstColor(1));
-	colorQuad(wig.get(0, 3), ConstColor(1));
-	colorQuad(wig.get(0, 4), ConstColor(7));
-	colorQuad(wig.get(0, 5), ConstColor(1));
-	colorQuad(wig.get(0, 6), ConstColor(1));
-	colorQuad(wig.get(0, 7), ConstColor(1));
-	colorQuad(wig.get(0, 8), ConstColor(1));
-	colorQuad(wig.get(1, 0), ConstColor(6));
-	size_t window_header_button = addButton(wig.get(1, 0));
-
 	
+
+	using WindowPreset = WidgetPreset<Element<9>, Element<1>>;
+	using Window = Widget<Element<9>, Element<1>>;
+	using SingleQuadColor = ColorPreset<Element<1>, ConstColor>;
+	using BorderCornerQuadColor = ColorPreset<Element<9>, ConstColor, ConstColor, ConstColor, ConstColor, ConstColor, ConstColor, ConstColor, ConstColor, ConstColor>;
+	using WindowColors = ColorPreset<Window, BorderCornerQuadColor, SingleQuadColor>;
+
+	ElementPreset<Element<9>> boco(0.0f, 0.0f, 1.0f, 1.0f, 0.005f);
+	ElementPreset<Element<1>> sing(0.005f, -0.005f*(1600.0f/850.0f), 0.99f, 0.05f);
+	
+	Window win(boco, sing); 
+	Window win1(boco, sing);
+
+	WindowColors winColors(
+		BorderCornerQuadColor(ConstColor(1), ConstColor(1), ConstColor(1), ConstColor(1), ConstColor(7), ConstColor(1), ConstColor(1), ConstColor(1), ConstColor(1)), 
+		SingleQuadColor(ConstColor(1)));
+	color(win, winColors);
+	color(win1, winColors);
+
+
+	size_t window_header_button = addButton(win.get<1>().quads[0]);
+	size_t window1_header_button = addButton(win1.get<1>().quads[0]);
+
+	size_t header_button_press = create_button_signal<MouseEvent, MouseKeyEvent>
+		(MouseEvent(window_header_button, MouseKeyEvent(0, KeyCondition(1, 0))),
+			MouseKeyEvent(0, KeyCondition(0, 0)));
+
+	Functor<AnySignalGate, Window, glm::vec2&>(moveWidget<Window>, win, cursorFrameDelta, { header_button_press });
+	
+	size_t header1_button_press = create_button_signal<MouseEvent, MouseKeyEvent>
+		(MouseEvent(window1_header_button, MouseKeyEvent(0, KeyCondition(1, 0))),
+			MouseKeyEvent(0, KeyCondition(0, 0)));
+
+	Functor<AnySignalGate, Window, glm::vec2&>(moveWidget<Window>, win1, cursorFrameDelta, { header1_button_press });
 
 	//Signals
 	colorQuad(playButtonQuad, ConstColor(7));
@@ -102,7 +120,7 @@ void App::mainMenuLoop()
 	gl::Lighting::createLight(glm::vec4(3.0f, 5.0f, 3.0f, 1.0f), glm::vec4(0.3f, 1.0f, 0.2f, 10.0f));
 	
 	size_t quit_button = addButton(quitButtonQuad);
-
+	size_t play_button = addButton(playButtonQuad);
 	reserveKeySignals(11);
 	KeySignal key_esc(GLFW_KEY_ESCAPE);
 	KeySignal key_c(GLFW_KEY_C);
@@ -124,16 +142,14 @@ void App::mainMenuLoop()
 	size_t lmb_release = EventSignal<MouseKeyEvent>(MouseKeyEvent(0, KeyCondition(0, 0))).index();
 
 	EventSignal<MouseEvent>::reserve(6);
+	size_t play_button_press = EventSignal<MouseEvent>(MouseEvent(play_button, MouseKeyEvent(0, KeyCondition(1, 0)))).index();
 	size_t quit_button_press = EventSignal<MouseEvent>(MouseEvent(quit_button, MouseKeyEvent(0, KeyCondition(1, 0)))).index();
-	size_t header_button_press = EventSignal<MouseEvent>(MouseEvent(window_header_button, MouseKeyEvent(0, KeyCondition(1, 0))),Signal(1).index()).index();
-	EventSignal<MouseEvent>(MouseEvent(window_header_button, MouseKeyEvent(0, KeyCondition(0, 0))), header_button_press, 0).index();
-	Functor<AnySignalGate, Window, glm::vec2&>(moveWidget<Window>,
-		wig, cursorFrameDelta, { header_button_press });
+	
 
 	//general functions
 	Functor<AnySignalGate>(quit, { key_esc.press, quit_button_press });
-	Functor<AnySignalGate>(App::Input::toggleCursor, { key_c.press, rmb_press, rmb_release });
-	Functor<AnySignalGate>(gl::Camera::toggleLook, { key_c.press, rmb_press, rmb_release });
+	Functor<AnySignalGate>(App::Input::toggleCursor, { play_button_press, key_c.press, rmb_press, rmb_release });
+	Functor<AnySignalGate>(gl::Camera::toggleLook, { play_button_press, key_c.press, rmb_press, rmb_release });
 	Functor<AnySignalGate>(gl::Debug::toggleGrid, { key_g.press });
 	Functor<AnySignalGate>(gl::Debug::toggleCoord, { key_h.press });
 	Functor<AnySignalGate>(App::Debug::togglePrintInfo, { key_i.press });
@@ -183,7 +199,7 @@ void App::mainMenuLoop()
 		gl::GUI::updateQuadBuffer();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, gl::Texture::gBuffer);
-		glViewport(0, 0, gl::screenWidth*gl::resolution, gl::screenHeight*gl::resolution);
+		glViewport(0, 0, size_t(gl::screenWidth*gl::resolution), size_t(gl::screenHeight*gl::resolution));
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		gl::Models::render();
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);

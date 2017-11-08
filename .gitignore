@@ -1,7 +1,12 @@
 *.dll
 *.obj
 *.exe
+*.lib
+*.pdb
 assets/
 deps/
 .vs
 /x64
+Debug
+App/Debug
+OpenGL/Debug

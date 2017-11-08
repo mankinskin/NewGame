@@ -90,6 +90,8 @@ namespace App {
 			}
 			EventInternal::EventSlot<EventType>::instances.emplace_back(pEvent, signal_index, pSetTo);
 		}
+		template<class PressEventType, class ReleaseEventType>
+		size_t create_button_signal(PressEventType&& pPressEvent, ReleaseEventType&& pReleaseEvent);
 	}
 }
 template<typename EventType>
@@ -120,4 +122,11 @@ void App::Input::EventInternal::EventSlot<EventType>::setSignals() {
 		}
 	}
 	EventSlot<EventType>::eventBuffer.clear();
+}
+
+template<class PressEventType, class ReleaseEventType>
+size_t App::Input::create_button_signal(PressEventType&& pPressEvent, ReleaseEventType&& pReleaseEvent) {
+	size_t signal_id = EventSignal<PressEventType>(pPressEvent, Signal(1).index()).index();
+	EventSignal<ReleaseEventType>(pReleaseEvent, signal_id, 0).index();
+	return signal_id;
 }

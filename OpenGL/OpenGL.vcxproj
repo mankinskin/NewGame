@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{75CFA8A4-AC58-48E7-8403-2CF7FB106B95}</ProjectGuid>
     <RootNamespace>OpenGL</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
     <ProjectName>OpenGL</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -147,11 +147,12 @@
     <ClInclude Include="Global\stdafx.h" />
     <ClInclude Include="GUI\UI\Buttons.h" />
     <ClInclude Include="GUI\UI\Colored_Quads.h" />
-    <ClInclude Include="GUI\UI\Slider.h" />
+    <ClInclude Include="GUI\UI\Element.h" />
     <ClInclude Include="GUI\UI\Line.h" />
     <ClInclude Include="GUI\Text\stdafx.h" />
     <ClInclude Include="GUI\UI\Quad.h" />
     <ClInclude Include="GUI\UI\stdafx.h" />
+    <ClInclude Include="GUI\UI\Widget.h" />
     <ClInclude Include="Lighting\Lights.h" />
     <ClInclude Include="Lighting\stdafx.h" />
     <ClInclude Include="Models\Models.h" />
@@ -180,9 +181,9 @@
     <ClCompile Include="Global\glDebug.cpp" />
     <ClCompile Include="GUI\UI\Buttons.cpp" />
     <ClCompile Include="GUI\UI\Colored_Quads.cpp" />
-    <ClCompile Include="GUI\UI\Slider.cpp" />
     <ClCompile Include="GUI\UI\Line.cpp" />
     <ClCompile Include="GUI\UI\Quad.cpp" />
+    <ClCompile Include="GUI\UI\Widget.cpp" />
     <ClCompile Include="Lighting\Lights.cpp" />
     <ClCompile Include="Models\Models.cpp" />
     <ClCompile Include="Models\Model_Loader.cpp" />
