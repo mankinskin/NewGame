@@ -1,4 +1,3 @@
-the one and only project I am working on
 
 The vision of this game made me start programming out of nowhere (i was only playing games before) and it turns out that i love it.
 
